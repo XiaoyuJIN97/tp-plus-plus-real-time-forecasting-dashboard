@@ -26,7 +26,6 @@ jobs:
           repository: Energy-Data-Science/entsoe-realtime-data
           ref: data
           path: external/entsoe-realtime-data
-          token: ${{ secrets.DATA_REPO_TOKEN || github.token }}
 
       - name: Checkout Open-Meteo realtime data
         uses: actions/checkout@v4
@@ -34,7 +33,6 @@ jobs:
           repository: XiaoyuJIN97/open-meteo-realtime-data
           ref: data
           path: external/open-meteo-realtime-data
-          token: ${{ secrets.DATA_REPO_TOKEN || github.token }}
 
       - uses: actions/setup-python@v5
         with:
@@ -42,25 +40,6 @@ jobs:
 
       - name: Install dashboard dependencies
         run: pip install -r requirements.txt -e .
-
-      - name: Refresh Open-Meteo weather data
-        working-directory: external/open-meteo-realtime-data
-        run: |
-          pip install -r requirements.txt
-          python scripts/fetch_open_meteo.py --rolling-days 14 --forecast-days 3
-
-      - name: Commit refreshed Open-Meteo data
-        working-directory: external/open-meteo-realtime-data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data config scripts
-          if git diff --cached --quiet; then
-            echo "No Open-Meteo data changes."
-          else
-            git commit -m "Update Open-Meteo weather data"
-            git push origin data
-          fi
 
       - name: Run daily forecast
         env:

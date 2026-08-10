@@ -89,7 +89,7 @@ tests/
 
 For GitHub Actions, add repository secrets:
 
-- `ENTSOE_API_KEY`
+- `ENTSOE_API_KEY` for direct ENTSO-E fallback if the realtime-data archive is incomplete.
 
 For Streamlit Community Cloud or Hugging Face Spaces, add the same value to app secrets and mount/persist the `data/` directory if historical tracking should survive redeploys.
 
@@ -103,8 +103,7 @@ flowchart TD
   B --> C["18:02-18:27: ENTSO-E realtime-data collector snapshots TP data and pushes data branch"]
   C --> D["18:30: Dashboard daily forecast workflow starts"]
   D --> E["Checkout dashboard repo, ENTSO-E data branch, and Open-Meteo data branch"]
-  E --> F["Refresh Open-Meteo rolling weather data"]
-  F --> G["Build 3-month context plus day-ahead TSO/weather covariates"]
+  E --> G["Build 3-month context plus day-ahead TSO/weather covariates"]
   G --> H["Run configured online models for BE, FR, DE: load, solar, onshore wind, offshore wind"]
   H --> I["Commit data/forecasts/forecasts_YYYY-MM-DD.csv to dashboard repo"]
   I --> J["Streamlit Cloud rebuilds from GitHub and displays the latest forecast"]
