@@ -27,7 +27,7 @@ models:
     enabled: true
     targets: [load, solar, wind_onshore, wind_offshore]
     max_train_rows: 4096
-    model_path: /Users/xiaoyujin/Library/Caches/tabpfn/tabpfn-v2.5-regressor-v2.5_default.ckpt
+    model_path: auto
   xgboost_online:
     label: XGBoost with covariates
     adapter: xgboost_context

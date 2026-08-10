@@ -58,9 +58,37 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache Python and model downloads
+        if: steps.brussels_window.outputs.should_run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+            ~/.cache/torch
+            ~/.cache/tabpfn
+          key: ${{ runner.os }}-forecast-models-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-forecast-models-
+
       - name: Install dashboard dependencies
         if: steps.brussels_window.outputs.should_run == 'true'
         run: pip install -r requirements.txt -e .
+
+      - name: Verify optional model runtimes
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          python - <<'PY'
+          import torch
+          import xgboost
+          from chronos import BaseChronosPipeline
+          from tabpfn import TabPFNRegressor
+
+          print("torch", torch.__version__)
+          print("xgboost", xgboost.__version__)
+          print("chronos runtime OK:", BaseChronosPipeline.__name__)
+          print("tabpfn runtime OK:", TabPFNRegressor.__name__)
+          PY
 
       - name: Run daily forecast
         if: steps.brussels_window.outputs.should_run == 'true'
