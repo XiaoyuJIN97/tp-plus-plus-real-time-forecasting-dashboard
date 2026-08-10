@@ -1,0 +1,57 @@
+cutoff:
+  hour_utc: 18
+  prediction_length_hours: 24
+  context_days: 92
+
+targets:
+  load:
+    label: Load
+    entsoe_signal: load_forecast
+    weather_point_type: load
+    horizon_hours: 24
+    context_hours: 2208
+    covariate_policy: load_optimal_engineering_plus_tso
+  solar:
+    label: Solar
+    entsoe_signal: generation_forecast_solar
+    weather_point_type: solar
+    horizon_hours: 24
+    context_hours: 2208
+    covariate_policy: solar_weather_plus_tso
+  wind_onshore:
+    label: Onshore wind
+    entsoe_signal: generation_forecast_wind_onshore
+    weather_point_type: onshore
+    horizon_hours: 24
+    context_hours: 2208
+    covariate_policy: wind_4p_weather_plus_tso
+  wind_offshore:
+    label: Offshore wind
+    entsoe_signal: generation_forecast_wind_offshore
+    weather_point_type: offshore
+    horizon_hours: 24
+    context_hours: 2208
+    covariate_policy: wind_4p_weather_plus_tso
+
+load_optimal_engineering_covariates:
+  Chronos2:
+    BE: Solar
+    FR: Temp
+    DE: Hum
+  Ridge:
+    BE: Temp
+    FR: deg_proxy
+    DE: Hum
+  TabPFN:
+    BE: Temp
+    FR: Temp
+    DE: Solar
+
+source_paths:
+  selected_weather_points: /Users/xiaoyujin/Desktop/TP++/Weather-one-four-points/v0.1/selected_weather_points_for_tp_v01_4p.csv
+  load_selected_weather_points: /Users/xiaoyujin/Desktop/TP++/Load_forecast_new/selected_weather_points_for_tp_v01_4p.csv
+  weather_forecasts_4p: /Users/xiaoyujin/Desktop/TP++/Weather-one-four-points/v0.1/weather_forecasts_4p
+  open_meteo_realtime_data: /Users/xiaoyujin/Documents/Real-time forecasting Dashboard/open-meteo-realtime-data
+  open_meteo_realtime_git_ref: data
+  entsoe_realtime_data: /Users/xiaoyujin/actions-runner/_work/entsoe-realtime-data/entsoe-realtime-data
+  entsoe_realtime_git_ref: origin/data

@@ -1,0 +1,14 @@
+altair>=5.3
+entsoe-py>=0.6.18
+joblib>=1.4
+numpy>=1.26
+openmeteo-requests>=1.2
+pandas>=2.2
+plotly>=5.22
+pytest>=8.0
+python-dotenv>=1.0
+pyyaml>=6.0
+requests-cache>=1.2
+retry-requests>=2.0
+scikit-learn>=1.5
+streamlit>=1.37

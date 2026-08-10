@@ -1,0 +1,4 @@
+[submodule "open-meteo-realtime-data"]
+	path = open-meteo-realtime-data
+	url = https://github.com/XiaoyuJIN97/open-meteo-realtime-data.git
+	branch = data

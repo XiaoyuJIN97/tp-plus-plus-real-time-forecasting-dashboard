@@ -1,0 +1,39 @@
+models:
+  tso_reference:
+    label: TSO forecast
+    adapter: tso_reference
+    enabled: true
+    targets: [load, solar, wind_onshore, wind_offshore]
+  persistence:
+    label: Persistence
+    adapter: persistence
+    enabled: true
+    targets: [load, solar, wind_onshore, wind_offshore]
+  ridge_3mo_context:
+    label: Ridge with covariates
+    adapter: ridge_context
+    enabled: true
+    targets: [load]
+  chronos2_online:
+    label: Chronos2 with covariates
+    adapter: chronos2_online
+    enabled: true
+    targets: [load, solar, wind_onshore, wind_offshore]
+    model_id: s3://autogluon/chronos-2/
+    device_map: cpu
+  tabpfn_online:
+    label: TabPFN with covariates
+    adapter: tabpfn_context
+    enabled: true
+    targets: [load, solar, wind_onshore, wind_offshore]
+    max_train_rows: 4096
+    model_path: /Users/xiaoyujin/Library/Caches/tabpfn/tabpfn-v2.5-regressor-v2.5_default.ckpt
+  xgboost_online:
+    label: XGBoost with covariates
+    adapter: xgboost_context
+    enabled: true
+    targets: [solar, wind_onshore, wind_offshore]
+    max_train_rows: 12000
+    n_estimators: 80
+    max_depth: 3
+    n_jobs: 1

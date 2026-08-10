@@ -1,0 +1,17 @@
+.DS_Store
+.env
+.cache.sqlite
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit/secrets.toml
+data/raw/*.csv
+data/forecasts/*.csv
+data/issues/*.csv
+data/backfill/*.csv
+open-meteo-realtime-data/data/raw/**/*.csv
+open-meteo-realtime-data/data/updates/**/*.csv
+models/*.joblib
+models/*.pkl
+models/*.pickle
