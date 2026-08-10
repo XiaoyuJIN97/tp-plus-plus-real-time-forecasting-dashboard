@@ -162,7 +162,7 @@ def _render_run_history(forecasts: pd.DataFrame) -> None:
 def render_app() -> None:
     st.set_page_config(page_title="Real-Time Energy Forecasting", page_icon="chart_with_upwards_trend", layout="wide")
     st.title("Real-Time Load and Renewables Forecasting")
-    st.caption("Daily 18:00 UTC forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
+    st.caption("Daily 18:00 Europe/Brussels forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
 
     forecasts, issues = _load_data()
     if forecasts.empty:

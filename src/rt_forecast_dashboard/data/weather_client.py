@@ -8,6 +8,7 @@ import pandas as pd
 from rt_forecast_dashboard.config import load_settings
 from rt_forecast_dashboard.data.demo import demo_context_frame, demo_future_frame
 from rt_forecast_dashboard.data.weather_archive import OpenMeteoRealtimeArchive
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
 
 OPEN_METEO_VARIABLES = [
     "temperature_2m",
@@ -29,7 +30,7 @@ class OpenMeteoClient:
     def fetch_future_weather(self, *, run_date: date, zone: str, points: list[dict], target: str, horizon_hours: int) -> pd.DataFrame:
         if self.demo_mode:
             return demo_future_frame(run_date, zone, target, horizon_hours).drop(columns=["actual_mw", "tso_forecast_mw"], errors="ignore")
-        start = pd.Timestamp(run_date, tz="UTC") + pd.Timedelta(hours=18)
+        start = brussels_cutoff_timestamp(run_date)
         archive = self.archive.fetch_weather(zone=zone, target=target, start=start, hours=horizon_hours)
         if len(archive) >= horizon_hours:
             return archive.head(horizon_hours)
@@ -38,7 +39,7 @@ class OpenMeteoClient:
     def fetch_context_weather(self, *, run_date: date, zone: str, points: list[dict], target: str, context_hours: int) -> pd.DataFrame:
         if self.demo_mode:
             return demo_context_frame(run_date, zone, target, context_hours).drop(columns=["actual_mw", "tso_forecast_mw"])
-        end = pd.Timestamp(run_date, tz="UTC") + pd.Timedelta(hours=18)
+        end = brussels_cutoff_timestamp(run_date)
         start = end - pd.Timedelta(hours=context_hours)
         archive = self.archive.fetch_weather(zone=zone, target=target, start=start, hours=context_hours)
         if len(archive) >= context_hours:

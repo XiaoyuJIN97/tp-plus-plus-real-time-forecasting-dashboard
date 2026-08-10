@@ -2,7 +2,7 @@
 
 Daily online forecasting dashboard for load, solar, and wind in the BE, FR, and DE bidding zones.
 
-The first online version runs once per day at the daily 18:00 UTC cutoff, when the first ENTSO-E Transparency Platform TSO forecasts are available. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
+The first online version runs once per day at the daily 18:00 Europe/Brussels cutoff, when the first ENTSO-E Transparency Platform TSO forecasts are available. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
 
 ## What Is Included
 
@@ -95,13 +95,13 @@ For Streamlit Community Cloud or Hugging Face Spaces, add the same value to app 
 
 ## Daily Update Timeline
 
-All scheduled times below are UTC. During summer time in Brussels, add two hours.
+Scheduled operation follows Europe/Brussels time. ENTSO-E and Open-Meteo API timestamps are still stored and queried in UTC after converting the Brussels cutoff timestamp.
 
 ```mermaid
 flowchart TD
-  A["Before 18:00: Open-Meteo data branch refreshes weather forecasts"] --> B["18:00: ENTSO-E TSO day-ahead forecasts become available"]
-  B --> C["18:02-18:27: ENTSO-E realtime-data collector snapshots TP data and pushes data branch"]
-  C --> D["18:30: Dashboard daily forecast workflow starts"]
+  A["Before 18:00 Brussels: Open-Meteo data branch refreshes weather forecasts"] --> B["18:00 Brussels: ENTSO-E TSO day-ahead forecasts become available"]
+  B --> C["18:02-18:27 Brussels: ENTSO-E realtime-data collector snapshots TP data and pushes data branch"]
+  C --> D["18:30 Brussels: Dashboard daily forecast workflow starts"]
   D --> E["Checkout dashboard repo, ENTSO-E data branch, and Open-Meteo data branch"]
   E --> G["Build 3-month context plus day-ahead TSO/weather covariates"]
   G --> H["Run configured online models for BE, FR, DE: load, solar, onshore wind, offshore wind"]
@@ -119,4 +119,4 @@ flowchart TD
 | Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` | Deterministic forecast analysis and run history |
 | Streamlit display | Streamlit Cloud | Live dashboard | Reads committed forecasts and fetches realized actuals from the ENTSO-E data branch |
 
-The dashboard forecast workflow is scheduled at `18:30 UTC` each day. This deliberately leaves a buffer after the 18:00 publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.
+The dashboard forecast workflow is scheduled to run at about `18:30 Europe/Brussels` each day. GitHub Actions cron is UTC-only, so the workflow has two UTC cron entries and a Brussels-time guard that lets only the CET or CEST matching run proceed. This deliberately leaves a buffer after the 18:00 Brussels publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.

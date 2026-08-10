@@ -7,9 +7,11 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+
 
 def cutoff_timestamp(run_date: date) -> pd.Timestamp:
-    return pd.Timestamp(run_date, tz="UTC") + pd.Timedelta(hours=18)
+    return brussels_cutoff_timestamp(run_date)
 
 
 def _base_level(zone: str, target: str) -> float:

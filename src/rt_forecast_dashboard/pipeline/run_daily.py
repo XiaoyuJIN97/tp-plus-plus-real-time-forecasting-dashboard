@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime
 
 import pandas as pd
 
@@ -12,18 +12,8 @@ from rt_forecast_dashboard.data.weather_client import OpenMeteoClient
 from rt_forecast_dashboard.features import build_feature_frame
 from rt_forecast_dashboard.models.registry import iter_model_adapters
 from rt_forecast_dashboard.storage import ForecastStore
+from rt_forecast_dashboard.time_utils import latest_complete_run_date
 from rt_forecast_dashboard.weather_points import selected_weather_points
-
-
-def latest_complete_run_date(now: datetime | None = None) -> date:
-    now = now or datetime.now(UTC)
-    if now.tzinfo is None:
-        now = now.replace(tzinfo=UTC)
-    now = now.astimezone(UTC)
-    run_day = now.date()
-    if now.hour < 18:
-        run_day = run_day - timedelta(days=1)
-    return run_day
 
 
 def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None) -> pd.DataFrame:

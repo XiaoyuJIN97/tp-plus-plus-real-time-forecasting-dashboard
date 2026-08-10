@@ -7,9 +7,10 @@ on:
         description: Optional YYYY-MM-DD run date
         required: false
   schedule:
-    # Run after the 18:00 UTC TSO forecast publication and after the
-    # ENTSO-E realtime-data collector has had time to push its data branch.
-    - cron: "30 18 * * *"
+    # GitHub cron is UTC. These two triggers are guarded below so exactly the
+    # one that lands around 18:30 Europe/Brussels runs in CET/CEST.
+    - cron: "30 16 * * *"
+    - cron: "30 17 * * *"
 
 jobs:
   forecast:
@@ -17,10 +18,28 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check Brussels forecast window
+        id: brussels_window
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          local_hour="$(TZ=Europe/Brussels date +%H)"
+          local_minute="$(TZ=Europe/Brussels date +%M)"
+          if [ "$local_hour" = "18" ] && [ "$local_minute" -ge 30 ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping duplicate UTC schedule at Brussels time ${local_hour}:${local_minute}."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout dashboard
+        if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/checkout@v4
 
       - name: Checkout ENTSO-E realtime data
+        if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/checkout@v4
         with:
           repository: Energy-Data-Science/entsoe-realtime-data
@@ -28,20 +47,24 @@ jobs:
           path: external/entsoe-realtime-data
 
       - name: Checkout Open-Meteo realtime data
+        if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/checkout@v4
         with:
           repository: XiaoyuJIN97/open-meteo-realtime-data
           ref: data
           path: external/open-meteo-realtime-data
 
-      - uses: actions/setup-python@v5
+      - if: steps.brussels_window.outputs.should_run == 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dashboard dependencies
+        if: steps.brussels_window.outputs.should_run == 'true'
         run: pip install -r requirements.txt -e .
 
       - name: Run daily forecast
+        if: steps.brussels_window.outputs.should_run == 'true'
         env:
           ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
           FORECAST_DEMO_MODE: "false"
@@ -59,6 +82,7 @@ jobs:
           fi
 
       - name: Commit forecast outputs
+        if: steps.brussels_window.outputs.should_run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

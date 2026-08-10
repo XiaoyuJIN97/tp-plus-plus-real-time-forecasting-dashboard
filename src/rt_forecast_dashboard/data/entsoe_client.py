@@ -7,6 +7,7 @@ import pandas as pd
 from rt_forecast_dashboard.config import load_settings
 from rt_forecast_dashboard.data.demo import demo_context_frame, demo_future_frame
 from rt_forecast_dashboard.data.entsoe_realtime_archive import EntsoeRealtimeArchive
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
 
 
 def _entsoe_response_to_hourly_frame(response: pd.Series | pd.DataFrame, value_col: str) -> pd.DataFrame:
@@ -40,7 +41,7 @@ class EntsoeForecastClient:
         self.archive = EntsoeRealtimeArchive()
 
     def fetch_tso_forecast(self, *, run_date: date, zone: str, zone_code: str, target: str, horizon_hours: int) -> pd.DataFrame:
-        start = pd.Timestamp(run_date, tz="UTC") + pd.Timedelta(hours=18)
+        start = brussels_cutoff_timestamp(run_date)
         end = start + pd.Timedelta(hours=horizon_hours)
         archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)
         if len(archive) >= horizon_hours:
@@ -69,7 +70,7 @@ class EntsoeForecastClient:
         return frame
 
     def fetch_actual_context(self, *, run_date: date, zone: str, zone_code: str, target: str, context_hours: int) -> pd.DataFrame:
-        end = pd.Timestamp(run_date, tz="UTC") + pd.Timedelta(hours=18)
+        end = brussels_cutoff_timestamp(run_date)
         start = end - pd.Timedelta(hours=context_hours + 72)
         actual_archive = self.archive.fetch_actuals(zone=zone, target=target, start=start, end=end)
         forecast_archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)

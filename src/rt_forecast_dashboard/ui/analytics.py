@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from rt_forecast_dashboard.config import model_registry
-from rt_forecast_dashboard.pipeline.run_daily import latest_complete_run_date
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, latest_complete_run_date
 
 
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
@@ -342,7 +342,8 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame = frame[frame["context_hours"].eq(ONLINE_CONTEXT_HOURS)].copy()
     if frame.empty:
         return frame
-    cutoff = pd.to_datetime(frame["run_date"], utc=True) + pd.Timedelta(hours=18)
+    cutoff = frame["run_date"].map(lambda value: brussels_cutoff_timestamp(pd.to_datetime(value).date()))
+    cutoff = pd.to_datetime(cutoff, utc=True)
     horizon = ((frame["timestamp"] - cutoff).dt.total_seconds() / 3600).astype(int)
     frame["horizon"] = horizon
     frame = frame[frame["horizon"].between(0, DAY_AHEAD_HOURS - 1)].copy()
