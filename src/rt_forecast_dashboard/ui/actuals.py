@@ -17,7 +17,8 @@ def attach_display_actuals(forecasts: pd.DataFrame, now: pd.Timestamp | None = N
     frame.attrs["actual_fetch_errors"] = []
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
     now = now or pd.Timestamp.now(tz="UTC")
-    needs_actual = frame["actual_mw"].isna() & frame["timestamp"].lt(now)
+    actual_cutoff = now - pd.Timedelta(hours=2)
+    needs_actual = frame["actual_mw"].isna() & frame["timestamp"].lt(actual_cutoff)
     if not needs_actual.any():
         return frame
 
@@ -41,14 +42,16 @@ def attach_display_actuals(forecasts: pd.DataFrame, now: pd.Timestamp | None = N
                 end=end,
             )
         except Exception as exc:
-            errors.append(f"{row.zone} {row.target}: {exc}")
+            message = str(exc).strip()
+            if message:
+                errors.append(f"{row.zone} {row.target}: {message}")
             continue
         actual["zone"] = row.zone
         actual["target"] = row.target
         actual_frames.append(actual)
 
     if not actual_frames:
-        frame.attrs["actual_fetch_errors"] = errors or ["No ENTSO-E actual rows were returned for realized timestamps."]
+        frame.attrs["actual_fetch_errors"] = errors
         return frame
 
     actuals = pd.concat(actual_frames, ignore_index=True).drop_duplicates(["zone", "target", "timestamp"])

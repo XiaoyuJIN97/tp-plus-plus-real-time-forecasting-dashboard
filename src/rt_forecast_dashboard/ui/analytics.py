@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from rt_forecast_dashboard.config import model_registry
-from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, latest_complete_run_date
+from rt_forecast_dashboard.time_utils import latest_complete_run_date
 
 
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
@@ -342,20 +342,19 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame = frame[frame["context_hours"].eq(ONLINE_CONTEXT_HOURS)].copy()
     if frame.empty:
         return frame
-    cutoff = frame["run_date"].map(lambda value: brussels_cutoff_timestamp(pd.to_datetime(value).date()))
-    cutoff = pd.to_datetime(cutoff, utc=True)
-    horizon = ((frame["timestamp"] - cutoff).dt.total_seconds() / 3600).astype(int)
-    frame["horizon"] = horizon
+    group_cols = ["run_date", "zone", "target", "model"]
+    frame = frame.sort_values(group_cols + ["timestamp"]).drop_duplicates(group_cols + ["timestamp"], keep="last")
+    frame["horizon"] = frame.groupby(group_cols).cumcount()
     frame = frame[frame["horizon"].between(0, DAY_AHEAD_HOURS - 1)].copy()
     complete = (
-        frame.groupby(["run_date", "zone", "target", "model"])["horizon"]
+        frame.groupby(group_cols)["horizon"]
         .nunique()
         .reset_index(name="horizon_count")
     )
     complete = complete[complete["horizon_count"].eq(DAY_AHEAD_HOURS)]
     if complete.empty:
         return frame.iloc[0:0].copy()
-    return frame.merge(complete[["run_date", "zone", "target", "model"]], on=["run_date", "zone", "target", "model"], how="inner")
+    return frame.merge(complete[group_cols], on=group_cols, how="inner")
 
 
 def filter_last_n_days(frame: pd.DataFrame, n_days: int) -> pd.DataFrame:

@@ -31,7 +31,6 @@ class ForecastStore:
             frame = pd.concat([existing, frame], ignore_index=True)
             frame = frame.drop_duplicates(["run_date", "zone", "target", "model", "timestamp"], keep="last")
         frame.to_csv(path, index=False)
-        self.clear_issues_for_run(run_date)
 
     def read_forecasts(self) -> pd.DataFrame:
         files = sorted((self.data_dir / "forecasts").glob("forecasts_*.csv"))

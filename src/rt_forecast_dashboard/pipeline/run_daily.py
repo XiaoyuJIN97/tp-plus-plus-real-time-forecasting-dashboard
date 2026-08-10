@@ -26,6 +26,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
     entsoe = EntsoeForecastClient()
     weather_client = OpenMeteoClient()
     outputs: list[pd.DataFrame] = []
+    store.clear_issues_for_run(run_date_str)
 
     for zone, zcfg in zone_config.items():
         for target, fcfg in target_config.items():
