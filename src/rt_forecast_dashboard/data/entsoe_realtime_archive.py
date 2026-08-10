@@ -4,6 +4,8 @@ from pathlib import Path
 from io import StringIO
 import os
 import subprocess
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 import pandas as pd
 
@@ -31,6 +33,7 @@ class EntsoeRealtimeArchive:
         configured = paths.get("entsoe_realtime_data")
         self.root = Path(root or configured) if root or configured else None
         self.git_ref = paths.get("entsoe_realtime_git_ref")
+        self.raw_base = (paths.get("entsoe_realtime_raw_base") or "").rstrip("/")
         self._available_cache: bool | None = None
         self._manifest_cache: pd.DataFrame | None = None
 
@@ -38,10 +41,11 @@ class EntsoeRealtimeArchive:
     def available(self) -> bool:
         if self._available_cache is not None:
             return self._available_cache
-        if not self.root:
+        if not self.root and not self.raw_base:
             self._available_cache = False
             return False
-        self._available_cache = bool(self._git_show("data/update_manifest.csv") or (self.root / "data" / "update_manifest.csv").exists())
+        local_manifest_exists = bool(self.root and (self.root / "data" / "update_manifest.csv").exists())
+        self._available_cache = bool(self._git_show("data/update_manifest.csv") or local_manifest_exists)
         return self._available_cache
 
     def fetch_actuals(self, *, zone: str, target: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
@@ -53,7 +57,7 @@ class EntsoeRealtimeArchive:
         return self._read_variable(zone=zone, variable=variable, start=start, end=end).rename(columns={"value": "tso_forecast_mw"})
 
     def _read_variable(self, *, zone: str, variable: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
-        if not self.available or self.root is None:
+        if not self.available:
             return pd.DataFrame(columns=["timestamp", "value"])
 
         start = pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else pd.Timestamp(start, tz="UTC")
@@ -98,14 +102,11 @@ class EntsoeRealtimeArchive:
     def _read_manifest(self) -> pd.DataFrame:
         if self._manifest_cache is not None:
             return self._manifest_cache.copy()
-        if not self.root:
-            self._manifest_cache = pd.DataFrame()
-            return self._manifest_cache.copy()
-        manifest_path = self.root / "data" / "update_manifest.csv"
+        manifest_path = self.root / "data" / "update_manifest.csv" if self.root else None
         manifest_text = self._git_show("data/update_manifest.csv")
         if manifest_text:
             self._manifest_cache = pd.read_csv(StringIO(manifest_text))
-        elif manifest_path.exists():
+        elif manifest_path and manifest_path.exists():
             self._manifest_cache = pd.read_csv(manifest_path)
         else:
             self._manifest_cache = pd.DataFrame()
@@ -158,17 +159,25 @@ class EntsoeRealtimeArchive:
         return self._to_hourly(pd.concat(frames, ignore_index=True))
 
     def _git_show(self, path: str) -> str | None:
-        if not self.root or not self.git_ref:
+        if self.root and self.git_ref:
+            try:
+                result = subprocess.run(
+                    ["git", "-C", str(self.root), "show", f"{self.git_ref}:{path}"],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=3,
+                    env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+                )
+                return result.stdout
+            except Exception:
+                pass
+        if not self.raw_base:
             return None
+        url = f"{self.raw_base}/{path}"
         try:
-            result = subprocess.run(
-                ["git", "-C", str(self.root), "show", f"{self.git_ref}:{path}"],
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=3,
-                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-            )
-        except Exception:
+            request = Request(url, headers={"User-Agent": "tp-plus-plus-real-time-forecasting-dashboard"})
+            with urlopen(request, timeout=10) as response:
+                return response.read().decode("utf-8")
+        except (HTTPError, URLError, TimeoutError, UnicodeDecodeError):
             return None
-        return result.stdout

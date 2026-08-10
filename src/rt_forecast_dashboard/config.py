@@ -64,6 +64,7 @@ def source_paths() -> dict[str, str]:
         "open_meteo_realtime_git_ref": "OPEN_METEO_REALTIME_GIT_REF",
         "entsoe_realtime_data": "ENTSOE_REALTIME_DATA",
         "entsoe_realtime_git_ref": "ENTSOE_REALTIME_GIT_REF",
+        "entsoe_realtime_raw_base": "ENTSOE_REALTIME_RAW_BASE",
     }
     for key, env_name in env_overrides.items():
         value = os.getenv(env_name)

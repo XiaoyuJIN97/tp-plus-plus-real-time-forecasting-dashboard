@@ -55,3 +55,4 @@ source_paths:
   open_meteo_realtime_git_ref: data
   entsoe_realtime_data: /Users/xiaoyujin/actions-runner/_work/entsoe-realtime-data/entsoe-realtime-data
   entsoe_realtime_git_ref: origin/data
+  entsoe_realtime_raw_base: https://raw.githubusercontent.com/Energy-Data-Science/entsoe-realtime-data/data
