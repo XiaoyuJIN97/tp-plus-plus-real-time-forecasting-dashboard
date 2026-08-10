@@ -102,7 +102,7 @@ flowchart TD
   A["Before 18:00 Brussels: Open-Meteo data branch refreshes weather forecasts"] --> B["18:00 Brussels: ENTSO-E TSO day-ahead forecasts become available"]
   B --> C["18:02-18:27 Brussels: ENTSO-E realtime-data collector snapshots TP data and pushes data branch"]
   C --> D["18:30 Brussels: Dashboard daily forecast workflow starts"]
-  D --> E["Checkout dashboard repo, ENTSO-E data branch, and Open-Meteo data branch"]
+  D --> E["Checkout dashboard repo and Open-Meteo data branch; read public ENTSO-E data branch"]
   E --> G["Build 3-month context plus day-ahead TSO/weather covariates"]
   G --> H["Run configured online models for BE, FR, DE: load, solar, onshore wind, offshore wind"]
   H --> I["Commit data/forecasts/forecasts_YYYY-MM-DD.csv to dashboard repo"]
@@ -116,7 +116,7 @@ flowchart TD
 |---|---|---|---|
 | ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | TSO forecasts and realized actuals under `data/raw` and `data/updates` | Forecast covariate, 3-month context, realized actuals for diagnostics |
 | Open-Meteo weather collection | `XiaoyuJIN97/open-meteo-realtime-data`, `data` branch | Four-point weather forecasts under `data/raw` and `data/updates` | Weather covariates for load, solar, onshore wind, offshore wind |
-| Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` | Deterministic forecast analysis and run history |
+| Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` | Reads public ENTSO-E raw files, reads checked-out Open-Meteo files, and displays deterministic forecast analysis and run history |
 | Streamlit display | Streamlit Cloud | Live dashboard | Reads committed forecasts and fetches realized actuals from the ENTSO-E data branch |
 
 The dashboard forecast workflow is scheduled to run at about `18:30 Europe/Brussels` each day. GitHub Actions cron is UTC-only, so the workflow has two UTC cron entries and a Brussels-time guard that lets only the CET or CEST matching run proceed. This deliberately leaves a buffer after the 18:00 Brussels publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.

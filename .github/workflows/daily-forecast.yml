@@ -38,14 +38,6 @@ jobs:
         if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/checkout@v4
 
-      - name: Checkout ENTSO-E realtime data
-        if: steps.brussels_window.outputs.should_run == 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: Energy-Data-Science/entsoe-realtime-data
-          ref: data
-          path: external/entsoe-realtime-data
-
       - name: Checkout Open-Meteo realtime data
         if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/checkout@v4
@@ -53,6 +45,13 @@ jobs:
           repository: XiaoyuJIN97/open-meteo-realtime-data
           ref: data
           path: external/open-meteo-realtime-data
+          filter: blob:none
+          sparse-checkout: |
+            config
+            data/raw/BE
+            data/raw/FR
+            data/raw/DE
+            data/update_manifest.csv
 
       - if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/setup-python@v5
@@ -68,8 +67,6 @@ jobs:
         env:
           ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
           FORECAST_DEMO_MODE: "false"
-          ENTSOE_REALTIME_DATA: external/entsoe-realtime-data
-          ENTSOE_REALTIME_GIT_REF: HEAD
           OPEN_METEO_REALTIME_DATA: external/open-meteo-realtime-data
           OPEN_METEO_REALTIME_GIT_REF: HEAD
           SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_weather_points_for_tp_v01_4p.csv

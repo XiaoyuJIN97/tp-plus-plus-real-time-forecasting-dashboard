@@ -1,5 +1,6 @@
 cutoff:
-  hour_utc: 18
+  timezone: Europe/Brussels
+  hour: 18
   prediction_length_hours: 24
   context_days: 92
 
