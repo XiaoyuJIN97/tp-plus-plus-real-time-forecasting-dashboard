@@ -92,3 +92,32 @@ For GitHub Actions, add repository secrets:
 - `ENTSOE_API_KEY`
 
 For Streamlit Community Cloud or Hugging Face Spaces, add the same value to app secrets and mount/persist the `data/` directory if historical tracking should survive redeploys.
+
+## Daily Update Timeline
+
+All scheduled times below are UTC. During summer time in Brussels, add two hours.
+
+```mermaid
+flowchart TD
+  A["Before 18:00: Open-Meteo data branch refreshes weather forecasts"] --> B["18:00: ENTSO-E TSO day-ahead forecasts become available"]
+  B --> C["18:02-18:27: ENTSO-E realtime-data collector snapshots TP data and pushes data branch"]
+  C --> D["18:30: Dashboard daily forecast workflow starts"]
+  D --> E["Checkout dashboard repo, ENTSO-E data branch, and Open-Meteo data branch"]
+  E --> F["Refresh Open-Meteo rolling weather data"]
+  F --> G["Build 3-month context plus day-ahead TSO/weather covariates"]
+  G --> H["Run configured online models for BE, FR, DE: load, solar, onshore wind, offshore wind"]
+  H --> I["Commit data/forecasts/forecasts_YYYY-MM-DD.csv to dashboard repo"]
+  I --> J["Streamlit Cloud rebuilds from GitHub and displays the latest forecast"]
+  J --> K["As realized actuals arrive, dashboard reads ENTSO-E data branch for scatter and accuracy"]
+```
+
+### Operational Map
+
+| Stage | Repository / service | Output | Dashboard use |
+|---|---|---|---|
+| ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | TSO forecasts and realized actuals under `data/raw` and `data/updates` | Forecast covariate, 3-month context, realized actuals for diagnostics |
+| Open-Meteo weather collection | `XiaoyuJIN97/open-meteo-realtime-data`, `data` branch | Four-point weather forecasts under `data/raw` and `data/updates` | Weather covariates for load, solar, onshore wind, offshore wind |
+| Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` | Deterministic forecast analysis and run history |
+| Streamlit display | Streamlit Cloud | Live dashboard | Reads committed forecasts and fetches realized actuals from the ENTSO-E data branch |
+
+The dashboard forecast workflow is scheduled at `18:30 UTC` each day. This deliberately leaves a buffer after the 18:00 publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.

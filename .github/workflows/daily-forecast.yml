@@ -7,7 +7,9 @@ on:
         description: Optional YYYY-MM-DD run date
         required: false
   schedule:
-    - cron: "1 18 * * *"
+    # Run after the 18:00 UTC TSO forecast publication and after the
+    # ENTSO-E realtime-data collector has had time to push its data branch.
+    - cron: "30 18 * * *"
 
 jobs:
   forecast:
