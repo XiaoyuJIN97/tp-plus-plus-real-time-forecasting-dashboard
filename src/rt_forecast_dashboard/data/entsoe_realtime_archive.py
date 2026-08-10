@@ -34,6 +34,7 @@ class EntsoeRealtimeArchive:
         self.root = Path(root or configured) if root or configured else None
         self.git_ref = paths.get("entsoe_realtime_git_ref")
         self.raw_base = (paths.get("entsoe_realtime_raw_base") or "").rstrip("/")
+        self.prefer_local = os.getenv("ENTSOE_REALTIME_PREFER_LOCAL", "false").lower() in {"1", "true", "yes"}
         self._available_cache: bool | None = None
         self._manifest_cache: pd.DataFrame | None = None
 
@@ -159,19 +160,32 @@ class EntsoeRealtimeArchive:
         return self._to_hourly(pd.concat(frames, ignore_index=True))
 
     def _git_show(self, path: str) -> str | None:
-        if self.root and self.git_ref:
-            try:
-                result = subprocess.run(
-                    ["git", "-C", str(self.root), "show", f"{self.git_ref}:{path}"],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    timeout=3,
-                    env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-                )
-                return result.stdout
-            except Exception:
-                pass
+        if not self.prefer_local:
+            raw_text = self._read_raw_url(path)
+            if raw_text is not None:
+                return raw_text
+        local_text = self._read_local_git(path)
+        if local_text is not None:
+            return local_text
+        return self._read_raw_url(path)
+
+    def _read_local_git(self, path: str) -> str | None:
+        if not self.root or not self.git_ref:
+            return None
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(self.root), "show", f"{self.git_ref}:{path}"],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=3,
+                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+            )
+            return result.stdout
+        except Exception:
+            return None
+
+    def _read_raw_url(self, path: str) -> str | None:
         if not self.raw_base:
             return None
         url = f"{self.raw_base}/{path}"

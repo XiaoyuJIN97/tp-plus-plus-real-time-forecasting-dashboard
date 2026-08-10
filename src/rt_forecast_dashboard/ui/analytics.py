@@ -161,6 +161,16 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame = forecasts.dropna(subset=["actual_mw", "forecast_mw"]).copy()
     if frame.empty:
         return pd.DataFrame()
+    if {"run_date", "zone", "target", "model", "horizon"}.issubset(frame.columns):
+        complete = (
+            frame.groupby(["run_date", "zone", "target", "model"])["horizon"]
+            .nunique()
+            .reset_index(name="realized_horizon_count")
+        )
+        complete = complete[complete["realized_horizon_count"].eq(DAY_AHEAD_HOURS)]
+        frame = frame.merge(complete[["run_date", "zone", "target", "model"]], on=["run_date", "zone", "target", "model"], how="inner")
+        if frame.empty:
+            return pd.DataFrame()
     rows = []
     group_cols = ["zone", "model_label", "covariate_case"]
     for (country, model_label, case), group in frame.groupby(group_cols, dropna=False):
