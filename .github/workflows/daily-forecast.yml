@@ -143,6 +143,10 @@ jobs:
           SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_weather_points_for_tp_v01_4p.csv
           LOAD_SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_load_weather_points_for_tp_v01_4p.csv
         run: |
+          if [ -z "${TABPFN_TOKEN:-}" ]; then
+            echo "Skipping TabPFN forecast because TABPFN_TOKEN secret is not configured."
+            exit 0
+          fi
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models tabpfn_online --keep-issues
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
