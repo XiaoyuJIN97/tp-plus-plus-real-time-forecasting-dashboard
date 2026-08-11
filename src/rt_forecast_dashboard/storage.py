@@ -28,6 +28,11 @@ class ForecastStore:
         path = self.forecast_path(run_date)
         if path.exists():
             existing = pd.read_csv(path, parse_dates=["timestamp", "run_at"])
+            replace_keys = ["run_date", "zone", "target", "model"]
+            if all(column in existing.columns for column in replace_keys) and all(column in frame.columns for column in replace_keys):
+                incoming_keys = frame[replace_keys].drop_duplicates()
+                existing = existing.merge(incoming_keys.assign(_replace=True), on=replace_keys, how="left")
+                existing = existing[existing["_replace"].isna()].drop(columns="_replace")
             frame = pd.concat([existing, frame], ignore_index=True)
             frame = frame.drop_duplicates(["run_date", "zone", "target", "model", "timestamp"], keep="last")
         frame.to_csv(path, index=False)
