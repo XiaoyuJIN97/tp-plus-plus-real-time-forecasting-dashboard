@@ -104,6 +104,7 @@ jobs:
         if: steps.brussels_window.outputs.should_run == 'true'
         env:
           ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
+          TABPFN_TOKEN: ${{ secrets.TABPFN_TOKEN }}
           FORECAST_DEMO_MODE: "false"
           OPEN_METEO_REALTIME_DATA: external/open-meteo-realtime-data
           OPEN_METEO_REALTIME_GIT_REF: HEAD
