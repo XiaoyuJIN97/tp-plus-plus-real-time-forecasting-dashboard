@@ -13,6 +13,6 @@ requests-cache>=1.2
 retry-requests>=2.0
 scikit-learn>=1.5
 streamlit>=1.37
-tabpfn>=2.0
+tabpfn==7.1.1
 torch>=2.3
 xgboost>=2.0

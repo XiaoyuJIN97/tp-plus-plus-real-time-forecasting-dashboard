@@ -90,7 +90,7 @@ tests/
 For GitHub Actions, add repository secrets:
 
 - `ENTSOE_API_KEY` for direct ENTSO-E fallback if the realtime-data archive is incomplete.
-- `TABPFN_TOKEN` for TabPFN model downloads in headless GitHub Actions runs. Create it after accepting the TabPFN license in the PriorLabs portal.
+- `TABPFN_TOKEN` is optional while the dashboard is pinned to the local-tested `tabpfn==7.1.1`. Keep it available as a fallback if TabPFN is upgraded to a newer PriorLabs release that requires headless license authentication.
 
 For Streamlit Community Cloud or Hugging Face Spaces, add the same value to app secrets and mount/persist the `data/` directory if historical tracking should survive redeploys.
 
