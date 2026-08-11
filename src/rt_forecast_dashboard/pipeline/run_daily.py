@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import UTC, date, datetime
+import sys
 
 import pandas as pd
 
@@ -108,6 +109,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                             )
                         )
                     except Exception as exc:
+                        print(f"Issue {run_date_str} {zone} {target} model:{model_key}: {exc}", file=sys.stderr)
                         store.log_issue(
                             run_date=run_date_str,
                             zone=zone,
@@ -117,6 +119,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                         )
                 store.write_raw(feature_frame, run_date_str, zone, target)
             except Exception as exc:
+                print(f"Issue {run_date_str} {zone} {target} data_or_features: {exc}", file=sys.stderr)
                 store.log_issue(
                     run_date=run_date_str,
                     zone=zone,
@@ -127,7 +130,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
 
     result = pd.concat(outputs, ignore_index=True) if outputs else pd.DataFrame()
     if not result.empty:
-        store.append_forecasts(result, run_date_str)
+        store.append_forecasts(result, run_date_str, replace_run=model_keys is None)
     return result
 
 

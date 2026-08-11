@@ -24,12 +24,14 @@ class ForecastStore:
     def issue_path(self) -> Path:
         return self.data_dir / "issues" / "issue_log.csv"
 
-    def append_forecasts(self, frame: pd.DataFrame, run_date: str) -> None:
+    def append_forecasts(self, frame: pd.DataFrame, run_date: str, *, replace_run: bool = False) -> None:
         path = self.forecast_path(run_date)
         if path.exists():
             existing = pd.read_csv(path, parse_dates=["timestamp", "run_at"])
+            if replace_run and "run_date" in existing.columns:
+                existing = existing[existing["run_date"].astype(str).ne(str(run_date))]
             replace_keys = ["run_date", "zone", "target", "model"]
-            if all(column in existing.columns for column in replace_keys) and all(column in frame.columns for column in replace_keys):
+            if not replace_run and all(column in existing.columns for column in replace_keys) and all(column in frame.columns for column in replace_keys):
                 incoming_keys = frame[replace_keys].drop_duplicates()
                 existing = existing.merge(incoming_keys.assign(_replace=True), on=replace_keys, how="left")
                 existing = existing[existing["_replace"].isna()].drop(columns="_replace")
