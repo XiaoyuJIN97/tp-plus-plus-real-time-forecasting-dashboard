@@ -330,6 +330,8 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     if "source" in frame.columns:
         frame = frame[frame["source"].eq("online")].copy()
     frame["context_hours"] = pd.to_numeric(frame.get("context_hours", 0), errors="coerce").fillna(0).astype(int)
+    if "context_end" in frame.columns:
+        frame["context_end"] = pd.to_datetime(frame["context_end"], utc=True, errors="coerce")
     enabled = model_registry()
     enabled_pairs = {
         (model_key, target)
@@ -344,6 +346,15 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
         return frame
     group_cols = ["run_date", "zone", "target", "model"]
     frame = frame.sort_values(group_cols + ["timestamp"]).drop_duplicates(group_cols + ["timestamp"], keep="last")
+    if "context_end" in frame.columns:
+        coverage = (
+            frame.groupby(group_cols, as_index=False)
+            .agg(first_delivery=("timestamp", "min"), context_end=("context_end", "max"))
+        )
+        coverage = coverage[coverage["context_end"].ge(coverage["first_delivery"] - pd.Timedelta(hours=1))]
+        frame = frame.merge(coverage[group_cols], on=group_cols, how="inner")
+        if frame.empty:
+            return frame
     frame["horizon"] = frame.groupby(group_cols).cumcount()
     frame = frame[frame["horizon"].between(0, DAY_AHEAD_HOURS - 1)].copy()
     complete = (

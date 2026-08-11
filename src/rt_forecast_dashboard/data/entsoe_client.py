@@ -76,7 +76,10 @@ class EntsoeForecastClient:
         forecast_archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)
         if len(actual_archive) >= context_hours and len(forecast_archive) >= context_hours:
             frame = actual_archive.merge(forecast_archive, on="timestamp", how="inner").sort_values("timestamp")
-            return frame[["timestamp", "actual_mw", "tso_forecast_mw"]].tail(context_hours)
+            frame = frame[["timestamp", "actual_mw", "tso_forecast_mw"]].tail(context_hours)
+            expected_last = end - pd.Timedelta(hours=1)
+            if len(frame) >= context_hours and pd.to_datetime(frame["timestamp"], utc=True).max() >= expected_last:
+                return frame
         if self.demo_mode:
             return demo_context_frame(run_date, zone, target, context_hours)[["timestamp", "actual_mw", "tso_forecast_mw"]]
         if not self.api_key:
