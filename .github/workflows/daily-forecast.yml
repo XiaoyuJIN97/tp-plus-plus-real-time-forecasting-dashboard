@@ -7,10 +7,14 @@ on:
         description: Optional YYYY-MM-DD run date
         required: false
   schedule:
-    # GitHub cron is UTC. These two triggers are guarded below so exactly the
-    # one that lands around 18:30 Europe/Brussels runs in CET/CEST.
+    # GitHub cron is UTC and can be delayed or occasionally missed. These
+    # fallback triggers are guarded below so only the first one after 18:30
+    # Europe/Brussels runs for a missing daily forecast file.
     - cron: "30 16 * * *"
     - cron: "30 17 * * *"
+    - cron: "30 18 * * *"
+    - cron: "30 19 * * *"
+    - cron: "30 20 * * *"
 
 jobs:
   forecast:
@@ -18,6 +22,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout dashboard
+        uses: actions/checkout@v4
+
       - name: Check Brussels forecast window
         id: brussels_window
         run: |
@@ -27,16 +34,19 @@ jobs:
           fi
           local_hour="$(TZ=Europe/Brussels date +%H)"
           local_minute="$(TZ=Europe/Brussels date +%M)"
-          if [ "$local_hour" = "18" ] && [ "$local_minute" -ge 30 ]; then
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Skipping duplicate UTC schedule at Brussels time ${local_hour}:${local_minute}."
+          run_date="$(TZ=Europe/Brussels date +%F)"
+          forecast_file="data/forecasts/forecasts_${run_date}.csv"
+          if [ "$local_hour" -lt 18 ] || { [ "$local_hour" = "18" ] && [ "$local_minute" -lt 30 ]; }; then
+            echo "Skipping before Brussels forecast window at ${local_hour}:${local_minute}."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
+          elif [ -f "$forecast_file" ]; then
+            echo "Forecast file already exists for ${run_date}: ${forecast_file}"
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "No forecast file found for ${run_date}; running at Brussels time ${local_hour}:${local_minute}."
+            echo "run_date=${run_date}" >> "$GITHUB_OUTPUT"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Checkout dashboard
-        if: steps.brussels_window.outputs.should_run == 'true'
-        uses: actions/checkout@v4
 
       - name: Checkout Open-Meteo realtime data
         if: steps.brussels_window.outputs.should_run == 'true'
@@ -102,6 +112,8 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}"
+          elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ steps.brussels_window.outputs.run_date }}"
           else
             python -m rt_forecast_dashboard.pipeline.run_daily
           fi
