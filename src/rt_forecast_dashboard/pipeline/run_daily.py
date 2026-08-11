@@ -17,7 +17,7 @@ from rt_forecast_dashboard.time_utils import latest_complete_run_date
 from rt_forecast_dashboard.weather_points import selected_weather_points
 
 
-def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None) -> pd.DataFrame:
+def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None, *, clear_issues: bool = True) -> pd.DataFrame:
     run_date = run_date or latest_complete_run_date()
     run_date_str = run_date.isoformat()
     run_at = datetime.now(UTC).isoformat(timespec="seconds")
@@ -27,7 +27,8 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
     entsoe = EntsoeForecastClient()
     weather_client = OpenMeteoClient()
     outputs: list[pd.DataFrame] = []
-    store.clear_issues_for_run(run_date_str)
+    if clear_issues:
+        store.clear_issues_for_run(run_date_str)
 
     for zone, zcfg in zone_config.items():
         for target, fcfg in target_config.items():
@@ -138,13 +139,14 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the daily real-time forecast pipeline.")
     parser.add_argument("--date", type=lambda value: datetime.strptime(value, "%Y-%m-%d").date(), default=None)
     parser.add_argument("--models", type=str, default=None, help="Comma-separated model keys to run.")
+    parser.add_argument("--keep-issues", action="store_true", help="Append issues instead of clearing existing issues for the run date.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
     model_keys = {value.strip() for value in args.models.split(",")} if args.models else None
-    result = run_daily_forecast(args.date, model_keys=model_keys)
+    result = run_daily_forecast(args.date, model_keys=model_keys, clear_issues=not args.keep_issues)
     print(f"Wrote {len(result)} forecast rows.")
 
 

@@ -100,7 +100,39 @@ jobs:
           print("tabpfn runtime OK:", TabPFNRegressor.__name__)
           PY
 
-      - name: Run daily forecast
+      - name: Run core daily forecast
+        if: steps.brussels_window.outputs.should_run == 'true'
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
+          FORECAST_DEMO_MODE: "false"
+          OPEN_METEO_REALTIME_DATA: external/open-meteo-realtime-data
+          OPEN_METEO_REALTIME_GIT_REF: HEAD
+          SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_weather_points_for_tp_v01_4p.csv
+          LOAD_SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_load_weather_points_for_tp_v01_4p.csv
+        run: |
+          MODELS="tso_reference,persistence,ridge_3mo_context,chronos2_online,xgboost_online"
+          if [ -n "${{ github.event.inputs.run_date }}" ]; then
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models "$MODELS"
+          elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ steps.brussels_window.outputs.run_date }}" --models "$MODELS"
+          else
+            python -m rt_forecast_dashboard.pipeline.run_daily --models "$MODELS"
+          fi
+
+      - name: Commit core forecast outputs
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No dashboard data changes."
+          else
+            git commit -m "Update daily realtime forecast"
+            git push
+          fi
+
+      - name: Run TabPFN daily forecast
         if: steps.brussels_window.outputs.should_run == 'true'
         env:
           ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
@@ -112,22 +144,20 @@ jobs:
           LOAD_SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_load_weather_points_for_tp_v01_4p.csv
         run: |
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}"
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models tabpfn_online --keep-issues
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ steps.brussels_window.outputs.run_date }}"
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ steps.brussels_window.outputs.run_date }}" --models tabpfn_online --keep-issues
           else
-            python -m rt_forecast_dashboard.pipeline.run_daily
+            python -m rt_forecast_dashboard.pipeline.run_daily --models tabpfn_online --keep-issues
           fi
 
-      - name: Commit forecast outputs
+      - name: Commit TabPFN forecast outputs
         if: steps.brussels_window.outputs.should_run == 'true'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data
           if git diff --cached --quiet; then
-            echo "No dashboard data changes."
+            echo "No TabPFN forecast data changes."
           else
-            git commit -m "Update daily realtime forecast"
+            git commit -m "Update daily TabPFN forecast"
             git push
           fi
