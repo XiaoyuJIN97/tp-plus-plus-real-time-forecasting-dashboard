@@ -12,7 +12,7 @@ from rt_forecast_dashboard.time_utils import latest_complete_run_date
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
 DAY_AHEAD_HOURS = 24
 ONLINE_CONTEXT_HOURS = 2208
-MODEL_FAMILY_ORDER = ["Chronos2", "Ridge", "TabPFN", "XGBoost", "TSO forecast", "Persistence"]
+MODEL_FAMILY_ORDER = ["Chronos2", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
 MODEL_FAMILY_RANK = {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
 
 

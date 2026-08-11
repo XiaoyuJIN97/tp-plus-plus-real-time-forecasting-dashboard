@@ -15,6 +15,7 @@ from rt_forecast_dashboard.ui.charts import accuracy_summary_chart, deterministi
 
 
 TARGET_ORDER = ["load", "solar", "wind_onshore", "wind_offshore"]
+HIDDEN_MODEL_KEYS = {"tabpfn_online"}
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -25,7 +26,10 @@ def _load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 @st.cache_data(ttl=300, show_spinner=False)
 def _prepared_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
-    return attach_display_actuals(valid_online_forecasts(forecasts))
+    prepared = valid_online_forecasts(forecasts)
+    if "model" in prepared.columns:
+        prepared = prepared[~prepared["model"].isin(HIDDEN_MODEL_KEYS)].copy()
+    return attach_display_actuals(prepared)
 
 
 def _target_label(target: str) -> str:
