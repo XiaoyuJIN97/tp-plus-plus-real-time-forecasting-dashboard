@@ -36,6 +36,53 @@ def _target_label(target: str) -> str:
     return features()[target].get("label", target)
 
 
+def _add_brussels_delivery_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    frame = frame.copy()
+    delivery = pd.to_datetime(frame["timestamp"], utc=True).dt.tz_convert("Europe/Brussels")
+    frame["delivery_time_brussels"] = delivery.dt.strftime("%Y-%m-%d %H:%M %Z")
+    frame["delivery_hour_brussels"] = delivery.dt.strftime("%H:%M")
+    return frame
+
+
+def _format_brussels_timestamp(value: pd.Timestamp | None) -> str:
+    if value is None or pd.isna(value):
+        return "n/a"
+    return pd.Timestamp(value).tz_convert("Europe/Brussels").strftime("%Y-%m-%d %H:%M %Z")
+
+
+def _render_timeline_and_inputs() -> None:
+    with st.expander("Daily update timeline and data inputs", expanded=False):
+        st.markdown(
+            """
+            The forecast run is scheduled after the 18:00 Europe/Brussels publication point. Timestamps are stored in UTC, but dashboard plots use Europe/Brussels delivery time. A 24-hour run from 18:00 therefore has hourly delivery timestamps from 18:00 through 17:00; the 17:00 point is the 17:00-18:00 delivery hour.
+            """
+        )
+        timeline = pd.DataFrame(
+            [
+                ("Before 18:00 Brussels", "Open-Meteo collector updates four-point weather forecast archive."),
+                ("18:00 Brussels", "ENTSO-E TP TSO forecasts for the next delivery window should be available."),
+                ("18:02-18:27 Brussels", "ENTSO-E realtime-data collector snapshots TP forecast and realized-value files."),
+                ("18:30+ Brussels", "Dashboard workflow reads the latest ENTSO-E/Open-Meteo archives, runs forecasts, commits forecast CSVs."),
+                ("After realization", "Dashboard fetches realized ENTSO-E actuals for completed delivery hours and updates diagnostics."),
+            ],
+            columns=["Time", "Step"],
+        )
+        st.dataframe(timeline, width="stretch", hide_index=True)
+        inputs = pd.DataFrame(
+            [
+                ("ENTSO-E realtime-data", "load", "forecast_load + actual_load", "TSO covariate, TSO benchmark, realized load actuals"),
+                ("ENTSO-E realtime-data", "solar", "forecast_solar_generation + actual_solar_generation", "TSO covariate, TSO benchmark, realized solar actuals"),
+                ("ENTSO-E realtime-data", "onshore wind", "forecast_onshore_wind_generation + actual_onshore_wind_generation", "TSO covariate, TSO benchmark, realized onshore wind actuals"),
+                ("ENTSO-E realtime-data", "offshore wind", "forecast_offshore_wind_generation + actual_offshore_wind_generation", "TSO covariate, TSO benchmark, realized offshore wind actuals"),
+                ("Open-Meteo realtime-data", "load", "temperature_2m, relative_humidity_2m, shortwave_radiation at four selected points; degree proxy derived in dashboard", "Optimal load engineering covariates by country/model"),
+                ("Open-Meteo realtime-data", "solar", "shortwave_radiation + temperature_2m at four selected points", "Solar weather covariates"),
+                ("Open-Meteo realtime-data", "onshore/offshore wind", "wind_speed_100m_ms + wind_dir_sin + wind_dir_cos at four selected points", "Wind weather covariates"),
+            ],
+            columns=["Resource", "Task", "Included data", "Dashboard use"],
+        )
+        st.dataframe(inputs, width="stretch", hide_index=True)
+
+
 def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[str]) -> None:
     if not countries:
         st.info("Select at least one bidding zone.")
@@ -76,7 +123,7 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         st.warning("No forecast rows match the selected models and time window.")
         return
 
-    meta_cols = st.columns(4)
+    meta_cols = st.columns(5)
     meta_cols[0].metric("Latest run", current["run_date"].max())
     latest_primary = current.copy()
     if not latest_primary.empty:
@@ -84,7 +131,9 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
     horizon = latest_primary["horizon"].nunique() if not latest_primary.empty else current["horizon"].nunique()
     meta_cols[1].metric("Day-ahead horizon", f"{int(horizon)} hours")
     meta_cols[2].metric("Context", f"{int(current['context_hours'].max()):,} hours")
-    meta_cols[3].metric("Models", current["model_label"].nunique())
+    latest_actual = current.loc[current["actual_mw"].notna(), "timestamp"].max() if "actual_mw" in current else None
+    meta_cols[3].metric("Actual through", _format_brussels_timestamp(latest_actual))
+    meta_cols[4].metric("Models", current["model_label"].nunique())
     if actual_errors and current["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
         st.warning("Actual line unavailable: " + "; ".join(actual_errors[:3]))
 
@@ -100,13 +149,15 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
             "context_hours",
             "context_start",
             "context_end",
+            "delivery_time_brussels",
             "timestamp",
             "horizon",
             "forecast_mw",
             "actual_mw",
             "tso_forecast_mw",
         ]
-        details = current[[c for c in detail_cols if c in current.columns]].sort_values(["zone", "model_label", "timestamp"])
+        details = _add_brussels_delivery_columns(current)
+        details = details[[c for c in detail_cols if c in details.columns]].sort_values(["zone", "model_label", "timestamp"])
         st.dataframe(details, width="stretch", hide_index=True)
     elif view == "Scatter diagnostics":
         _render_scatter_diagnostics(target, current)
@@ -198,6 +249,7 @@ def render_app() -> None:
     metric_cols[3].metric("Actual rows", int(filtered["actual_mw"].notna().sum()) if "actual_mw" in filtered else 0)
     if actual_errors and not filtered.empty and filtered["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
         st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
+    _render_timeline_and_inputs()
 
     for target in TARGET_ORDER:
         if target in target_filter:

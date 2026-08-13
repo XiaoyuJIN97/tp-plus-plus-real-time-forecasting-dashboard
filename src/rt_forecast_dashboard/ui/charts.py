@@ -7,18 +7,28 @@ import plotly.graph_objects as go
 from rt_forecast_dashboard.ui.analytics import MODEL_FAMILY_ORDER
 
 
+def _add_brussels_delivery_time(frame: pd.DataFrame) -> pd.DataFrame:
+    plot = frame.copy()
+    plot["delivery_time_brussels"] = (
+        pd.to_datetime(plot["timestamp"], utc=True)
+        .dt.tz_convert("Europe/Brussels")
+        .dt.tz_localize(None)
+    )
+    return plot
+
+
 def forecast_line_chart(frame: pd.DataFrame) -> go.Figure:
-    plot = frame.sort_values(["target", "zone", "model_label", "run_date", "timestamp"]).copy()
+    plot = _add_brussels_delivery_time(frame).sort_values(["target", "zone", "model_label", "run_date", "timestamp"])
     plot["line_id"] = plot["zone"].astype(str) + "|" + plot["target"].astype(str) + "|" + plot["model_label"].astype(str)
     fig = px.line(
         plot,
-        x="timestamp",
+        x="delivery_time_brussels",
         y="forecast_mw",
         color="model_label",
         line_dash="target",
         line_group="line_id",
         facet_row="target",
-        labels={"forecast_mw": "Forecast (MW)", "timestamp": "Delivery time", "model_label": "Model"},
+        labels={"forecast_mw": "Forecast (MW)", "delivery_time_brussels": "Delivery time (Europe/Brussels)", "model_label": "Model"},
         height=680,
     )
     fig.update_layout(
@@ -43,31 +53,37 @@ def zone_summary(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def deterministic_forecast_chart(frame: pd.DataFrame, title: str) -> go.Figure:
-    plot = frame.sort_values(["zone", "model_label", "run_date", "timestamp"]).copy()
+    plot = _add_brussels_delivery_time(frame).sort_values(["zone", "model_label", "run_date", "timestamp"])
     if "actual_mw" in plot.columns and plot["actual_mw"].notna().any():
-        forecast = plot[["zone", "run_date", "timestamp", "model_label", "forecast_mw"]].rename(columns={"forecast_mw": "value"})
+        forecast = plot[["zone", "run_date", "timestamp", "delivery_time_brussels", "model_label", "forecast_mw"]].rename(columns={"forecast_mw": "value"})
         forecast["series"] = forecast["model_label"]
         actual = (
-            plot[["zone", "timestamp", "actual_mw"]]
+            plot[["zone", "timestamp", "delivery_time_brussels", "actual_mw"]]
             .dropna()
             .drop_duplicates(["zone", "timestamp"])
             .rename(columns={"actual_mw": "value"})
         )
         actual["run_date"] = "actual"
         actual["series"] = "Actual"
-        plot_long = pd.concat([forecast[["zone", "run_date", "timestamp", "series", "value"]], actual[["zone", "run_date", "timestamp", "series", "value"]]], ignore_index=True)
+        plot_long = pd.concat(
+            [
+                forecast[["zone", "run_date", "timestamp", "delivery_time_brussels", "series", "value"]],
+                actual[["zone", "run_date", "timestamp", "delivery_time_brussels", "series", "value"]],
+            ],
+            ignore_index=True,
+        )
     else:
         plot_long = plot.rename(columns={"forecast_mw": "value"}).copy()
         plot_long["series"] = plot_long["model_label"]
     plot_long["line_id"] = plot_long["zone"].astype(str) + "|" + plot_long["series"].astype(str)
     fig = px.line(
         plot_long,
-        x="timestamp",
+        x="delivery_time_brussels",
         y="value",
         color="series",
         line_group="line_id",
         facet_row="zone",
-        labels={"value": "MW", "timestamp": "Delivery time", "series": "Model"},
+        labels={"value": "MW", "delivery_time_brussels": "Delivery time (Europe/Brussels)", "series": "Model"},
         title=title,
         height=max(420, 260 * max(1, plot_long["zone"].nunique())),
     )
