@@ -50,7 +50,25 @@ def _format_brussels_timestamp(value: pd.Timestamp | None) -> str:
     return pd.Timestamp(value).tz_convert("Europe/Brussels").strftime("%Y-%m-%d %H:%M %Z")
 
 
-def _render_timeline_and_inputs() -> None:
+def _actual_status_table(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty or "actual_mw" not in frame.columns:
+        return pd.DataFrame()
+    actual = frame.dropna(subset=["actual_mw"]).copy()
+    if actual.empty:
+        return pd.DataFrame()
+    actual = actual.drop_duplicates(["zone", "target", "timestamp"])
+    status = (
+        actual.groupby(["zone", "target"], as_index=False)
+        .agg(actual_through=("timestamp", "max"), actual_points=("timestamp", "size"))
+        .sort_values(["zone", "target"])
+    )
+    status["Task"] = status["target"].map(_target_label)
+    status["Actual through"] = status["actual_through"].map(_format_brussels_timestamp)
+    status = status.rename(columns={"zone": "Zone", "actual_points": "Hourly actual points"})
+    return status[["Zone", "Task", "Actual through", "Hourly actual points"]]
+
+
+def _render_timeline_and_inputs(frame: pd.DataFrame) -> None:
     with st.expander("Daily update timeline and data inputs", expanded=False):
         st.markdown(
             """
@@ -68,6 +86,12 @@ def _render_timeline_and_inputs() -> None:
             columns=["Time", "Step"],
         )
         st.dataframe(timeline, width="stretch", hide_index=True)
+        actual_status = _actual_status_table(frame)
+        st.markdown("#### Current actual data display")
+        if actual_status.empty:
+            st.info("No realized actual values are currently attached for the selected tasks and zones.")
+        else:
+            st.dataframe(actual_status, width="stretch", hide_index=True)
         inputs = pd.DataFrame(
             [
                 ("ENTSO-E realtime-data", "load", "forecast_load + actual_load", "TSO covariate, TSO benchmark, realized load actuals"),
@@ -249,7 +273,7 @@ def render_app() -> None:
     metric_cols[3].metric("Actual rows", int(filtered["actual_mw"].notna().sum()) if "actual_mw" in filtered else 0)
     if actual_errors and not filtered.empty and filtered["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
         st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
-    _render_timeline_and_inputs()
+    _render_timeline_and_inputs(filtered)
 
     for target in TARGET_ORDER:
         if target in target_filter:

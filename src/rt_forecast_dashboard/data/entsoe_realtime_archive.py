@@ -97,8 +97,13 @@ class EntsoeRealtimeArchive:
         updates = self._to_hourly(data[["timestamp", "value"]])
         if raw.empty:
             return updates
+        raw = raw.copy()
+        updates = updates.copy()
+        raw["_source_rank"] = 0
+        updates["_source_rank"] = 1
         combined = pd.concat([raw, updates], ignore_index=True)
-        return combined.sort_values("timestamp").drop_duplicates("timestamp", keep="last").reset_index(drop=True)
+        combined = combined.sort_values(["timestamp", "_source_rank"]).drop_duplicates("timestamp", keep="last")
+        return combined.drop(columns="_source_rank").reset_index(drop=True)
 
     def _read_manifest(self) -> pd.DataFrame:
         if self._manifest_cache is not None:
