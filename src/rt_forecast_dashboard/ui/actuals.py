@@ -17,7 +17,7 @@ def attach_display_actuals(forecasts: pd.DataFrame, now: pd.Timestamp | None = N
     frame.attrs["actual_fetch_errors"] = []
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
     now = now or pd.Timestamp.now(tz="UTC")
-    actual_cutoff = now - pd.Timedelta(hours=2)
+    actual_cutoff = now - pd.Timedelta(minutes=30)
     needs_actual = frame["actual_mw"].isna() & frame["timestamp"].lt(actual_cutoff)
     if not needs_actual.any():
         return frame
