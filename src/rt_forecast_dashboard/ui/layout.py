@@ -29,6 +29,13 @@ def _inject_styles() -> None:
             margin: 1.75rem 0 0.35rem 0;
             color: #111827;
         }
+        .ops-section-title {
+            font-size: 1.15rem;
+            font-weight: 650;
+            line-height: 1.25;
+            margin: 3.25rem 0 0.45rem 0;
+            color: #64748b;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -246,7 +253,8 @@ def _render_run_history(forecasts: pd.DataFrame) -> None:
 
 
 def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
-    with st.expander("Failure and backfill history", expanded=False):
+    st.markdown('<div class="ops-section-title">Failure and backfill history</div>', unsafe_allow_html=True)
+    with st.expander("Open / close records", expanded=False):
         metric_cols = st.columns(4)
         issue_status = issues["status"].astype(str) if "status" in issues.columns else pd.Series("", index=issues.index)
         backfill_status = backfills["status"].astype(str) if "status" in backfills.columns else pd.Series("", index=backfills.index)
