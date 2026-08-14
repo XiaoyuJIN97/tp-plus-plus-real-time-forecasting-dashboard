@@ -18,20 +18,6 @@ TARGET_ORDER = ["load", "solar", "wind_onshore", "wind_offshore"]
 HIDDEN_MODEL_KEYS = {"tabpfn_online"}
 
 
-def _inject_styles() -> None:
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stExpander"] details summary p {
-            font-size: 1.35rem;
-            font-weight: 750;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 @st.cache_data(ttl=300, show_spinner=False)
 def _load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
@@ -48,6 +34,10 @@ def _prepared_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
 
 def _target_label(target: str) -> str:
     return features()[target].get("label", target)
+
+
+def _task_expander_label(target: str) -> str:
+    return f"### **{_target_label(target)}**"
 
 
 def _add_brussels_delivery_columns(frame: pd.DataFrame) -> pd.DataFrame:
@@ -265,7 +255,6 @@ def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFra
 
 def render_app() -> None:
     st.set_page_config(page_title="Real-Time Energy Forecasting", page_icon="chart_with_upwards_trend", layout="wide")
-    _inject_styles()
     st.title("Real-Time Load and Renewables Forecasting")
     st.caption("Daily 18:00 Europe/Brussels forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
 
@@ -291,7 +280,7 @@ def render_app() -> None:
     _render_timeline_and_inputs(filtered)
 
     for target in TARGET_ORDER:
-        with st.expander(_target_label(target), expanded=target == "load"):
+        with st.expander(_task_expander_label(target), expanded=target == "load"):
             _render_target_section(target, filtered, all_zones)
 
     _render_failure_backfill_history(issues, backfills)
