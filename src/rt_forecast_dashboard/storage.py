@@ -24,6 +24,9 @@ class ForecastStore:
     def issue_path(self) -> Path:
         return self.data_dir / "issues" / "issue_log.csv"
 
+    def backfill_dir(self) -> Path:
+        return self.data_dir / "backfill"
+
     def append_forecasts(self, frame: pd.DataFrame, run_date: str, *, replace_run: bool = False) -> None:
         path = self.forecast_path(run_date)
         if path.exists():
@@ -87,6 +90,24 @@ class ForecastStore:
         if not path.exists():
             return pd.DataFrame()
         return pd.read_csv(path, parse_dates=["logged_at"])
+
+    def read_backfill_history(self) -> pd.DataFrame:
+        files = sorted(self.backfill_dir().glob("backfill_*.csv"))
+        if not files:
+            return pd.DataFrame()
+        frames = []
+        for path in files:
+            frame = pd.read_csv(path)
+            frame["report"] = path.name
+            frames.append(frame)
+        history = pd.concat(frames, ignore_index=True)
+        if "run_date" in history.columns:
+            history["run_date"] = history["run_date"].astype(str)
+        if "seconds" in history.columns:
+            history["seconds"] = pd.to_numeric(history["seconds"], errors="coerce")
+        if "rows" in history.columns:
+            history["rows"] = pd.to_numeric(history["rows"], errors="coerce").fillna(0).astype(int)
+        return history
 
     def clear_issues_for_run(self, run_date: str) -> None:
         path = self.issue_path()

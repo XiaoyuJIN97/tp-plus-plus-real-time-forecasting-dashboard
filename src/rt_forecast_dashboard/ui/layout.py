@@ -19,9 +19,9 @@ HIDDEN_MODEL_KEYS = {"tabpfn_online"}
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
+def _load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
-    return store.read_forecasts(), store.read_issues()
+    return store.read_forecasts(), store.read_issues(), store.read_backfill_history()
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -238,12 +238,42 @@ def _render_run_history(forecasts: pd.DataFrame) -> None:
     st.dataframe(history, width="stretch", hide_index=True)
 
 
+def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
+    st.subheader("Failure and backfill history")
+    metric_cols = st.columns(4)
+    issue_status = issues["status"].astype(str) if "status" in issues.columns else pd.Series("", index=issues.index)
+    backfill_status = backfills["status"].astype(str) if "status" in backfills.columns else pd.Series("", index=backfills.index)
+    open_issues = issues[issue_status.eq("open")] if not issues.empty else pd.DataFrame()
+    failed_backfills = backfills[backfill_status.ne("ok")] if not backfills.empty else pd.DataFrame()
+    metric_cols[0].metric("Logged issues", len(issues))
+    metric_cols[1].metric("Open issues", len(open_issues))
+    metric_cols[2].metric("Backfill rows", len(backfills))
+    metric_cols[3].metric("Failed backfills", len(failed_backfills))
+
+    with st.expander("Recent failure / backfill records", expanded=False):
+        issue_cols = ["logged_at", "run_date", "zone", "target", "stage", "message", "status"]
+        st.markdown("#### Recent failures")
+        if issues.empty:
+            st.success("No failures have been logged.")
+        else:
+            recent_issues = issues.sort_values("logged_at", ascending=False).head(30).copy()
+            st.dataframe(recent_issues[[c for c in issue_cols if c in recent_issues.columns]], width="stretch", hide_index=True)
+
+        backfill_cols = ["report", "run_date", "rows", "seconds", "status", "message"]
+        st.markdown("#### Backfill reports")
+        if backfills.empty:
+            st.info("No backfill reports have been stored yet.")
+        else:
+            recent_backfills = backfills.sort_values(["report", "run_date"], ascending=[False, False]).head(30).copy()
+            st.dataframe(recent_backfills[[c for c in backfill_cols if c in recent_backfills.columns]], width="stretch", hide_index=True)
+
+
 def render_app() -> None:
     st.set_page_config(page_title="Real-Time Energy Forecasting", page_icon="chart_with_upwards_trend", layout="wide")
     st.title("Real-Time Load and Renewables Forecasting")
     st.caption("Daily 18:00 Europe/Brussels forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
 
-    forecasts, issues = _load_data()
+    forecasts, issues, backfills = _load_data()
     if forecasts.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
@@ -280,8 +310,4 @@ def render_app() -> None:
             _render_target_section(target, filtered, zone_filter)
             st.divider()
 
-    with st.expander("Issues", expanded=False):
-        if issues.empty:
-            st.success("No issues have been logged.")
-        else:
-            st.dataframe(issues.sort_values("logged_at", ascending=False), width="stretch", hide_index=True)
+    _render_failure_backfill_history(issues, backfills)

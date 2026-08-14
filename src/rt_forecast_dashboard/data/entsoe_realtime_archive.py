@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from io import StringIO
+from io import BytesIO, StringIO
 import os
 import subprocess
 from urllib.error import HTTPError, URLError
@@ -34,6 +34,7 @@ class EntsoeRealtimeArchive:
         self.root = Path(root or configured) if root or configured else None
         self.git_ref = paths.get("entsoe_realtime_git_ref")
         self.raw_base = (paths.get("entsoe_realtime_raw_base") or "").rstrip("/")
+        self.hourly_dir = Path(paths.get("entsoe_realtime_hourly_dir") or "data/hourly")
         self.prefer_local = os.getenv("ENTSOE_REALTIME_PREFER_LOCAL", "false").lower() in {"1", "true", "yes"}
         self._available_cache: bool | None = None
         self._manifest_cache: pd.DataFrame | None = None
@@ -46,7 +47,8 @@ class EntsoeRealtimeArchive:
             self._available_cache = False
             return False
         local_manifest_exists = bool(self.root and (self.root / "data" / "update_manifest.csv").exists())
-        self._available_cache = bool(self._git_show("data/update_manifest.csv") or local_manifest_exists)
+        local_hourly_exists = bool(self.root and self._local_hourly_base().exists())
+        self._available_cache = bool(self._git_show("data/update_manifest.csv") or local_manifest_exists or local_hourly_exists)
         return self._available_cache
 
     def fetch_actuals(self, *, zone: str, target: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
@@ -63,8 +65,19 @@ class EntsoeRealtimeArchive:
 
         start = pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else pd.Timestamp(start, tz="UTC")
         end = pd.Timestamp(end).tz_convert("UTC") if pd.Timestamp(end).tzinfo else pd.Timestamp(end, tz="UTC")
+        hourly = self._read_hourly_variable(zone=zone, variable=variable, start=start, end=end)
+        legacy = self._read_legacy_variable(zone=zone, variable=variable, start=start, end=end)
+        if hourly.empty:
+            return legacy
+        if legacy.empty:
+            return hourly
+        return self._merge_sources(legacy, hourly)
+
+    def _read_legacy_variable(self, *, zone: str, variable: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
         raw = self._read_raw_variable(zone=zone, variable=variable, start=start, end=end)
         manifest = self._read_manifest()
+        if not {"country", "variable"}.issubset(manifest.columns):
+            return raw
         manifest = manifest[(manifest["country"].eq(zone)) & (manifest["variable"].eq(variable))].copy()
         if manifest.empty:
             return raw
@@ -97,13 +110,40 @@ class EntsoeRealtimeArchive:
         updates = self._to_hourly(data[["timestamp", "value"]])
         if raw.empty:
             return updates
-        raw = raw.copy()
-        updates = updates.copy()
-        raw["_source_rank"] = 0
-        updates["_source_rank"] = 1
-        combined = pd.concat([raw, updates], ignore_index=True)
+        return self._merge_sources(raw, updates)
+
+    def _merge_sources(self, older: pd.DataFrame, newer: pd.DataFrame) -> pd.DataFrame:
+        older = older.copy()
+        newer = newer.copy()
+        older["_source_rank"] = 0
+        newer["_source_rank"] = 1
+        combined = pd.concat([older, newer], ignore_index=True)
         combined = combined.sort_values(["timestamp", "_source_rank"]).drop_duplicates("timestamp", keep="last")
-        return combined.drop(columns="_source_rank").reset_index(drop=True)
+        return combined.drop(columns="_source_rank").sort_values("timestamp").reset_index(drop=True)
+
+    def _read_hourly_variable(self, *, zone: str, variable: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+        frames = []
+        for year in range(start.year, end.year + 1):
+            path = self._hourly_path(zone, variable, year)
+            frame = self._read_hourly_parquet(path)
+            if frame.empty:
+                continue
+            if "timestamp_utc" not in frame.columns or "value" not in frame.columns:
+                continue
+            columns = ["timestamp_utc", "value"]
+            if "collection_time_utc" in frame.columns:
+                columns.append("collection_time_utc")
+            frame = frame[columns].rename(columns={"timestamp_utc": "timestamp"})
+            frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+            frame["value"] = pd.to_numeric(frame["value"], errors="coerce")
+            frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
+            if "collection_time_utc" in frame.columns:
+                frame["collection_time_utc"] = pd.to_datetime(frame["collection_time_utc"], utc=True, errors="coerce")
+                frame = frame.sort_values(["timestamp", "collection_time_utc"]).drop_duplicates("timestamp", keep="last")
+            frames.append(frame[["timestamp", "value"]])
+        if not frames:
+            return pd.DataFrame(columns=["timestamp", "value"])
+        return self._to_hourly(pd.concat(frames, ignore_index=True))
 
     def _read_manifest(self) -> pd.DataFrame:
         if self._manifest_cache is not None:
@@ -142,6 +182,17 @@ class EntsoeRealtimeArchive:
             return pd.DataFrame()
         return pd.read_csv(snapshot_path, usecols=["collection_time_utc", "timestamp_utc", "value"])
 
+    def _read_hourly_parquet(self, path: str) -> pd.DataFrame:
+        raw_bytes = None if Path(path).is_absolute() else self._git_show_bytes(path)
+        if raw_bytes is not None:
+            return pd.read_parquet(BytesIO(raw_bytes))
+        if not self.root and not Path(path).is_absolute():
+            return pd.DataFrame()
+        snapshot_path = Path(path) if Path(path).is_absolute() else self.root / path
+        if not snapshot_path.exists():
+            return pd.DataFrame()
+        return pd.read_parquet(snapshot_path)
+
     def _read_raw_variable(self, *, zone: str, variable: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
         frames = []
         for year in range(start.year, end.year + 1):
@@ -174,7 +225,26 @@ class EntsoeRealtimeArchive:
             return local_text
         return self._read_raw_url(path)
 
+    def _git_show_bytes(self, path: str) -> bytes | None:
+        if not self.prefer_local:
+            raw_bytes = self._read_raw_url_bytes(path)
+            if raw_bytes is not None:
+                return raw_bytes
+        local_bytes = self._read_local_git_bytes(path)
+        if local_bytes is not None:
+            return local_bytes
+        return self._read_raw_url_bytes(path)
+
     def _read_local_git(self, path: str) -> str | None:
+        raw = self._read_local_git_bytes(path)
+        if raw is None:
+            return None
+        try:
+            return raw.decode("utf-8")
+        except UnicodeDecodeError:
+            return None
+
+    def _read_local_git_bytes(self, path: str) -> bytes | None:
         if not self.root or not self.git_ref:
             return None
         try:
@@ -182,7 +252,6 @@ class EntsoeRealtimeArchive:
                 ["git", "-C", str(self.root), "show", f"{self.git_ref}:{path}"],
                 check=True,
                 capture_output=True,
-                text=True,
                 timeout=3,
                 env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
             )
@@ -200,3 +269,25 @@ class EntsoeRealtimeArchive:
                 return response.read().decode("utf-8")
         except (HTTPError, URLError, TimeoutError, UnicodeDecodeError):
             return None
+
+    def _read_raw_url_bytes(self, path: str) -> bytes | None:
+        if not self.raw_base:
+            return None
+        url = f"{self.raw_base}/{path}"
+        try:
+            request = Request(url, headers={"User-Agent": "tp-plus-plus-real-time-forecasting-dashboard"})
+            with urlopen(request, timeout=10) as response:
+                return response.read()
+        except (HTTPError, URLError, TimeoutError):
+            return None
+
+    def _local_hourly_base(self) -> Path:
+        if self.hourly_dir.is_absolute():
+            return self.hourly_dir
+        if self.root:
+            return self.root / self.hourly_dir
+        return self.hourly_dir
+
+    def _hourly_path(self, zone: str, variable: str, year: int) -> str:
+        path = self.hourly_dir / zone / variable / f"{year}.parquet"
+        return str(path)
