@@ -18,6 +18,20 @@ TARGET_ORDER = ["load", "solar", "wind_onshore", "wind_offshore"]
 HIDDEN_MODEL_KEYS = {"tabpfn_online"}
 
 
+def _inject_styles() -> None:
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stExpander"] details summary p {
+            font-size: 1.35rem;
+            font-weight: 750;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 @st.cache_data(ttl=300, show_spinner=False)
 def _load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
@@ -221,18 +235,17 @@ def _render_run_history(forecasts: pd.DataFrame) -> None:
 
 
 def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
-    st.subheader("Failure and backfill history")
-    metric_cols = st.columns(4)
-    issue_status = issues["status"].astype(str) if "status" in issues.columns else pd.Series("", index=issues.index)
-    backfill_status = backfills["status"].astype(str) if "status" in backfills.columns else pd.Series("", index=backfills.index)
-    open_issues = issues[issue_status.eq("open")] if not issues.empty else pd.DataFrame()
-    failed_backfills = backfills[backfill_status.ne("ok")] if not backfills.empty else pd.DataFrame()
-    metric_cols[0].metric("Logged issues", len(issues))
-    metric_cols[1].metric("Open issues", len(open_issues))
-    metric_cols[2].metric("Backfill rows", len(backfills))
-    metric_cols[3].metric("Failed backfills", len(failed_backfills))
+    with st.expander("Failure and backfill history", expanded=False):
+        metric_cols = st.columns(4)
+        issue_status = issues["status"].astype(str) if "status" in issues.columns else pd.Series("", index=issues.index)
+        backfill_status = backfills["status"].astype(str) if "status" in backfills.columns else pd.Series("", index=backfills.index)
+        open_issues = issues[issue_status.eq("open")] if not issues.empty else pd.DataFrame()
+        failed_backfills = backfills[backfill_status.ne("ok")] if not backfills.empty else pd.DataFrame()
+        metric_cols[0].metric("Logged issues", len(issues))
+        metric_cols[1].metric("Open issues", len(open_issues))
+        metric_cols[2].metric("Backfill rows", len(backfills))
+        metric_cols[3].metric("Failed backfills", len(failed_backfills))
 
-    with st.expander("Recent failure / backfill records", expanded=False):
         issue_cols = ["logged_at", "run_date", "zone", "target", "stage", "message", "status"]
         st.markdown("#### Recent failures")
         if issues.empty:
@@ -252,6 +265,7 @@ def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFra
 
 def render_app() -> None:
     st.set_page_config(page_title="Real-Time Energy Forecasting", page_icon="chart_with_upwards_trend", layout="wide")
+    _inject_styles()
     st.title("Real-Time Load and Renewables Forecasting")
     st.caption("Daily 18:00 Europe/Brussels forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
 
