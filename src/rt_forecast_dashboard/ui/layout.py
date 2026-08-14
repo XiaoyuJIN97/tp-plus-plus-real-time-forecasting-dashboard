@@ -22,14 +22,12 @@ def _inject_styles() -> None:
     st.markdown(
         """
         <style>
-        div[data-testid="stMarkdown"]:has(.task-expander-marker) {
-            height: 0;
-            margin: 0;
-            padding: 0;
-        }
-        div[data-testid="stMarkdown"]:has(.task-expander-marker) + div[data-testid="stExpander"] details summary p {
-            font-size: 1.8rem;
+        .task-section-title {
+            font-size: 2.1rem;
             font-weight: 800;
+            line-height: 1.2;
+            margin: 1.75rem 0 0.35rem 0;
+            color: #111827;
         }
         </style>
         """,
@@ -56,11 +54,11 @@ def _target_label(target: str) -> str:
 
 
 def _task_expander_label(target: str) -> str:
-    return _target_label(target)
+    return f"Open / close {_target_label(target)} display"
 
 
-def _mark_next_expander_as_task() -> None:
-    st.markdown('<span class="task-expander-marker"></span>', unsafe_allow_html=True)
+def _render_task_title(target: str) -> None:
+    st.markdown(f'<div class="task-section-title">{_target_label(target)}</div>', unsafe_allow_html=True)
 
 
 def _add_brussels_delivery_columns(frame: pd.DataFrame) -> pd.DataFrame:
@@ -304,7 +302,7 @@ def render_app() -> None:
     _render_timeline_and_inputs(filtered)
 
     for target in TARGET_ORDER:
-        _mark_next_expander_as_task()
+        _render_task_title(target)
         with st.expander(_task_expander_label(target), expanded=target == "load"):
             _render_target_section(target, filtered, all_zones)
 
