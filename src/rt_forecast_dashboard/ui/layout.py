@@ -111,7 +111,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
     if not countries:
         st.info("Select at least one bidding zone.")
         return
-    st.header(_target_label(target))
     actual_errors = prepared.attrs.get("actual_fetch_errors", [])
     current = prepared[(prepared["target"] == target) & (prepared["zone"].isin(countries))].copy()
 
@@ -264,19 +263,8 @@ def render_app() -> None:
     forecasts["timestamp"] = pd.to_datetime(forecasts["timestamp"], utc=True)
     prepared = _prepared_online_forecasts(forecasts)
     actual_errors = prepared.attrs.get("actual_fetch_errors", [])
-    target_config = features()
     all_zones = list(zones().keys())
-    filter_cols = st.columns([1.2, 1.8])
-    target_filter = filter_cols[0].multiselect(
-        "Forecasting tasks",
-        TARGET_ORDER,
-        default=TARGET_ORDER,
-        format_func=lambda value: target_config[value].get("label", value),
-    )
-    zone_filter = filter_cols[1].multiselect("Available bidding zones", all_zones, default=all_zones)
-
     filtered = prepared.copy()
-    filtered = filtered[filtered["zone"].isin(zone_filter) & filtered["target"].isin(target_filter)].copy()
     latest_run = filtered["run_date"].max() if not filtered.empty else None
 
     metric_cols = st.columns(4)
@@ -289,8 +277,7 @@ def render_app() -> None:
     _render_timeline_and_inputs(filtered)
 
     for target in TARGET_ORDER:
-        if target in target_filter:
-            _render_target_section(target, filtered, zone_filter)
-            st.divider()
+        with st.expander(_target_label(target), expanded=target == "load"):
+            _render_target_section(target, filtered, all_zones)
 
     _render_failure_backfill_history(issues, backfills)
