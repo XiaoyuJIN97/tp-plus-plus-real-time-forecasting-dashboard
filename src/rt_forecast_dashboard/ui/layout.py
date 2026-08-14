@@ -166,23 +166,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
             deterministic_forecast_chart(current, f"{_target_label(target)} deterministic forecast analysis"),
             width="stretch",
         )
-        detail_cols = [
-            "zone",
-            "model_label",
-            "covariate_case",
-            "context_hours",
-            "context_start",
-            "context_end",
-            "delivery_time_brussels",
-            "timestamp",
-            "horizon",
-            "forecast_mw",
-            "actual_mw",
-            "tso_forecast_mw",
-        ]
-        details = _add_brussels_delivery_columns(current)
-        details = details[[c for c in detail_cols if c in details.columns]].sort_values(["zone", "model_label", "timestamp"])
-        st.dataframe(details, width="stretch", hide_index=True)
     elif view == "Scatter diagnostics":
         _render_scatter_diagnostics(target, current)
     elif view == "Model accuracy summary":
