@@ -7,8 +7,12 @@ __pycache__/
 .pytest_cache/
 .streamlit/secrets.toml
 data/raw/*.csv
-data/issues/*.csv
-data/backfill/*.csv
+data/issues/*
+!data/issues/.gitkeep
+!data/issues/issue_log.csv
+data/backfill/*
+!data/backfill/.gitkeep
+!data/backfill/*.csv
 open-meteo-realtime-data/data/raw/**/*.csv
 open-meteo-realtime-data/data/updates/**/*.csv
 models/*.joblib

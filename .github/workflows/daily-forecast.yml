@@ -19,6 +19,9 @@ on:
 jobs:
   forecast:
     runs-on: ubuntu-latest
+    concurrency:
+      group: daily-forecast-${{ github.ref }}
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
@@ -36,14 +39,15 @@ jobs:
           local_minute="$(TZ=Europe/Brussels date +%M)"
           run_date="$(TZ=Europe/Brussels date +%F)"
           forecast_file="data/forecasts/forecasts_${run_date}.csv"
+          core_models="tso_reference,persistence,ridge_3mo_context,chronos2_online,xgboost_online"
           if [ "$local_hour" -lt 18 ] || { [ "$local_hour" = "18" ] && [ "$local_minute" -lt 30 ]; }; then
             echo "Skipping before Brussels forecast window at ${local_hour}:${local_minute}."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
-          elif [ -f "$forecast_file" ]; then
-            echo "Forecast file already exists for ${run_date}: ${forecast_file}"
+          elif [ -f "$forecast_file" ] && PYTHONPATH=src python -m rt_forecast_dashboard.pipeline.check_forecast_complete --date "$run_date" --models "$core_models"; then
+            echo "Forecast file is complete for ${run_date}: ${forecast_file}"
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
-            echo "No forecast file found for ${run_date}; running at Brussels time ${local_hour}:${local_minute}."
+            echo "Forecast file missing or incomplete for ${run_date}; running at Brussels time ${local_hour}:${local_minute}."
             echo "run_date=${run_date}" >> "$GITHUB_OUTPUT"
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           fi
