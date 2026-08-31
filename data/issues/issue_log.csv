@@ -1,12 +1,12 @@
 logged_at,run_date,zone,target,stage,message,context,status
-2026-08-30T19:58:34+00:00,2026-08-30,BE,solar,data_or_features,"503 Server Error from ENTSO-E TP while fetching BE solar TSO forecast horizon.",{},open
-2026-08-30T19:58:38+00:00,2026-08-30,BE,wind_onshore,data_or_features,"503 Server Error from ENTSO-E TP while fetching BE onshore wind TSO forecast horizon.",{},open
-2026-08-30T19:58:39+00:00,2026-08-30,BE,wind_offshore,data_or_features,"503 Server Error from ENTSO-E TP while fetching BE offshore wind TSO forecast horizon.",{},open
-2026-08-30T19:58:41+00:00,2026-08-30,FR,load,data_or_features,"503 Server Error from ENTSO-E TP while fetching FR load TSO forecast horizon.",{},open
-2026-08-30T19:58:43+00:00,2026-08-30,FR,solar,data_or_features,"503 Server Error from ENTSO-E TP while fetching FR solar TSO forecast horizon.",{},open
-2026-08-30T19:58:46+00:00,2026-08-30,FR,wind_onshore,data_or_features,"503 Server Error from ENTSO-E TP while fetching FR onshore wind TSO forecast horizon.",{},open
-2026-08-30T19:58:49+00:00,2026-08-30,FR,wind_offshore,data_or_features,"503 Server Error from ENTSO-E TP while fetching FR offshore wind TSO forecast horizon.",{},open
-2026-08-30T19:58:53+00:00,2026-08-30,DE,load,data_or_features,"Incomplete ENTSO-E TSO forecast horizon for DE load: 6/24 hourly rows.",{},open
-2026-08-30T19:59:02+00:00,2026-08-30,DE,solar,data_or_features,"Incomplete ENTSO-E TSO forecast horizon for DE solar: 6/24 hourly rows.",{},open
-2026-08-30T19:59:16+00:00,2026-08-30,DE,wind_onshore,data_or_features,"Incomplete ENTSO-E TSO forecast horizon for DE onshore wind: 6/24 hourly rows.",{},open
-2026-08-30T19:59:30+00:00,2026-08-30,DE,wind_offshore,data_or_features,"Incomplete ENTSO-E TSO forecast horizon for DE offshore wind: 6/24 hourly rows.",{},open
+2026-08-30T19:58:34+00:00,2026-08-30,BE,solar,data_or_features,503 Server Error from ENTSO-E TP while fetching BE solar TSO forecast horizon.,{},open
+2026-08-30T19:58:38+00:00,2026-08-30,BE,wind_onshore,data_or_features,503 Server Error from ENTSO-E TP while fetching BE onshore wind TSO forecast horizon.,{},open
+2026-08-30T19:58:39+00:00,2026-08-30,BE,wind_offshore,data_or_features,503 Server Error from ENTSO-E TP while fetching BE offshore wind TSO forecast horizon.,{},open
+2026-08-30T19:58:41+00:00,2026-08-30,FR,load,data_or_features,503 Server Error from ENTSO-E TP while fetching FR load TSO forecast horizon.,{},open
+2026-08-30T19:58:43+00:00,2026-08-30,FR,solar,data_or_features,503 Server Error from ENTSO-E TP while fetching FR solar TSO forecast horizon.,{},open
+2026-08-30T19:58:46+00:00,2026-08-30,FR,wind_onshore,data_or_features,503 Server Error from ENTSO-E TP while fetching FR onshore wind TSO forecast horizon.,{},open
+2026-08-30T19:58:49+00:00,2026-08-30,FR,wind_offshore,data_or_features,503 Server Error from ENTSO-E TP while fetching FR offshore wind TSO forecast horizon.,{},open
+2026-08-30T19:58:53+00:00,2026-08-30,DE,load,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE load: 6/24 hourly rows.,{},open
+2026-08-30T19:59:02+00:00,2026-08-30,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 6/24 hourly rows.,{},open
+2026-08-30T19:59:16+00:00,2026-08-30,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE onshore wind: 6/24 hourly rows.,{},open
+2026-08-30T19:59:30+00:00,2026-08-30,DE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE offshore wind: 6/24 hourly rows.,{},open
