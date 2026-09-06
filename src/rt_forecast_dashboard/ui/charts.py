@@ -38,7 +38,7 @@ def forecast_line_chart(frame: pd.DataFrame) -> go.Figure:
     )
     fig.update_yaxes(matches=None)
     fig.update_xaxes(showspikes=True, spikemode="across", spikesnap="cursor", spikedash="dash", spikecolor="#111827", spikethickness=1)
-    fig.update_traces(connectgaps=True)
+    fig.update_traces(connectgaps=False)
     return fig
 
 
@@ -94,7 +94,7 @@ def deterministic_forecast_chart(frame: pd.DataFrame, title: str) -> go.Figure:
         hovermode="x unified",
     )
     fig.update_xaxes(showspikes=True, spikemode="across", spikesnap="cursor", spikedash="dash", spikecolor="#111827", spikethickness=1)
-    fig.update_traces(connectgaps=True)
+    fig.update_traces(connectgaps=False)
     return fig
 
 

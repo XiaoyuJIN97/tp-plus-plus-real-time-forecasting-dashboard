@@ -90,7 +90,7 @@ class EntsoeRealtimeArchive:
             return raw
 
         parts = []
-        for row in overlapping.sort_values("collection_time_utc", ascending=False).head(5).itertuples(index=False):
+        for row in self._select_covering_snapshots(overlapping, start=start, end=end).itertuples(index=False):
             frame = self._read_snapshot_csv(row.path)
             if frame.empty:
                 continue
@@ -99,8 +99,6 @@ class EntsoeRealtimeArchive:
             frame["value"] = pd.to_numeric(frame["value"], errors="coerce")
             frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
             parts.append(frame[["timestamp", "value", "collection_time_utc"]])
-            if not frame.empty:
-                break
 
         if not parts:
             return raw
@@ -111,6 +109,39 @@ class EntsoeRealtimeArchive:
         if raw.empty:
             return updates
         return self._merge_sources(raw, updates)
+
+    def _select_covering_snapshots(self, manifest: pd.DataFrame, *, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+        selected = []
+        covered: list[pd.Interval] = []
+        for row in manifest.sort_values("collection_time_utc", ascending=False).itertuples(index=False):
+            row_start = max(row.window_start_utc, start)
+            row_end = min(row.window_end_utc, end)
+            if row_start >= row_end:
+                continue
+            interval = pd.Interval(row_start, row_end, closed="left")
+            midpoint = row_start + (row_end - row_start) / 2
+            if any(item.left <= midpoint < item.right for item in covered):
+                continue
+            selected.append(row)
+            covered.append(interval)
+            if self._intervals_cover_window(covered, start=start, end=end):
+                break
+        return pd.DataFrame(selected)
+
+    def _intervals_cover_window(self, intervals: list[pd.Interval], *, start: pd.Timestamp, end: pd.Timestamp) -> bool:
+        if len(intervals) == 0:
+            return False
+        ordered = sorted(intervals, key=lambda item: item.left)
+        cursor = start
+        for interval in ordered:
+            if interval.right <= cursor:
+                continue
+            if interval.left > cursor:
+                return False
+            cursor = max(cursor, interval.right)
+            if cursor >= end:
+                return True
+        return cursor >= end
 
     def _merge_sources(self, older: pd.DataFrame, newer: pd.DataFrame) -> pd.DataFrame:
         older = older.copy()
