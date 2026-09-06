@@ -17,9 +17,21 @@ def _add_brussels_delivery_time(frame: pd.DataFrame) -> pd.DataFrame:
     return plot
 
 
+def _add_line_segments(frame: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
+    plot = frame.sort_values([*group_cols, "delivery_time_brussels"]).copy()
+    gap = plot.groupby(group_cols, dropna=False)["delivery_time_brussels"].diff().gt(pd.Timedelta(hours=1.5))
+    plot["_segment"] = gap.fillna(False).groupby([plot[col] for col in group_cols], dropna=False).cumsum().astype(int)
+    plot["line_id"] = (
+        plot[group_cols].astype(str).agg("|".join, axis=1)
+        + "|segment="
+        + plot["_segment"].astype(str)
+    )
+    return plot.drop(columns="_segment")
+
+
 def forecast_line_chart(frame: pd.DataFrame) -> go.Figure:
     plot = _add_brussels_delivery_time(frame).sort_values(["target", "zone", "model_label", "run_date", "timestamp"])
-    plot["line_id"] = plot["zone"].astype(str) + "|" + plot["target"].astype(str) + "|" + plot["model_label"].astype(str)
+    plot = _add_line_segments(plot, ["zone", "target", "model_label"])
     fig = px.line(
         plot,
         x="delivery_time_brussels",
@@ -75,7 +87,7 @@ def deterministic_forecast_chart(frame: pd.DataFrame, title: str) -> go.Figure:
     else:
         plot_long = plot.rename(columns={"forecast_mw": "value"}).copy()
         plot_long["series"] = plot_long["model_label"]
-    plot_long["line_id"] = plot_long["zone"].astype(str) + "|" + plot_long["series"].astype(str)
+    plot_long = _add_line_segments(plot_long, ["zone", "series"])
     fig = px.line(
         plot_long,
         x="delivery_time_brussels",
