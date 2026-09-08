@@ -75,13 +75,13 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-09-07T21:46:04+00:00,2026-09-07,DE,solar,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A69&processType=A01&in_Domain=10Y1001A1001A83F&psrType=B16&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202609071600&periodEnd=202609081600,{},open
 2026-09-07T21:46:10+00:00,2026-09-07,DE,wind_onshore,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A69&processType=A01&in_Domain=10Y1001A1001A83F&psrType=B19&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202609071600&periodEnd=202609081600,{},open
 2026-09-07T21:46:16+00:00,2026-09-07,DE,wind_offshore,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A69&processType=A01&in_Domain=10Y1001A1001A83F&psrType=B18&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202609071600&periodEnd=202609081600,{},open
-2026-09-08T20:06:20+00:00,2026-09-08,BE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE solar: 6/24 hourly rows.,{},open
-2026-09-08T20:06:47+00:00,2026-09-08,BE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_onshore: 6/24 hourly rows.,{},open
-2026-09-08T20:07:07+00:00,2026-09-08,BE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_offshore: 6/24 hourly rows.,{},open
-2026-09-08T20:10:06+00:00,2026-09-08,FR,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR solar: 6/24 hourly rows.,{},open
-2026-09-08T20:10:40+00:00,2026-09-08,FR,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_onshore: 6/24 hourly rows.,{},open
-2026-09-08T20:10:50+00:00,2026-09-08,FR,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_offshore: 6/24 hourly rows.,{},open
-2026-09-08T20:12:49+00:00,2026-09-08,DE,load,data_or_features,400 Client Error: Bad Request for url: https://web-api.tp.entsoe.eu/api?documentType=A65&processType=A01&outBiddingZone_Domain=10Y1001A1001A83F&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202608051600&periodEnd=202609051600,{},open
-2026-09-08T20:13:10+00:00,2026-09-08,DE,solar,data_or_features,400 Client Error: Bad Request for url: https://web-api.tp.entsoe.eu/api?documentType=A69&processType=A01&in_Domain=10Y1001A1001A83F&psrType=B16&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202609081600&periodEnd=202609091600,{},open
-2026-09-08T20:13:24+00:00,2026-09-08,DE,wind_onshore,data_or_features,,{},open
-2026-09-08T20:13:50+00:00,2026-09-08,DE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_offshore: 6/24 hourly rows.,{},open
+2026-09-08T21:29:29+00:00,2026-09-08,BE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE solar: 6/24 hourly rows.,{},open
+2026-09-08T21:30:17+00:00,2026-09-08,BE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_onshore: 6/24 hourly rows.,{},open
+2026-09-08T21:31:13+00:00,2026-09-08,BE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_offshore: 6/24 hourly rows.,{},open
+2026-09-08T21:39:41+00:00,2026-09-08,FR,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR solar: 6/24 hourly rows.,{},open
+2026-09-08T21:40:26+00:00,2026-09-08,FR,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_onshore: 6/24 hourly rows.,{},open
+2026-09-08T21:41:29+00:00,2026-09-08,FR,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_offshore: 6/24 hourly rows.,{},open
+2026-09-08T21:45:35+00:00,2026-09-08,DE,load,data_or_features,400 Client Error: Bad Request for url: https://web-api.tp.entsoe.eu/api?documentType=A65&processType=A01&outBiddingZone_Domain=10Y1001A1001A83F&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202608051600&periodEnd=202609051600,{},open
+2026-09-08T21:46:40+00:00,2026-09-08,DE,solar,data_or_features,,{},open
+2026-09-08T21:47:35+00:00,2026-09-08,DE,wind_onshore,data_or_features,,{},open
+2026-09-08T21:48:00+00:00,2026-09-08,DE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_offshore: 6/24 hourly rows.,{},open
