@@ -63,16 +63,16 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-09-04T21:45:05+00:00,2026-09-04,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},resolved_after_backfill
 2026-09-05T21:31:29+00:00,2026-09-05,BE,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},resolved_after_backfill
 2026-09-05T21:34:40+00:00,2026-09-05,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},resolved_after_backfill
-2026-09-09T19:57:01+00:00,2026-09-07,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 6/24 hourly rows.,{},open
-2026-09-09T19:57:18+00:00,2026-09-07,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 6/24 hourly rows.,{},open
-2026-09-09T19:57:55+00:00,2026-09-08,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 18/24 hourly rows.,{},open
-2026-09-09T19:58:03+00:00,2026-09-08,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 18/24 hourly rows.,{},open
-2026-09-09T19:58:11+00:00,2026-09-09,BE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE solar: 6/24 hourly rows.,{},open
-2026-09-09T19:58:41+00:00,2026-09-09,BE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_onshore: 6/24 hourly rows.,{},open
-2026-09-09T19:58:44+00:00,2026-09-09,BE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_offshore: 6/24 hourly rows.,{},open
-2026-09-09T19:58:56+00:00,2026-09-09,FR,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR solar: 6/24 hourly rows.,{},open
-2026-09-09T19:58:58+00:00,2026-09-09,FR,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_onshore: 6/24 hourly rows.,{},open
-2026-09-09T19:59:20+00:00,2026-09-09,FR,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_offshore: 6/24 hourly rows.,{},open
-2026-09-09T19:59:25+00:00,2026-09-09,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 6/24 hourly rows.,{},open
-2026-09-09T19:59:28+00:00,2026-09-09,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 6/24 hourly rows.,{},open
-2026-09-09T19:59:30+00:00,2026-09-09,DE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_offshore: 6/24 hourly rows.,{},open
+2026-09-09T21:09:26+00:00,2026-09-07,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 6/24 hourly rows.,{},open
+2026-09-09T21:10:02+00:00,2026-09-07,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 6/24 hourly rows.,{},open
+2026-09-09T21:11:17+00:00,2026-09-08,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 18/24 hourly rows.,{},open
+2026-09-09T21:11:52+00:00,2026-09-08,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 18/24 hourly rows.,{},open
+2026-09-09T21:12:28+00:00,2026-09-09,BE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE solar: 6/24 hourly rows.,{},open
+2026-09-09T21:13:11+00:00,2026-09-09,BE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_onshore: 6/24 hourly rows.,{},open
+2026-09-09T21:13:41+00:00,2026-09-09,BE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for BE wind_offshore: 6/24 hourly rows.,{},open
+2026-09-09T21:14:19+00:00,2026-09-09,FR,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR solar: 6/24 hourly rows.,{},open
+2026-09-09T21:14:35+00:00,2026-09-09,FR,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_onshore: 6/24 hourly rows.,{},open
+2026-09-09T21:14:49+00:00,2026-09-09,FR,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for FR wind_offshore: 6/24 hourly rows.,{},open
+2026-09-09T21:15:29+00:00,2026-09-09,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 6/24 hourly rows.,{},open
+2026-09-09T21:15:53+00:00,2026-09-09,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 6/24 hourly rows.,{},open
+2026-09-09T21:16:57+00:00,2026-09-09,DE,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_offshore: 6/24 hourly rows.,{},open
