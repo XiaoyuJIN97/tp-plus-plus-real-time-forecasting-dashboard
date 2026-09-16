@@ -1,6 +1,6 @@
 checked_at,run_date,rows,seconds,status,message
-2026-09-16T20:18:37+00:00,2026-09-12,0,0.006,skipped_complete,complete 48 groups x 24 hours
-2026-09-16T20:18:37+00:00,2026-09-13,0,0.005,skipped_complete,complete 48 groups x 24 hours
-2026-09-16T20:22:46+00:00,2026-09-14,1056,248.381,incomplete,"incomplete groups: FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
-2026-09-16T20:24:56+00:00,2026-09-15,1056,130.743,incomplete,"incomplete groups: FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
-2026-09-16T20:27:34+00:00,2026-09-16,1056,157.611,incomplete,"incomplete groups: FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-09-16T21:35:23+00:00,2026-09-12,0,0.005,skipped_complete,complete 48 groups x 24 hours
+2026-09-16T21:35:23+00:00,2026-09-13,0,0.005,skipped_complete,complete 48 groups x 24 hours
+2026-09-16T21:39:16+00:00,2026-09-14,1056,233.4,incomplete,"incomplete groups: FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-09-16T21:41:31+00:00,2026-09-15,1056,134.8,incomplete,"incomplete groups: FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-09-16T21:43:35+00:00,2026-09-16,1056,124.025,incomplete,"incomplete groups: FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
