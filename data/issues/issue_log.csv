@@ -63,7 +63,7 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-09-04T21:45:05+00:00,2026-09-04,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},resolved_after_backfill
 2026-09-05T21:31:29+00:00,2026-09-05,BE,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},resolved_after_backfill
 2026-09-05T21:34:40+00:00,2026-09-05,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},resolved_after_backfill
-2026-09-17T20:29:14+00:00,2026-09-14,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
-2026-09-17T20:33:44+00:00,2026-09-15,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
-2026-09-17T20:36:24+00:00,2026-09-16,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
-2026-09-17T20:37:45+00:00,2026-09-17,BE,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
+2026-09-17T21:40:49+00:00,2026-09-14,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
+2026-09-17T21:43:09+00:00,2026-09-15,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
+2026-09-17T21:45:27+00:00,2026-09-16,FR,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
+2026-09-17T21:47:34+00:00,2026-09-17,BE,wind_offshore,data_or_features,"Can only union MultiIndex with MultiIndex or Index of tuples, try mi.to_flat_index().union(other) instead.",{},open
