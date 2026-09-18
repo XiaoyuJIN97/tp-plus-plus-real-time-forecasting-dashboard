@@ -1,6 +1,6 @@
 checked_at,run_date,rows,seconds,status,message
-2026-09-18T20:05:41+00:00,2026-09-14,264,393.074,incomplete,incomplete groups: FR/wind_offshore/timesfm3_online=0
-2026-09-18T20:09:34+00:00,2026-09-15,264,233.009,incomplete,incomplete groups: FR/wind_offshore/timesfm3_online=0
-2026-09-18T20:12:55+00:00,2026-09-16,264,201.33,incomplete,incomplete groups: FR/wind_offshore/timesfm3_online=0
-2026-09-18T20:15:50+00:00,2026-09-17,264,174.705,incomplete,incomplete groups: BE/wind_offshore/timesfm3_online=0
-2026-09-18T20:19:01+00:00,2026-09-18,240,190.977,incomplete,"incomplete groups: BE/wind_offshore/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0"
+2026-09-18T21:11:11+00:00,2026-09-14,1152,77.195,complete,complete 48 groups x 24 hours
+2026-09-18T21:12:07+00:00,2026-09-15,1152,55.548,complete,complete 48 groups x 24 hours
+2026-09-18T21:12:52+00:00,2026-09-16,1152,45.199,complete,complete 48 groups x 24 hours
+2026-09-18T21:13:26+00:00,2026-09-17,1152,34.578,complete,complete 48 groups x 24 hours
+2026-09-18T21:14:01+00:00,2026-09-18,1152,34.997,complete,complete 48 groups x 24 hours
