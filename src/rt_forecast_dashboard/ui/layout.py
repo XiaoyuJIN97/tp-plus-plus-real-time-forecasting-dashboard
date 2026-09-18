@@ -168,7 +168,8 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         default=model_options,
         key=f"{target}_online_models_{model_signature}",
     )
-    last_n_days = control_cols[1].slider("Plot last N days", 1, 60, min(14, max(1, current["run_date"].nunique())), key=f"{target}_online_last_n")
+    available_run_days = max(1, current["run_date"].nunique())
+    last_n_days = control_cols[1].slider("Plot last N days", 1, 60, min(60, available_run_days), key=f"{target}_online_last_n")
     selected_zone = control_cols[2].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
 
     if not selected_models:

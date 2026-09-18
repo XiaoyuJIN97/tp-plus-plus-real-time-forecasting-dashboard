@@ -7,7 +7,11 @@ import pandas as pd
 from rt_forecast_dashboard.config import load_settings
 from rt_forecast_dashboard.data.demo import demo_context_frame, demo_future_frame
 from rt_forecast_dashboard.data.entsoe_realtime_archive import EntsoeRealtimeArchive
+from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+
+
+_STORED_FORECAST_CACHE: pd.DataFrame | None = None
 
 
 def _entsoe_response_to_hourly_frame(response: pd.Series | pd.DataFrame, value_col: str) -> pd.DataFrame:
@@ -46,6 +50,9 @@ class EntsoeForecastClient:
         archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)
         if len(archive) >= horizon_hours:
             return archive.head(horizon_hours)
+        stored = self._stored_tso_forecast(run_date=run_date, zone=zone, target=target, start=start, end=end, horizon_hours=horizon_hours)
+        if len(stored) >= horizon_hours:
+            return stored.head(horizon_hours)
         if self.demo_mode:
             return demo_future_frame(run_date, zone, target, horizon_hours)[["timestamp", "tso_forecast_mw"]]
         if not self.api_key:
@@ -80,6 +87,23 @@ class EntsoeForecastClient:
             expected_last = end - pd.Timedelta(hours=1)
             if len(frame) >= context_hours and pd.to_datetime(frame["timestamp"], utc=True).max() >= expected_last:
                 return frame
+            if len(frame) >= context_hours:
+                return frame
+        stored_context = self._stored_actual_context(zone=zone, target=target, start=start, end=end)
+        if not stored_context.empty:
+            context_parts = []
+            if not actual_archive.empty and not forecast_archive.empty:
+                context_parts.append(actual_archive.merge(forecast_archive, on="timestamp", how="inner"))
+            context_parts.append(stored_context)
+            frame = pd.concat(context_parts, ignore_index=True)
+            frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+            for column in ["actual_mw", "tso_forecast_mw"]:
+                frame[column] = pd.to_numeric(frame[column], errors="coerce")
+            frame = frame.dropna(subset=["actual_mw", "tso_forecast_mw"])
+            frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
+            frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
+            if len(frame) >= context_hours:
+                return frame[["timestamp", "actual_mw", "tso_forecast_mw"]].tail(context_hours)
         if self.demo_mode:
             return demo_context_frame(run_date, zone, target, context_hours)[["timestamp", "actual_mw", "tso_forecast_mw"]]
         if not self.api_key:
@@ -101,6 +125,69 @@ class EntsoeForecastClient:
         tso_frame = _entsoe_response_to_hourly_frame(tso, "tso_forecast_mw")
         frame = actual_frame.merge(tso_frame, on="timestamp", how="inner")
         return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
+
+    def _stored_tso_forecast(
+        self,
+        *,
+        run_date: date,
+        zone: str,
+        target: str,
+        start: pd.Timestamp,
+        end: pd.Timestamp,
+        horizon_hours: int,
+    ) -> pd.DataFrame:
+        path = ForecastStore().forecast_path(run_date.isoformat())
+        if not path.exists():
+            return pd.DataFrame(columns=["timestamp", "tso_forecast_mw"])
+        try:
+            frame = pd.read_csv(path, usecols=["zone", "target", "timestamp", "tso_forecast_mw"], parse_dates=["timestamp"])
+        except (ValueError, OSError):
+            return pd.DataFrame(columns=["timestamp", "tso_forecast_mw"])
+        frame = frame[(frame["zone"].eq(zone)) & (frame["target"].eq(target))].copy()
+        if frame.empty:
+            return pd.DataFrame(columns=["timestamp", "tso_forecast_mw"])
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+        frame["tso_forecast_mw"] = pd.to_numeric(frame["tso_forecast_mw"], errors="coerce")
+        frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
+        frame = frame.dropna(subset=["tso_forecast_mw"]).drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+        if len(frame) < horizon_hours:
+            return pd.DataFrame(columns=["timestamp", "tso_forecast_mw"])
+        return frame[["timestamp", "tso_forecast_mw"]]
+
+    def _stored_actual_context(self, *, zone: str, target: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+        frame = self._stored_forecasts()
+        if frame.empty:
+            return pd.DataFrame(columns=["timestamp", "actual_mw", "tso_forecast_mw"])
+        frame = frame[(frame["zone"].eq(zone)) & (frame["target"].eq(target))].copy()
+        if frame.empty:
+            return pd.DataFrame(columns=["timestamp", "actual_mw", "tso_forecast_mw"])
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+        frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
+        for column in ["actual_mw", "tso_forecast_mw"]:
+            frame[column] = pd.to_numeric(frame[column], errors="coerce")
+        frame = frame.dropna(subset=["actual_mw", "tso_forecast_mw"])
+        frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
+        return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
+
+    def _stored_forecasts(self) -> pd.DataFrame:
+        global _STORED_FORECAST_CACHE
+        if _STORED_FORECAST_CACHE is not None:
+            return _STORED_FORECAST_CACHE.copy()
+        store = ForecastStore()
+        files = sorted((store.data_dir / "forecasts").glob("forecasts_*.csv"))
+        frames = []
+        for path in files:
+            try:
+                frame = pd.read_csv(
+                    path,
+                    usecols=["zone", "target", "timestamp", "actual_mw", "tso_forecast_mw"],
+                    parse_dates=["timestamp"],
+                )
+            except (ValueError, OSError):
+                continue
+            frames.append(frame)
+        _STORED_FORECAST_CACHE = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+        return _STORED_FORECAST_CACHE.copy()
 
     def fetch_actuals(self, *, zone: str, zone_code: str, target: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
         # This method is used for display/backfill actuals. The dashboard should
