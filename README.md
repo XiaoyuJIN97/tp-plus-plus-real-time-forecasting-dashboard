@@ -51,15 +51,18 @@ The initial registry uses robust baseline adapters:
 
 - `tso_reference`: returns the ENTSO-E TSO forecast as the benchmark.
 - `ridge_3mo_context`: fits a Ridge model each day on the latest 3 months using selected weather covariates plus TSO forecast.
+- `chronos2_online`: runs Chronos2 with the selected 3-month context and task-specific covariates.
+- `timesfm3_online`: runs TimesFM3 with the same online covariate policy as Chronos2.
+- `xgboost_online`: fits compact XGBoost models for renewable targets using four-point weather plus TSO forecast.
 - `artifact_model`: loads saved artifacts when paths are configured.
 
 Load covariates follow the latest selected feature table:
 
-| Country | Chronos2 | Ridge | TabPFN |
-|---|---|---|---|
-| BE | Solar + TSO | Temp + TSO | Temp + TSO |
-| FR | Temp + TSO | deg_proxy + TSO | Temp + TSO |
-| DE | Hum + TSO | Hum + TSO | Solar + TSO |
+| Country | Chronos2 | TimesFM3 | Ridge | TabPFN |
+|---|---|---|---|---|
+| BE | Solar + TSO | Solar + TSO | Temp + TSO | Temp + TSO |
+| FR | Temp + TSO | Temp + TSO | deg_proxy + TSO | Temp + TSO |
+| DE | Hum + TSO | Hum + TSO | Hum + TSO | Solar + TSO |
 
 Solar uses four-point `shortwave_radiation` and `temperature_2m` plus TSO forecast. Onshore and offshore wind use four-point `wind_speed_100m_ms`, `wind_dir_sin`, and `wind_dir_cos` plus TSO forecast.
 
@@ -106,7 +109,7 @@ flowchart TD
   D --> E["Read ENTSO-E realtime-data raw/update files and checked-out Open-Meteo data branch"]
   E --> G["Build 92-day context plus 24-hour day-ahead TSO/weather covariates"]
   G --> H["Run configured online models for BE, FR, DE: load, solar, onshore wind, offshore wind"]
-  H --> I["Commit data/forecasts/forecasts_YYYY-MM-DD.csv to dashboard repo"]
+  H --> I["Commit core model rows first, then append TimesFM3 rows when that run finishes"]
   I --> J["Streamlit Cloud rebuilds from GitHub and displays Europe/Brussels delivery times"]
   J --> K["After realized hours arrive, dashboard reads ENTSO-E actuals for scatter and accuracy"]
 ```

@@ -12,7 +12,7 @@ from rt_forecast_dashboard.time_utils import latest_complete_run_date
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
 DAY_AHEAD_HOURS = 24
 ONLINE_CONTEXT_HOURS = 2208
-MODEL_FAMILY_ORDER = ["Chronos2", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
+MODEL_FAMILY_ORDER = ["Chronos2", "TimesFM3", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
 MODEL_FAMILY_RANK = {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
 
 
@@ -21,6 +21,8 @@ def _normal_model_family(value: object) -> str:
     lowered = text.lower().replace("_", " ")
     if "chronos" in lowered:
         return "Chronos2"
+    if "timesfm" in lowered:
+        return "TimesFM3"
     if "ridge" in lowered:
         return "Ridge"
     if "tabpfn" in lowered:

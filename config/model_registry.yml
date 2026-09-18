@@ -21,6 +21,15 @@ models:
     targets: [load, solar, wind_onshore, wind_offshore]
     model_id: s3://autogluon/chronos-2/
     device_map: cpu
+  timesfm3_online:
+    label: TimesFM3 with covariates
+    adapter: timesfm3_online
+    enabled: true
+    targets: [load, solar, wind_onshore, wind_offshore]
+    checkpoint_path: google/timesfm-3.0-pytorch
+    device: cpu
+    standardize_covariates: false
+    local_files_only: false
   tabpfn_online:
     label: TabPFN with covariates
     adapter: tabpfn_context

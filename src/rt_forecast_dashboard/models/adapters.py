@@ -12,6 +12,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 _CHRONOS2_PIPELINE = None
+_TIMESFM3_PIPELINE = None
 
 
 class ForecastAdapter(Protocol):
@@ -175,6 +176,98 @@ class Chronos2OnlineAdapter:
         return np.maximum(values[: len(features)], 0.0)
 
 
+class TimesFM3OnlineAdapter:
+    def __init__(
+        self,
+        checkpoint_path: str = "google/timesfm-3.0-pytorch",
+        device: str = "cpu",
+        standardize_covariates: bool = False,
+        local_files_only: bool = False,
+    ) -> None:
+        self.checkpoint_path = checkpoint_path
+        self.device = device
+        self.standardize_covariates = standardize_covariates
+        self.local_files_only = local_files_only
+
+    def _pipeline(self):
+        global _TIMESFM3_PIPELINE
+        if _TIMESFM3_PIPELINE is None:
+            try:
+                import timesfm
+            except ImportError as exc:
+                raise ImportError(
+                    "TimesFM3 is not installed. Install `timesfm==3.0.2` in the forecast environment."
+                ) from exc
+
+            _TIMESFM3_PIPELINE = timesfm.TimesFM3Forecaster(
+                checkpoint_path=self.checkpoint_path,
+                device=self.device,
+                local_files_only=self.local_files_only,
+            )
+        return _TIMESFM3_PIPELINE
+
+    @staticmethod
+    def _clean_covariates(context: pd.DataFrame, features: pd.DataFrame, covariates: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+        valid = [column for column in covariates if column in context.columns and column in features.columns]
+        context = context.copy()
+        features = features.copy()
+        for column in valid:
+            context[column] = pd.to_numeric(context[column], errors="coerce").interpolate(limit_direction="both").ffill().bfill()
+            features[column] = pd.to_numeric(features[column], errors="coerce").interpolate(limit_direction="both").ffill().bfill()
+        return context, features, valid
+
+    def _covariate_array(self, context: pd.DataFrame, features: pd.DataFrame, covariates: list[str]) -> np.ndarray | None:
+        if not covariates:
+            return None
+        combined = pd.concat([context[covariates], features[covariates]], ignore_index=True).astype(float)
+        if self.standardize_covariates:
+            mean = combined.iloc[: len(context)].mean(axis=0)
+            std = combined.iloc[: len(context)].std(axis=0).replace(0, 1.0)
+            combined = (combined - mean) / std
+        return combined.to_numpy(dtype=np.float32).T
+
+    @staticmethod
+    def _extract_forecast(result: object, horizon: int) -> np.ndarray:
+        values = None
+        for attr in ("forecast", "mean", "median", "predictions"):
+            if hasattr(result, attr):
+                values = getattr(result, attr)
+                break
+        if values is None and isinstance(result, dict):
+            for key in ("forecast", "mean", "median", "predictions"):
+                if key in result:
+                    values = result[key]
+                    break
+        if values is None:
+            values = result
+        array = np.asarray(values, dtype=float).reshape(-1)[:horizon]
+        if len(array) != horizon:
+            raise RuntimeError(f"Could not extract a {horizon}-step TimesFM3 forecast from output shape {np.asarray(values).shape}.")
+        return np.maximum(array, 0.0)
+
+    def predict(self, features: pd.DataFrame, target: str, context: pd.DataFrame | None = None, covariates: list[str] | None = None) -> np.ndarray:
+        if context is None or context.empty or "actual_mw" not in context.columns:
+            return features["tso_forecast_mw"].to_numpy(dtype=float)
+        covariates = covariates or ["tso_forecast_mw"]
+        context_in = context.dropna(subset=["timestamp", "actual_mw"]).sort_values("timestamp").copy()
+        features_in = features.sort_values("timestamp").copy()
+        if len(context_in) < 7 * 24:
+            return features["tso_forecast_mw"].to_numpy(dtype=float)
+        context_in, features_in, covariates = self._clean_covariates(context_in, features_in, covariates)
+        y_context = context_in["actual_mw"].to_numpy(dtype=np.float32)
+        cov_array = self._covariate_array(context_in, features_in, covariates)
+
+        result = self._pipeline().predict(
+            context=y_context,
+            horizon=len(features_in),
+            past_future_covariates=cov_array,
+            ts_id=f"{target}:{features_in['timestamp'].iloc[0]}",
+            make_positive=True,
+            use_znorm=True,
+        )
+        return self._extract_forecast(result, len(features_in))
+
+
 class ArtifactModelAdapter:
     def __init__(self, artifact_path: str | dict[str, str] | None = None) -> None:
         self.artifact_path = artifact_path
@@ -217,6 +310,13 @@ def make_adapter(config: dict) -> ForecastAdapter:
         )
     if adapter == "chronos2_online":
         return Chronos2OnlineAdapter(model_id=config.get("model_id", "s3://autogluon/chronos-2/"), device_map=config.get("device_map", "cpu"))
+    if adapter == "timesfm3_online":
+        return TimesFM3OnlineAdapter(
+            checkpoint_path=config.get("checkpoint_path", "google/timesfm-3.0-pytorch"),
+            device=config.get("device", "cpu"),
+            standardize_covariates=bool(config.get("standardize_covariates", False)),
+            local_files_only=bool(config.get("local_files_only", False)),
+        )
     if adapter == "artifact_model":
         return ArtifactModelAdapter(config.get("artifact_path"))
     raise ValueError(f"Unknown model adapter: {adapter}")

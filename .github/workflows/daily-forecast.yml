@@ -109,11 +109,13 @@ jobs:
           python - <<'PY'
           import torch
           import xgboost
+          import timesfm
           from chronos import BaseChronosPipeline
           from tabpfn import TabPFNRegressor
 
           print("torch", torch.__version__)
           print("xgboost", xgboost.__version__)
+          print("timesfm runtime OK:", timesfm.TimesFM3Forecaster.__name__)
           print("chronos runtime OK:", BaseChronosPipeline.__name__)
           print("tabpfn runtime OK:", TabPFNRegressor.__name__)
           PY
@@ -151,6 +153,62 @@ jobs:
           else
             git commit -m "Update daily realtime forecast"
             git push
+          fi
+
+      - name: Run TimesFM3 daily forecast
+        if: steps.brussels_window.outputs.should_run == 'true'
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
+          FORECAST_DEMO_MODE: "false"
+          ENTSOE_REALTIME_DATA: external/entsoe-realtime-data
+          ENTSOE_REALTIME_GIT_REF: HEAD
+          ENTSOE_REALTIME_PREFER_LOCAL: "true"
+          OPEN_METEO_REALTIME_DATA: external/open-meteo-realtime-data
+          OPEN_METEO_REALTIME_GIT_REF: HEAD
+          SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_weather_points_for_tp_v01_4p.csv
+          LOAD_SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_load_weather_points_for_tp_v01_4p.csv
+        run: |
+          if [ -n "${{ github.event.inputs.run_date }}" ]; then
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models timesfm3_online --keep-issues
+          elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 5 --models timesfm3_online
+          else
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 5 --models timesfm3_online
+          fi
+
+      - name: Commit TimesFM3 forecast outputs
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          git add data
+          if git diff --cached --quiet; then
+            echo "No TimesFM3 forecast data changes."
+          else
+            git commit -m "Update daily TimesFM3 forecast"
+            git push
+          fi
+
+      - name: Validate TimesFM3 forecast completeness
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          MODELS="timesfm3_online"
+          END_DATE="${{ steps.brussels_window.outputs.run_date }}"
+          if [ -n "${{ github.event.inputs.run_date }}" ]; then
+            DATES="${{ github.event.inputs.run_date }}"
+          else
+            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=4); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
+          fi
+          failed=0
+          for run_date in $DATES; do
+            if python -m rt_forecast_dashboard.pipeline.check_forecast_complete --date "$run_date" --models "$MODELS"; then
+              echo "Complete TimesFM3 forecast file for ${run_date}."
+            else
+              echo "::warning::TimesFM3 forecast file is still missing or incomplete for ${run_date}."
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more recent TimesFM3 forecast dates are incomplete after the rolling backfill attempt."
+            exit 1
           fi
 
       - name: Run TabPFN daily forecast

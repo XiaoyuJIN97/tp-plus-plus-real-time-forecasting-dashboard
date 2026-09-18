@@ -39,6 +39,10 @@ load_optimal_engineering_covariates:
     BE: Solar
     FR: Temp
     DE: Hum
+  TimesFM3:
+    BE: Solar
+    FR: Temp
+    DE: Hum
   Ridge:
     BE: Temp
     FR: deg_proxy

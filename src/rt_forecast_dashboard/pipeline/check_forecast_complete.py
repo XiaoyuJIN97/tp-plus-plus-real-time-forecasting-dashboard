@@ -8,10 +8,10 @@ from pathlib import Path
 EXPECTED_ZONES = ("BE", "FR", "DE")
 EXPECTED_TARGETS = ("load", "solar", "wind_onshore", "wind_offshore")
 TARGET_MODELS = {
-    "load": {"tso_reference", "persistence", "ridge_3mo_context", "chronos2_online"},
-    "solar": {"tso_reference", "persistence", "chronos2_online", "xgboost_online"},
-    "wind_onshore": {"tso_reference", "persistence", "chronos2_online", "xgboost_online"},
-    "wind_offshore": {"tso_reference", "persistence", "chronos2_online", "xgboost_online"},
+    "load": {"tso_reference", "persistence", "ridge_3mo_context", "chronos2_online", "timesfm3_online"},
+    "solar": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
+    "wind_onshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
+    "wind_offshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
 }
 HORIZON_HOURS = 24
 

@@ -47,6 +47,8 @@ def covariates_for(target: str, country: str, model_key: str) -> tuple[str, list
         base_model = "Ridge"
     elif model_key.startswith("chronos"):
         base_model = "Chronos2"
+    elif model_key.startswith("timesfm"):
+        base_model = "TimesFM3"
     elif model_key.startswith("tabpfn"):
         base_model = "TabPFN"
     elif model_key.startswith("xgboost"):
