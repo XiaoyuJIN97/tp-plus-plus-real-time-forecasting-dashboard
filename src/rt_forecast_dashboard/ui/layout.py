@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+
 import pandas as pd
 import streamlit as st
 
@@ -159,11 +161,12 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
     )
     control_cols = st.columns([1.2, 1.0, 1.0])
     model_options = sorted(current["model_label"].dropna().unique())
+    model_signature = hashlib.md5("|".join(model_options).encode("utf-8")).hexdigest()[:8]
     selected_models = control_cols[0].multiselect(
         "Model family",
         model_options,
         default=model_options,
-        key=f"{target}_online_models",
+        key=f"{target}_online_models_{model_signature}",
     )
     last_n_days = control_cols[1].slider("Plot last N days", 1, 60, min(14, max(1, current["run_date"].nunique())), key=f"{target}_online_last_n")
     selected_zone = control_cols[2].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
