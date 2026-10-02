@@ -1,6 +1,6 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-02T20:55:50+00:00,2026-09-28,0,0.004,skipped_complete,complete 48 groups x 24 hours
-2026-10-02T20:55:50+00:00,2026-09-29,0,0.004,skipped_complete,complete 48 groups x 24 hours
-2026-10-02T20:55:50+00:00,2026-09-30,0,0.004,skipped_complete,complete 48 groups x 24 hours
-2026-10-02T20:55:50+00:00,2026-10-01,0,0.004,skipped_complete,complete 48 groups x 24 hours
-2026-10-02T21:01:23+00:00,2026-10-02,1104,332.826,incomplete,"incomplete groups: FR/load/chronos2_online=0, FR/load/ridge_3mo_context=0"
+2026-10-02T21:01:26+00:00,2026-09-28,0,0.003,skipped_complete,complete 12 groups x 24 hours
+2026-10-02T21:01:26+00:00,2026-09-29,0,0.003,skipped_complete,complete 12 groups x 24 hours
+2026-10-02T21:01:26+00:00,2026-09-30,0,0.003,skipped_complete,complete 12 groups x 24 hours
+2026-10-02T21:01:26+00:00,2026-10-01,0,0.003,skipped_complete,complete 12 groups x 24 hours
+2026-10-02T21:02:34+00:00,2026-10-02,288,67.358,complete,complete 12 groups x 24 hours
