@@ -8,6 +8,7 @@ pytest>=8.0
 requests-cache>=1.2
 retry-requests>=2.0
 scikit-learn>=1.5
+scipy>=1.13
 tabpfn==7.1.1
 torch>=2.3
 timesfm==3.0.2
