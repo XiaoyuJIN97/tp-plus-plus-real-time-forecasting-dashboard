@@ -1,29 +1,118 @@
 settings:
   minimum_training_runs: 21
   training_window_runs: 60
-  regularization: 0.10
-  maximum_component_weight: 0.70
+  regularization: 0.1
+  maximum_component_weight: 0.7
   horizon_bands:
-    - [1, 6]
-    - [7, 12]
-    - [13, 18]
-    - [19, 24]
-
-# Best configuration for each series in the rolling offline test covering
-# 2026-09-16 through 2026-10-04. Load uses Ridge; renewable targets use XGBoost.
+  - - 1
+    - 6
+  - - 7
+    - 12
+  - - 13
+    - 18
+  - - 19
+    - 24
+  selection_evidence: 2024 train / 2025 test using saved Chronos2, Ridge-or-XGBoost,
+    and optional TSO forecasts; TimesFM3 history unavailable for new zones
 selections:
   BE:
-    load: {method: constrained_learned, include_tso: false}
-    solar: {method: constrained_learned, include_tso: true}
-    wind_onshore: {method: median, include_tso: true}
-    wind_offshore: {method: constrained_learned, include_tso: false}
+    load:
+      method: constrained_learned
+      include_tso: false
+    solar:
+      method: constrained_learned
+      include_tso: true
+    wind_onshore:
+      method: median
+      include_tso: true
+    wind_offshore:
+      method: constrained_learned
+      include_tso: false
   DE:
-    load: {method: median, include_tso: false}
-    solar: {method: median, include_tso: true}
-    wind_onshore: {method: constrained_learned, include_tso: true}
-    wind_offshore: {method: simple_mean, include_tso: false}
+    load:
+      method: median
+      include_tso: false
+    solar:
+      method: median
+      include_tso: true
+    wind_onshore:
+      method: constrained_learned
+      include_tso: true
+    wind_offshore:
+      method: simple_mean
+      include_tso: false
   FR:
-    load: {method: constrained_learned, include_tso: false}
-    solar: {method: constrained_learned, include_tso: true}
-    wind_onshore: {method: constrained_learned, include_tso: true}
-    wind_offshore: {method: constrained_learned, include_tso: true}
+    load:
+      method: constrained_learned
+      include_tso: false
+    solar:
+      method: constrained_learned
+      include_tso: true
+    wind_onshore:
+      method: constrained_learned
+      include_tso: true
+    wind_offshore:
+      method: constrained_learned
+      include_tso: true
+  DK1:
+    load:
+      method: constrained_learned
+      include_tso: false
+    solar:
+      method: constrained_learned
+      include_tso: false
+    wind_offshore:
+      method: constrained_learned
+      include_tso: true
+    wind_onshore:
+      method: constrained_learned
+      include_tso: true
+  DK2:
+    load:
+      method: constrained_learned
+      include_tso: false
+    solar:
+      method: constrained_learned
+      include_tso: false
+    wind_offshore:
+      method: constrained_learned
+      include_tso: true
+    wind_onshore:
+      method: constrained_learned
+      include_tso: true
+  ES:
+    load:
+      method: constrained_learned
+      include_tso: true
+    solar:
+      method: constrained_learned
+      include_tso: true
+    wind_onshore:
+      method: median
+      include_tso: true
+  NL:
+    load:
+      method: constrained_learned
+      include_tso: false
+    solar:
+      method: simple_mean
+      include_tso: false
+    wind_offshore:
+      method: constrained_learned
+      include_tso: true
+    wind_onshore:
+      method: constrained_learned
+      include_tso: true
+  PT:
+    load:
+      method: median
+      include_tso: true
+    solar:
+      method: median
+      include_tso: true
+    wind_offshore:
+      method: constrained_learned
+      include_tso: false
+    wind_onshore:
+      method: constrained_learned
+      include_tso: true

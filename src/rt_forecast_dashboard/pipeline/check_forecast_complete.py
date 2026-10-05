@@ -4,9 +4,9 @@ import argparse
 import csv
 from pathlib import Path
 
+from rt_forecast_dashboard.config import features, zones
 
-EXPECTED_ZONES = ("BE", "FR", "DE")
-EXPECTED_TARGETS = ("load", "solar", "wind_onshore", "wind_offshore")
+
 TARGET_MODELS = {
     "load": {"tso_reference", "persistence", "ridge_3mo_context", "chronos2_online", "timesfm3_online"},
     "solar": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
@@ -25,8 +25,12 @@ def _requested_models(value: str | None) -> set[str] | None:
 
 def expected_groups(model_keys: set[str] | None = None) -> set[tuple[str, str, str]]:
     groups: set[tuple[str, str, str]] = set()
-    for zone in EXPECTED_ZONES:
-        for target in EXPECTED_TARGETS:
+    target_names = tuple(features())
+    for zone, zone_config in zones().items():
+        enabled_targets = set(zone_config.get("targets", target_names))
+        for target in target_names:
+            if target not in enabled_targets:
+                continue
             for model in TARGET_MODELS[target]:
                 if model_keys is None or model in model_keys:
                     groups.add((zone, target, model))

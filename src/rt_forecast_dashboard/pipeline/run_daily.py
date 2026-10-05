@@ -31,7 +31,10 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
         store.clear_issues_for_run(run_date_str)
 
     for zone, zcfg in zone_config.items():
+        enabled_targets = set(zcfg.get("targets", target_config))
         for target, fcfg in target_config.items():
+            if target not in enabled_targets:
+                continue
             try:
                 horizon = int(fcfg["horizon_hours"])
                 context_hours = int(fcfg["context_hours"])

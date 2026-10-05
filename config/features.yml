@@ -3,7 +3,6 @@ cutoff:
   hour: 18
   prediction_length_hours: 24
   context_days: 92
-
 targets:
   load:
     label: Load
@@ -33,28 +32,110 @@ targets:
     horizon_hours: 24
     context_hours: 2208
     covariate_policy: wind_4p_weather_plus_tso
-
 load_optimal_engineering_covariates:
   Chronos2:
-    BE: Solar
-    FR: Temp
-    DE: Hum
+    BE:
+      feature: Solar
+      include_tso: true
+    FR:
+      feature: Temp
+      include_tso: true
+    DE:
+      feature: Hum
+      include_tso: true
+    NL:
+      feature: Solar
+      include_tso: false
+    DK1:
+      feature: Wind
+      include_tso: true
+    DK2:
+      feature: deg_proxy
+      include_tso: true
+    ES:
+      feature: deg_proxy
+      include_tso: true
+    PT:
+      feature: Hum
+      include_tso: true
   TimesFM3:
-    BE: Solar
-    FR: Temp
-    DE: Hum
+    BE:
+      feature: Solar
+      include_tso: true
+    FR:
+      feature: Temp
+      include_tso: true
+    DE:
+      feature: Hum
+      include_tso: true
+    NL:
+      feature: Solar
+      include_tso: false
+    DK1:
+      feature: Wind
+      include_tso: true
+    DK2:
+      feature: deg_proxy
+      include_tso: true
+    ES:
+      feature: deg_proxy
+      include_tso: true
+    PT:
+      feature: Hum
+      include_tso: true
   Ridge:
-    BE: Temp
-    FR: deg_proxy
-    DE: Hum
+    BE:
+      feature: Temp
+      include_tso: true
+    FR:
+      feature: deg_proxy
+      include_tso: true
+    DE:
+      feature: Hum
+      include_tso: true
+    NL:
+      feature: Solar
+      include_tso: false
+    DK1:
+      feature: Temp
+      include_tso: true
+    DK2:
+      feature: Temp
+      include_tso: true
+    ES:
+      feature: Wind
+      include_tso: true
+    PT:
+      feature: null
+      include_tso: true
   TabPFN:
-    BE: Temp
-    FR: Temp
-    DE: Solar
-
+    BE:
+      feature: Temp
+      include_tso: true
+    FR:
+      feature: Temp
+      include_tso: true
+    DE:
+      feature: Solar
+      include_tso: true
+    NL:
+      feature: Solar
+      include_tso: false
+    DK1:
+      feature: Wind
+      include_tso: true
+    DK2:
+      feature: deg_proxy
+      include_tso: true
+    ES:
+      feature: deg_proxy
+      include_tso: true
+    PT:
+      feature: Hum
+      include_tso: true
 source_paths:
-  selected_weather_points: /Users/xiaoyujin/Desktop/TP++/Weather-one-four-points/v0.1/selected_weather_points_for_tp_v01_4p.csv
-  load_selected_weather_points: /Users/xiaoyujin/Desktop/TP++/Load_forecast_new/selected_weather_points_for_tp_v01_4p.csv
+  selected_weather_points: config/selected_weather_points_for_tp_v01_4p.csv
+  load_selected_weather_points: config/selected_load_weather_points_for_tp_v01_4p.csv
   weather_forecasts_4p: /Users/xiaoyujin/Desktop/TP++/Weather-one-four-points/v0.1/weather_forecasts_4p
   open_meteo_realtime_data: /Users/xiaoyujin/Documents/Real-time forecasting Dashboard/open-meteo-realtime-data
   open_meteo_realtime_git_ref: data

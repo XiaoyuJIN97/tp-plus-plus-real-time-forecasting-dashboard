@@ -65,6 +65,11 @@ jobs:
             data/raw/BE
             data/raw/FR
             data/raw/DE
+            data/raw/NL
+            data/raw/DK1
+            data/raw/DK2
+            data/raw/ES
+            data/raw/PT
             data/update_manifest.csv
 
       - name: Checkout ENTSO-E realtime data
