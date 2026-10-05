@@ -27,6 +27,12 @@ class ForecastStore:
     def backfill_dir(self) -> Path:
         return self.data_dir / "backfill"
 
+    def dashboard_dir(self) -> Path:
+        return self.data_dir / "dashboard"
+
+    def dashboard_forecast_path(self) -> Path:
+        return self.dashboard_dir() / "forecasts_recent.parquet"
+
     def append_forecasts(self, frame: pd.DataFrame, run_date: str, *, replace_run: bool = False) -> None:
         path = self.forecast_path(run_date)
         if path.exists():
@@ -61,6 +67,25 @@ class ForecastStore:
         frame["source"] = frame["source"].fillna("legacy")
         frame["context_hours"] = pd.to_numeric(frame["context_hours"], errors="coerce").fillna(0).astype(int)
         return frame
+
+    def read_dashboard_forecasts(self) -> pd.DataFrame:
+        """Read the compact dashboard artifact, with CSV history as a safe fallback."""
+        path = self.dashboard_forecast_path()
+        if not path.exists():
+            return self.read_forecasts()
+        frame = pd.read_parquet(path)
+        for column in ("timestamp", "run_at", "context_start", "context_end"):
+            if column in frame.columns:
+                frame[column] = pd.to_datetime(frame[column], utc=True, errors="coerce")
+        return frame
+
+    def write_dashboard_forecasts(self, frame: pd.DataFrame) -> Path:
+        path = self.dashboard_forecast_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_suffix(".parquet.tmp")
+        frame.to_parquet(temporary, index=False, compression="zstd")
+        temporary.replace(path)
+        return path
 
     def write_raw(self, frame: pd.DataFrame, run_date: str, zone: str, target: str) -> None:
         frame.to_csv(self.raw_path(run_date, zone, target), index=False)

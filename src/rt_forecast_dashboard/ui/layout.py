@@ -5,7 +5,7 @@ import hashlib
 import pandas as pd
 import streamlit as st
 
-from rt_forecast_dashboard.config import features, zones
+from rt_forecast_dashboard.config import features
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
@@ -44,15 +44,23 @@ def _inject_styles() -> None:
     )
 
 
-@st.cache_data(ttl=300, show_spinner=False)
-def _load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def _data_version(store: ForecastStore) -> tuple[int, int]:
+    path = store.dashboard_forecast_path()
+    if not path.exists():
+        return (0, 0)
+    stat = path.stat()
+    return (stat.st_mtime_ns, stat.st_size)
+
+
+@st.cache_data(show_spinner=False)
+def _load_auxiliary_data(version: tuple[int, int]) -> tuple[pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
-    return store.read_forecasts(), store.read_issues(), store.read_backfill_history()
+    return store.read_issues(), store.read_backfill_history()
 
 
-@st.cache_data(ttl=300, show_spinner=False)
-def _prepared_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
-    prepared = valid_online_forecasts(forecasts)
+@st.cache_data(ttl=3600, show_spinner=False)
+def _prepared_online_forecasts(version: tuple[int, int]) -> pd.DataFrame:
+    prepared = valid_online_forecasts(ForecastStore().read_dashboard_forecasts())
     if "model" in prepared.columns:
         prepared = prepared[~prepared["model"].isin(HIDDEN_MODEL_KEYS)].copy()
     return attach_display_actuals(prepared)
@@ -169,7 +177,13 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         key=f"{target}_online_models_{model_signature}",
     )
     available_run_days = max(1, current["run_date"].nunique())
-    last_n_days = control_cols[1].slider("Plot last N days", 1, 60, min(60, available_run_days), key=f"{target}_online_last_n")
+    last_n_days = control_cols[1].slider(
+        "Plot last N days",
+        1,
+        60,
+        min(14, available_run_days),
+        key=f"{target}_online_last_n",
+    )
     selected_zone = control_cols[2].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
 
     if not selected_models:
@@ -292,15 +306,15 @@ def render_app() -> None:
     st.title("Real-Time Load and Renewables Forecasting")
     st.caption("Daily 18:00 Europe/Brussels forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
 
-    forecasts, issues, backfills = _load_data()
-    if forecasts.empty:
+    store = ForecastStore()
+    data_version = _data_version(store)
+    issues, backfills = _load_auxiliary_data(data_version)
+    prepared = _prepared_online_forecasts(data_version)
+    if prepared.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
 
-    forecasts["timestamp"] = pd.to_datetime(forecasts["timestamp"], utc=True)
-    prepared = _prepared_online_forecasts(forecasts)
     actual_errors = prepared.attrs.get("actual_fetch_errors", [])
-    all_zones = list(zones().keys())
     filtered = prepared.copy()
     latest_run = filtered["run_date"].max() if not filtered.empty else None
 
@@ -321,11 +335,21 @@ def render_app() -> None:
         st.warning(
             f"ENTSO-E comparison data is delayed: the static actuals snapshot is {artifact_age:.0f} minutes old."
         )
-    _render_timeline_and_inputs(filtered)
+    selected_target = st.selectbox(
+        "Forecast target",
+        TARGET_ORDER,
+        format_func=_target_label,
+        index=0,
+    )
+    available_zones = sorted(filtered.loc[filtered["target"].eq(selected_target), "zone"].dropna().unique())
+    selected_zones = st.multiselect(
+        "Bidding zones",
+        available_zones,
+        default=available_zones,
+    )
+    _render_task_title(selected_target)
+    _render_target_section(selected_target, filtered, selected_zones)
 
-    for target in TARGET_ORDER:
-        _render_task_title(target)
-        with st.expander(_task_expander_label(target), expanded=target == "load"):
-            _render_target_section(target, filtered, all_zones)
+    _render_timeline_and_inputs(filtered)
 
     _render_failure_backfill_history(issues, backfills)

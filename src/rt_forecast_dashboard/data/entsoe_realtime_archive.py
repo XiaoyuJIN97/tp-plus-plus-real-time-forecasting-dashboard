@@ -35,7 +35,7 @@ class EntsoeRealtimeArchive:
         self.git_ref = paths.get("entsoe_realtime_git_ref")
         self.raw_base = (paths.get("entsoe_realtime_raw_base") or "").rstrip("/")
         self.hourly_dir = Path(paths.get("entsoe_realtime_hourly_dir") or "data/hourly")
-        self.prefer_local = os.getenv("ENTSOE_REALTIME_PREFER_LOCAL", "false").lower() in {"1", "true", "yes"}
+        self.prefer_local = bool(root) or os.getenv("ENTSOE_REALTIME_PREFER_LOCAL", "false").lower() in {"1", "true", "yes"}
         self._available_cache: bool | None = None
         self._manifest_cache: pd.DataFrame | None = None
 
@@ -254,6 +254,13 @@ class EntsoeRealtimeArchive:
         local_text = self._read_local_git(path)
         if local_text is not None:
             return local_text
+        if self.root:
+            local_path = self.root / path
+            if local_path.exists():
+                try:
+                    return local_path.read_text(encoding="utf-8")
+                except (OSError, UnicodeDecodeError):
+                    pass
         return self._read_raw_url(path)
 
     def _git_show_bytes(self, path: str) -> bytes | None:
@@ -264,6 +271,13 @@ class EntsoeRealtimeArchive:
         local_bytes = self._read_local_git_bytes(path)
         if local_bytes is not None:
             return local_bytes
+        if self.root:
+            local_path = self.root / path
+            if local_path.exists():
+                try:
+                    return local_path.read_bytes()
+                except OSError:
+                    pass
         return self._read_raw_url_bytes(path)
 
     def _read_local_git(self, path: str) -> str | None:
