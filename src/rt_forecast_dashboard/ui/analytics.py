@@ -94,7 +94,7 @@ def load_historical_accuracy(target: str) -> pd.DataFrame:
         frame["n"] = frame["n_samples"]
         rows = [frame[["target", "country", "display_model", "base_model", "case", "MAE", "RMSE", "MAPE", "R2", "n"]]]
         wind_name = "Wind_Onshore" if target == "wind_onshore" else "Wind_Offshore"
-        for country in ["BE", "FR", "DE"]:
+        for country in ["BE", "FR", "DE", "NL", "DK1", "DK2", "ES", "PT"]:
             for case_name, display_name in [
                 ("XGBoost_Wind100mCovariates", "XGBoost + 100m wind"),
                 ("XGBoost_NoCovariates", "XGBoost"),
@@ -319,7 +319,7 @@ def load_historical_forecasts(target: str) -> pd.DataFrame:
             ("Daily_Persistence", "Daily persistence"),
         ]
         frames = []
-        for country in ["BE", "FR", "DE"]:
+        for country in ["BE", "FR", "DE", "NL", "DK1", "DK2", "ES", "PT"]:
             for file_key, label in wanted:
                 path = folder / f"{country}_Solar_{file_key}_results_eval.csv"
                 if not path.exists():

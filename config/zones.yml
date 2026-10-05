@@ -3,26 +3,206 @@ zones:
     name: Belgium
     entsoe_code: 10YBE----------2
     timezone: Europe/Brussels
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
     weather_points:
-      - {name: Brussels, latitude: 50.8503, longitude: 4.3517, weight: 0.35}
-      - {name: Antwerp, latitude: 51.2194, longitude: 4.4025, weight: 0.25}
-      - {name: Liege, latitude: 50.6326, longitude: 5.5797, weight: 0.20}
-      - {name: Ghent, latitude: 51.0543, longitude: 3.7174, weight: 0.20}
+    - name: BE point 1
+      latitude: 50.74599838256836
+      longitude: 4.466000080108643
+      weight: 0.25
+    - name: BE point 2
+      latitude: 50.74599838256836
+      longitude: 5.509999752044678
+      weight: 0.25
+    - name: BE point 3
+      latitude: 51.2140007019043
+      longitude: 3.044999837875366
+      weight: 0.25
+    - name: BE point 4
+      latitude: 50.97999954223633
+      longitude: 3.508999824523926
+      weight: 0.25
   FR:
     name: France
     entsoe_code: 10YFR-RTE------C
     timezone: Europe/Paris
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
     weather_points:
-      - {name: Paris, latitude: 48.8566, longitude: 2.3522, weight: 0.35}
-      - {name: Lyon, latitude: 45.7640, longitude: 4.8357, weight: 0.25}
-      - {name: Marseille, latitude: 43.2965, longitude: 5.3698, weight: 0.20}
-      - {name: Toulouse, latitude: 43.6047, longitude: 1.4442, weight: 0.20}
+    - name: FR point 1
+      latitude: 48.76000213623047
+      longitude: 2.2199997901916504
+      weight: 0.25
+    - name: FR point 2
+      latitude: 45.2400016784668
+      longitude: 5.039999485015869
+      weight: 0.25
+    - name: FR point 3
+      latitude: 43.47999954223633
+      longitude: 1.5199999809265137
+      weight: 0.25
+    - name: FR point 4
+      latitude: 50.74599838256836
+      longitude: 3.044999837875366
+      weight: 0.25
   DE:
     name: Germany
     entsoe_code: 10Y1001A1001A83F
     timezone: Europe/Berlin
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
     weather_points:
-      - {name: Berlin, latitude: 52.5200, longitude: 13.4050, weight: 0.30}
-      - {name: Hamburg, latitude: 53.5511, longitude: 9.9937, weight: 0.25}
-      - {name: Munich, latitude: 48.1351, longitude: 11.5820, weight: 0.25}
-      - {name: Cologne, latitude: 50.9375, longitude: 6.9603, weight: 0.20}
+    - name: DE point 1
+      latitude: 48.52000045776367
+      longitude: 10.779998779296877
+      weight: 0.25
+    - name: DE point 2
+      latitude: 50.279998779296875
+      longitude: 7.739999294281006
+      weight: 0.25
+    - name: DE point 3
+      latitude: 52.040000915527344
+      longitude: 13.0
+      weight: 0.25
+    - name: DE point 4
+      latitude: 52.959999084472656
+      longitude: 9.5
+      weight: 0.25
+  NL:
+    name: Netherlands
+    entsoe_code: 10YNL----------L
+    timezone: Europe/Amsterdam
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
+    weather_points:
+    - name: NL point 1
+      latitude: 52.02399826049805
+      longitude: 4.466000080108643
+      weight: 0.25
+    - name: NL point 2
+      latitude: 51.790000915527344
+      longitude: 5.509999752044678
+      weight: 0.25
+    - name: NL point 3
+      latitude: 52.72599792480469
+      longitude: 6.785999774932861
+      weight: 0.25
+    - name: NL point 4
+      latitude: 52.257999420166016
+      longitude: 5.046000003814697
+      weight: 0.25
+  DK1:
+    name: Denmark DK1
+    entsoe_code: 10YDK-1--------W
+    timezone: Europe/Copenhagen
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
+    weather_points:
+    - name: DK1 point 1
+      latitude: 56.25
+      longitude: 10.25
+      weight: 0.25
+    - name: DK1 point 2
+      latitude: 55.75
+      longitude: 8.5
+      weight: 0.25
+    - name: DK1 point 3
+      latitude: 55.5
+      longitude: 10.5
+      weight: 0.25
+    - name: DK1 point 4
+      latitude: 55.5
+      longitude: 9.75
+      weight: 0.25
+  DK2:
+    name: Denmark DK2
+    entsoe_code: 10YDK-2--------M
+    timezone: Europe/Copenhagen
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
+    weather_points:
+    - name: DK2 point 1
+      latitude: 55.75
+      longitude: 12.5
+      weight: 0.25
+    - name: DK2 point 2
+      latitude: 55.25
+      longitude: 14.75
+      weight: 0.25
+    - name: DK2 point 3
+      latitude: 55.25
+      longitude: 11.5
+      weight: 0.25
+    - name: DK2 point 4
+      latitude: 55.5
+      longitude: 12.0
+      weight: 0.25
+  ES:
+    name: Spain
+    entsoe_code: 10YES-REE------0
+    timezone: Europe/Madrid
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    weather_points:
+    - name: ES point 1
+      latitude: 40.5625
+      longitude: 1.5
+      weight: 0.25
+    - name: ES point 2
+      latitude: 28.01405906677246
+      longitude: -15.440185546875
+      weight: 0.25
+    - name: ES point 3
+      latitude: 38.8125
+      longitude: -6.4375
+      weight: 0.25
+    - name: ES point 4
+      latitude: 41.9375
+      longitude: -3.25
+      weight: 0.25
+  PT:
+    name: Portugal
+    entsoe_code: 10YPT-REN------W
+    timezone: Europe/Lisbon
+    targets:
+    - load
+    - solar
+    - wind_onshore
+    - wind_offshore
+    weather_points:
+    - name: PT point 1
+      latitude: 41.25
+      longitude: -8.5625
+      weight: 0.25
+    - name: PT point 2
+      latitude: 38.875
+      longitude: -9.0
+      weight: 0.25
+    - name: PT point 3
+      latitude: 37.125
+      longitude: -8.1875
+      weight: 0.25
+    - name: PT point 4
+      latitude: 40.1875
+      longitude: -8.5625
+      weight: 0.25

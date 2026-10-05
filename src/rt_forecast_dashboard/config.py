@@ -50,7 +50,7 @@ def forecast_runtime() -> dict[str, Any]:
     return config["cutoff"]
 
 
-def load_optimal_engineering_covariates() -> dict[str, dict[str, str]]:
+def load_optimal_engineering_covariates() -> dict[str, dict[str, object]]:
     return load_yaml("features.yml")["load_optimal_engineering_covariates"]
 
 
