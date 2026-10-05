@@ -11,9 +11,16 @@ from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
     filter_last_n_days,
     online_forecast_accuracy,
+    online_rmae_leaderboard,
     valid_online_forecasts,
 )
-from rt_forecast_dashboard.ui.charts import accuracy_summary_chart, deterministic_forecast_chart, scatter_diagnostics_chart
+from rt_forecast_dashboard.ui.charts import (
+    accuracy_summary_chart,
+    deterministic_forecast_chart,
+    rmae_heatmap_chart,
+    rmae_leaderboard_chart,
+    scatter_diagnostics_chart,
+)
 
 
 TARGET_ORDER = ["load", "solar", "wind_onshore", "wind_offshore"]
@@ -288,6 +295,45 @@ def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFra
             st.dataframe(recent_backfills[[c for c in backfill_cols if c in recent_backfills.columns]], width="stretch", hide_index=True)
 
 
+def _render_rmae_landing(frame: pd.DataFrame) -> None:
+    detail, leaderboard = online_rmae_leaderboard(frame)
+    st.markdown('<div class="task-section-title">rMAE leaderboard</div>', unsafe_allow_html=True)
+    st.caption(
+        "Relative MAE (rMAE) compares each model with the TSO forecast on the same fully realized runs. "
+        "Values below 1.00 outperform TSO. Each forecasting series contributes equally to the mean."
+    )
+    if detail.empty or leaderboard.empty:
+        st.info("The leaderboard will appear after complete realized runs are available for every compared model.")
+        return
+    leader = leaderboard.iloc[0]
+    cards = st.columns(4)
+    cards[0].metric("Current leader", leader["display_family"])
+    cards[1].metric("Mean rMAE", f"{leader['mean_rMAE']:.3f}")
+    cards[2].metric("Series beating TSO", f"{int(leader['series_beating_tso'])} / {int(leader['series_covered'])}")
+    cards[3].metric("Common test runs", f"{int(detail['test_runs'].min())}–{int(detail['test_runs'].max())}")
+    chart_col, table_col = st.columns([1.35, 1.0])
+    with chart_col:
+        st.plotly_chart(rmae_leaderboard_chart(leaderboard), width="stretch")
+    with table_col:
+        table = leaderboard.rename(
+            columns={
+                "rank": "Rank",
+                "display_family": "Model Family",
+                "mean_rMAE": "Mean rMAE",
+                "median_rMAE": "Median rMAE",
+                "series_beating_tso": "Series beating TSO",
+                "series_covered": "Series covered",
+            }
+        )
+        st.dataframe(
+            table[["Rank", "Model Family", "Mean rMAE", "Median rMAE", "Series beating TSO", "Series covered"]],
+            width="stretch",
+            hide_index=True,
+            column_config={"Mean rMAE": st.column_config.NumberColumn(format="%.3f"), "Median rMAE": st.column_config.NumberColumn(format="%.3f")},
+        )
+    st.plotly_chart(rmae_heatmap_chart(detail), width="stretch")
+
+
 def render_app() -> None:
     st.set_page_config(page_title="Real-Time Energy Forecasting", page_icon="chart_with_upwards_trend", layout="wide")
     _inject_styles()
@@ -323,6 +369,8 @@ def render_app() -> None:
         st.warning(
             f"ENTSO-E comparison data is delayed: the static actuals snapshot is {artifact_age:.0f} minutes old."
         )
+    _render_rmae_landing(filtered)
+    st.markdown('<div class="task-section-title">Explore forecast details</div>', unsafe_allow_html=True)
     selected_target = st.selectbox(
         "Forecast target",
         TARGET_ORDER,
