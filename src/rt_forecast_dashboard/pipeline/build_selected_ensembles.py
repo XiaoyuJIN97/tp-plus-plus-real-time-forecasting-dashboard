@@ -193,7 +193,7 @@ def build_selected_ensembles(
                 component_labels = [MODEL_COLUMNS[column] for column in components]
                 weight_note = ""
                 if weights_by_band:
-                    weight_note = "; weights=" + "|".join(
+                    weight_note = "|".join(
                         f"{band}:{','.join(f'{label}={weight:.4f}' for label, weight in zip(component_labels, weights))}"
                         for band, weights in sorted(weights_by_band.items())
                     )
@@ -214,7 +214,8 @@ def build_selected_ensembles(
                         "target": target,
                         "model": ENSEMBLE_MODEL_KEY,
                         "model_label": "Ensembled model",
-                        "covariate_case": f"offline_selected:{'+'.join(component_labels)}{weight_note}",
+                        "covariate_case": f"offline_selected:{'+'.join(component_labels)}",
+                        "ensemble_weights": weight_note,
                         "context_hours": int(reference["context_hours"].max()),
                         "timestamp": current["timestamp"].to_numpy(),
                         "forecast_mw": np.maximum(ensemble, 0.0),

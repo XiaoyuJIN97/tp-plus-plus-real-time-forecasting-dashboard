@@ -75,6 +75,8 @@ def test_build_selected_ensembles_uses_offline_selected_configuration(tmp_path) 
     assert result["model"].unique().tolist() == ["ensemble_selected"]
     assert result["model_label"].unique().tolist() == ["Ensembled model"]
     assert "TSO" not in result["covariate_case"].iloc[0].split(";", 1)[0]
+    assert result["covariate_case"].nunique() == 1
+    assert result["ensemble_weights"].str.len().gt(0).all()
     stored = store.read_forecasts()
     assert len(stored[stored["model"].eq("ensemble_selected")]) == 24
 
