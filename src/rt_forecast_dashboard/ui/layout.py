@@ -304,13 +304,23 @@ def render_app() -> None:
     filtered = prepared.copy()
     latest_run = filtered["run_date"].max() if not filtered.empty else None
 
-    metric_cols = st.columns(4)
+    latest_actual = filtered.loc[filtered["actual_mw"].notna(), "timestamp"].max() if "actual_mw" in filtered else None
+    artifact_age = prepared.attrs.get("actual_artifact_age_minutes")
+    metric_cols = st.columns(5)
     metric_cols[0].metric("Latest run", latest_run or "n/a")
     metric_cols[1].metric("Forecast rows", f"{len(filtered):,}")
     metric_cols[2].metric("Zones", filtered["zone"].nunique() if not filtered.empty else 0)
-    metric_cols[3].metric("Actual rows", int(filtered["actual_mw"].notna().sum()) if "actual_mw" in filtered else 0)
+    metric_cols[3].metric("Comparison through", _format_brussels_timestamp(latest_actual))
+    metric_cols[4].metric(
+        "Actual snapshot age",
+        f"{artifact_age:.0f} min" if artifact_age is not None else "n/a",
+    )
     if actual_errors and not filtered.empty and filtered["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
         st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
+    elif artifact_age is not None and artifact_age > 60:
+        st.warning(
+            f"ENTSO-E comparison data is delayed: the static actuals snapshot is {artifact_age:.0f} minutes old."
+        )
     _render_timeline_and_inputs(filtered)
 
     for target in TARGET_ORDER:
