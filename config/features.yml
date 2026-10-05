@@ -62,3 +62,4 @@ source_paths:
   entsoe_realtime_git_ref: origin/data
   entsoe_realtime_raw_base: https://raw.githubusercontent.com/Energy-Data-Science/entsoe-realtime-data/data
   entsoe_realtime_hourly_dir: data/hourly
+  entsoe_dashboard_actuals_url: https://raw.githubusercontent.com/Energy-Data-Science/entsoe-realtime-data/data/data/dashboard/actuals_recent.parquet

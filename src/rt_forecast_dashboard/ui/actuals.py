@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from rt_forecast_dashboard.config import zones
-from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
+from rt_forecast_dashboard.data.dashboard_actuals import fetch_dashboard_actuals
 
 
 def attach_display_actuals(forecasts: pd.DataFrame, now: pd.Timestamp | None = None) -> pd.DataFrame:
@@ -22,40 +21,25 @@ def attach_display_actuals(forecasts: pd.DataFrame, now: pd.Timestamp | None = N
     if not needs_actual.any():
         return frame
 
-    zone_config = zones()
-    entsoe = EntsoeForecastClient(demo_mode=False)
-    keys = frame.loc[needs_actual, ["zone", "target"]].drop_duplicates()
-    actual_frames = []
-    errors = []
-    for row in keys.itertuples(index=False):
-        subset = frame.loc[needs_actual & frame["zone"].eq(row.zone) & frame["target"].eq(row.target)]
-        if subset.empty or row.zone not in zone_config:
-            continue
-        start = subset["timestamp"].min()
-        end = subset["timestamp"].max() + pd.Timedelta(hours=1)
-        try:
-            actual = entsoe.fetch_actuals(
-                zone=row.zone,
-                zone_code=zone_config[row.zone]["entsoe_code"],
-                target=row.target,
-                start=start,
-                end=end,
-            )
-        except Exception as exc:
-            message = str(exc).strip()
-            if message:
-                errors.append(f"{row.zone} {row.target}: {message}")
-            continue
-        actual["zone"] = row.zone
-        actual["target"] = row.target
-        actual_frames.append(actual)
-
-    if not actual_frames:
-        frame.attrs["actual_fetch_errors"] = errors
+    try:
+        actuals = fetch_dashboard_actuals()
+    except Exception as exc:
+        frame.attrs["actual_fetch_errors"] = [str(exc).strip()]
         return frame
 
-    actuals = pd.concat(actual_frames, ignore_index=True).drop_duplicates(["zone", "target", "timestamp"])
+    artifact_generated_at = actuals["collection_time_utc"].max()
+    artifact_age_minutes = None
+    if pd.notna(artifact_generated_at):
+        artifact_age_minutes = max(
+            0.0, (now - artifact_generated_at).total_seconds() / 60
+        )
+    needed_keys = frame.loc[needs_actual, ["zone", "target"]].drop_duplicates()
+    actuals = actuals.merge(needed_keys, on=["zone", "target"], how="inner")
+    actuals = actuals.drop_duplicates(["zone", "target", "timestamp"], keep="last")
     frame = frame.merge(actuals, on=["zone", "target", "timestamp"], how="left", suffixes=("", "_display"))
     frame["actual_mw"] = frame["actual_mw"].combine_first(frame["actual_mw_display"])
-    frame.attrs["actual_fetch_errors"] = errors
-    return frame.drop(columns=["actual_mw_display"])
+    frame.attrs["actual_fetch_errors"] = []
+    frame.attrs["actual_artifact_generated_at"] = artifact_generated_at
+    if artifact_age_minutes is not None:
+        frame.attrs["actual_artifact_age_minutes"] = artifact_age_minutes
+    return frame.drop(columns=["actual_mw_display", "collection_time_utc"])
