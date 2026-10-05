@@ -73,9 +73,7 @@ def test_build_selected_ensembles_uses_offline_selected_configuration(tmp_path) 
 
     assert len(result) == 24
     assert result["model"].unique().tolist() == ["ensemble_selected"]
-    assert result["model_label"].unique().tolist() == [
-        "Ensemble — Constrained learned (without TSO)"
-    ]
+    assert result["model_label"].unique().tolist() == ["Ensembled model"]
     assert "TSO" not in result["covariate_case"].iloc[0].split(";", 1)[0]
     stored = store.read_forecasts()
     assert len(stored[stored["model"].eq("ensemble_selected")]) == 24
@@ -101,5 +99,5 @@ def test_simple_mean_selected_configuration(tmp_path) -> None:
     result = build_selected_ensembles(store, actuals_path=actuals_path, run_dates=[run_date])
 
     assert len(result) == 24
-    assert result["model_label"].unique().tolist() == ["Ensemble — Simple mean (without TSO)"]
+    assert result["model_label"].unique().tolist() == ["Ensembled model"]
     np.testing.assert_allclose(result["forecast_mw"], actual + (10.0 - 5.0 + 2.0) / 3.0)

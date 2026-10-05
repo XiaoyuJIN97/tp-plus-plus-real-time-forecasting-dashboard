@@ -20,13 +20,6 @@ MODEL_COLUMNS = {
     "timesfm3_online": "TimesFM3",
     "tso_reference": "TSO",
 }
-METHOD_LABELS = {
-    "simple_mean": "Simple mean",
-    "median": "Median",
-    "constrained_learned": "Constrained learned",
-}
-
-
 def _component_columns(target: str, include_tso: bool) -> list[str]:
     ml_model = "ridge_3mo_context" if target == "load" else "xgboost_online"
     columns = ["chronos2_online", ml_model, "timesfm3_online"]
@@ -197,7 +190,6 @@ def build_selected_ensembles(
                 else:
                     raise ValueError(f"Unknown ensemble method: {method}")
 
-                tso_option = "with TSO" if include_tso else "without TSO"
                 component_labels = [MODEL_COLUMNS[column] for column in components]
                 weight_note = ""
                 if weights_by_band:
@@ -221,7 +213,7 @@ def build_selected_ensembles(
                         "zone": zone,
                         "target": target,
                         "model": ENSEMBLE_MODEL_KEY,
-                        "model_label": f"Ensemble — {METHOD_LABELS[method]} ({tso_option})",
+                        "model_label": "Ensembled model",
                         "covariate_case": f"offline_selected:{'+'.join(component_labels)}{weight_note}",
                         "context_hours": int(reference["context_hours"].max()),
                         "timestamp": current["timestamp"].to_numpy(),

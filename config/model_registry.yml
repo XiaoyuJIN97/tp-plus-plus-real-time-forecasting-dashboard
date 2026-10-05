@@ -1,6 +1,6 @@
 models:
   ensemble_selected:
-    label: Selected ensemble
+    label: Ensembled model
     enabled: true
     pipeline_generated: true
     targets: [load, solar, wind_onshore, wind_offshore]
