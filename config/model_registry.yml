@@ -1,4 +1,9 @@
 models:
+  ensemble_selected:
+    label: Selected ensemble
+    enabled: true
+    pipeline_generated: true
+    targets: [load, solar, wind_onshore, wind_offshore]
   tso_reference:
     label: TSO forecast
     adapter: tso_reference

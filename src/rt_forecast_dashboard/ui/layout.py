@@ -167,24 +167,24 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         horizontal=True,
         key=f"{target}_view",
     )
-    control_cols = st.columns([1.2, 1.0, 1.0])
-    model_options = sorted(current["model_label"].dropna().unique())
+    control_cols = st.columns([1.0, 1.4, 1.0])
+    selected_zone = control_cols[0].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
+    model_options = sorted(current.loc[current["zone"].eq(selected_zone), "model_label"].dropna().unique())
     model_signature = hashlib.md5("|".join(model_options).encode("utf-8")).hexdigest()[:8]
-    selected_models = control_cols[0].multiselect(
+    selected_models = control_cols[1].multiselect(
         "Model family",
         model_options,
         default=model_options,
-        key=f"{target}_online_models_{model_signature}",
+        key=f"{target}_{selected_zone}_online_models_{model_signature}",
     )
     available_run_days = max(1, current["run_date"].nunique())
-    last_n_days = control_cols[1].slider(
+    last_n_days = control_cols[2].slider(
         "Plot last N days",
         1,
         60,
         min(14, available_run_days),
         key=f"{target}_online_last_n",
     )
-    selected_zone = control_cols[2].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
 
     if not selected_models:
         st.warning("Select at least one model.")
@@ -229,7 +229,7 @@ def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
     if accuracy.empty:
         st.info("No realized actual values are attached to this target in the selected window yet.")
         return
-    metrics = ["MAE", "RMSE", "MAPE", "R2"] if target == "load" else ["MAE", "R2"]
+    metrics = ["MAE", "RMSE", "R2"] if target == "load" else ["MAE", "R2"]
     available_metrics = [metric for metric in metrics if metric in accuracy.columns and accuracy[metric].notna().any()]
     if not available_metrics:
         st.info("No accuracy metrics are available for the selected rows yet.")
@@ -241,7 +241,7 @@ def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
                 accuracy_summary_chart(accuracy, metric, title=metric, show_legend=idx == 0),
                 width="stretch",
             )
-    display_cols = ["country", "display_family", "display_model", "case", "MAE", "RMSE", "MAPE", "R2", "n"]
+    display_cols = ["country", "display_family", "display_model", "case", "MAE", "RMSE", "R2", "n"]
     table = accuracy.sort_values(["country", "family_rank"])
     st.dataframe(
         table[[c for c in display_cols if c in table.columns]],

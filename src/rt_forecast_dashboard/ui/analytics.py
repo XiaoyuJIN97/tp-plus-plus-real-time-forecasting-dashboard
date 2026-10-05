@@ -12,7 +12,7 @@ from rt_forecast_dashboard.time_utils import latest_complete_run_date
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
 DAY_AHEAD_HOURS = 24
 ONLINE_CONTEXT_HOURS = 2208
-MODEL_FAMILY_ORDER = ["Chronos2", "TimesFM3", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
+MODEL_FAMILY_ORDER = ["Ensemble", "Chronos2", "TimesFM3", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
 MODEL_FAMILY_RANK = {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
 
 
@@ -21,6 +21,8 @@ def _normal_model_family(value: object) -> str:
     lowered = text.lower().replace("_", " ")
     if "chronos" in lowered:
         return "Chronos2"
+    if "ensemble" in lowered:
+        return "Ensemble"
     if "timesfm" in lowered:
         return "TimesFM3"
     if "ridge" in lowered:
@@ -179,7 +181,6 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
         actual = group["actual_mw"].to_numpy(dtype=float)
         forecast = group["forecast_mw"].to_numpy(dtype=float)
         error = forecast - actual
-        mask = np.abs(actual) > 1e-6
         ss_res = float(np.sum(error**2))
         ss_tot = float(np.sum((actual - actual.mean()) ** 2))
         rows.append(
@@ -190,7 +191,6 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
                 "case": case,
                 "MAE": float(np.mean(np.abs(error))),
                 "RMSE": float(np.sqrt(np.mean(error**2))),
-                "MAPE": float(np.mean(np.abs(error[mask] / actual[mask])) * 100) if mask.any() else np.nan,
                 "R2": 1.0 - ss_res / ss_tot if ss_tot > 0 else np.nan,
                 "n": int(len(group)),
             }

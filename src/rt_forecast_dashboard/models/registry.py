@@ -9,7 +9,9 @@ def enabled_models_for_target(target: str) -> dict[str, dict]:
     return {
         key: config
         for key, config in registry.items()
-        if config.get("enabled", False) and target in config.get("targets", [])
+        if config.get("enabled", False)
+        and not config.get("pipeline_generated", False)
+        and target in config.get("targets", [])
     }
 
 
