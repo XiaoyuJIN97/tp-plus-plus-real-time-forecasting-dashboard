@@ -163,7 +163,7 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
 
     view = st.radio(
         "View",
-        ["Deterministic forecast analysis", "Scatter diagnostics", "Model accuracy summary", "Run history"],
+        ["Deterministic forecast analysis", "Scatter diagnostics", "Model accuracy summary"],
         horizontal=True,
         key=f"{target}_view",
     )
@@ -219,8 +219,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         _render_scatter_diagnostics(target, current)
     elif view == "Model accuracy summary":
         _render_accuracy_section(target, current)
-    else:
-        _render_run_history(current)
 
 
 def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
@@ -258,16 +256,6 @@ def _render_scatter_diagnostics(target: str, forecasts: pd.DataFrame) -> None:
         return
 
     st.plotly_chart(scatter_diagnostics_chart(current, f"{_target_label(target)} actual vs forecast scatter"), width="stretch")
-
-
-def _render_run_history(forecasts: pd.DataFrame) -> None:
-    st.subheader("Run history")
-    history = (
-        forecasts.groupby(["run_date", "zone", "target", "model_label", "covariate_case", "context_hours"], as_index=False)
-        .agg(rows=("forecast_mw", "size"), run_at=("run_at", "max"))
-        .sort_values(["run_date", "zone", "target"], ascending=[False, True, True])
-    )
-    st.dataframe(history, width="stretch", hide_index=True)
 
 
 def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
