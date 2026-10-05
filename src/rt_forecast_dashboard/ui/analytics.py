@@ -165,6 +165,8 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame = forecasts.dropna(subset=["actual_mw", "forecast_mw"]).copy()
     if frame.empty:
         return pd.DataFrame()
+    if {"model", "covariate_case"}.issubset(frame.columns):
+        frame.loc[frame["model"].eq("ensemble_selected"), "covariate_case"] = "Selected configuration"
     if {"run_date", "zone", "target", "model", "horizon"}.issubset(frame.columns):
         complete = (
             frame.groupby(["run_date", "zone", "target", "model"])["horizon"]
