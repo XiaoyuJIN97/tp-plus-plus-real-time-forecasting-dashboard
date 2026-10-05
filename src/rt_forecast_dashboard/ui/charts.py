@@ -123,7 +123,7 @@ def accuracy_summary_chart(frame: pd.DataFrame, metric: str = "RMSE", title: str
         color=color_col,
         facet_col="country",
         category_orders={x_col: present_order, color_col: present_color_order},
-        labels={x_col: "Model", metric: metric, color_col: "Family"},
+        labels={x_col: "Model Family", metric: metric, color_col: "Model Family"},
         title=title or metric,
         height=420,
     )
@@ -132,6 +132,66 @@ def accuracy_summary_chart(frame: pd.DataFrame, metric: str = "RMSE", title: str
         margin=dict(l=20, r=20, t=60, b=120),
         showlegend=show_legend,
         legend=dict(orientation="h", y=1.05, x=1, xanchor="right"),
+    )
+    return fig
+
+
+def rmae_leaderboard_chart(summary: pd.DataFrame) -> go.Figure:
+    plot = summary.sort_values("mean_rMAE", ascending=True).copy()
+    fig = px.bar(
+        plot,
+        x="mean_rMAE",
+        y="display_family",
+        color="mean_rMAE",
+        orientation="h",
+        text=plot["mean_rMAE"].map(lambda value: f"{value:.2f}"),
+        color_continuous_scale=[(0.0, "#166534"), (0.5, "#86efac"), (1.0, "#dc2626")],
+        range_color=[max(0.0, float(plot["mean_rMAE"].min()) - 0.05), max(1.05, float(plot["mean_rMAE"].max()))],
+        labels={"mean_rMAE": "Mean rMAE vs TSO", "display_family": "Model Family"},
+        height=max(340, 48 * len(plot) + 110),
+    )
+    fig.add_vline(x=1.0, line_dash="dash", line_color="#475569", annotation_text="TSO baseline")
+    fig.update_traces(textposition="outside", cliponaxis=False)
+    fig.update_layout(
+        coloraxis_showscale=False,
+        margin=dict(l=20, r=70, t=35, b=60),
+        yaxis={"categoryorder": "array", "categoryarray": plot["display_family"].tolist()[::-1]},
+    )
+    return fig
+
+
+def rmae_heatmap_chart(detail: pd.DataFrame) -> go.Figure:
+    family_order = [family for family in MODEL_FAMILY_ORDER if family in set(detail["display_family"])]
+    series_order = list(dict.fromkeys(detail.sort_values(["target", "zone"])["series"].tolist()))
+    matrix = detail.pivot(index="display_family", columns="series", values="rMAE").reindex(
+        index=family_order, columns=series_order
+    )
+    text = matrix.map(lambda value: "" if pd.isna(value) else f"{value:.2f}")
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=matrix.to_numpy(dtype=float),
+            x=matrix.columns.tolist(),
+            y=matrix.index.tolist(),
+            text=text.to_numpy(),
+            texttemplate="%{text}",
+            colorscale=[
+                [0.0, "#166534"],
+                [0.45, "#86efac"],
+                [0.5, "#f8fafc"],
+                [0.75, "#fca5a5"],
+                [1.0, "#991b1b"],
+            ],
+            zmid=1.0,
+            colorbar=dict(title="rMAE"),
+            hovertemplate="Model Family=%{y}<br>Series=%{x}<br>rMAE=%{z:.3f}<extra></extra>",
+        )
+    )
+    fig.update_layout(
+        xaxis_title="Forecast Series",
+        yaxis_title="Model Family",
+        xaxis=dict(tickangle=40, side="top"),
+        height=max(430, 58 * len(matrix.index) + 150),
+        margin=dict(l=110, r=30, t=150, b=30),
     )
     return fig
 

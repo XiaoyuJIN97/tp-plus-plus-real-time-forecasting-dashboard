@@ -12,7 +12,7 @@ from rt_forecast_dashboard.time_utils import latest_complete_run_date
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
 DAY_AHEAD_HOURS = 24
 ONLINE_CONTEXT_HOURS = 2208
-MODEL_FAMILY_ORDER = ["Ensemble", "Chronos2", "TimesFM3", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
+MODEL_FAMILY_ORDER = ["Ensembled model", "Chronos2", "TimesFM3", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
 MODEL_FAMILY_RANK = {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
 
 
@@ -22,7 +22,7 @@ def _normal_model_family(value: object) -> str:
     if "chronos" in lowered:
         return "Chronos2"
     if "ensemble" in lowered:
-        return "Ensemble"
+        return "Ensembled model"
     if "timesfm" in lowered:
         return "TimesFM3"
     if "ridge" in lowered:
@@ -202,6 +202,87 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
         return out
     out["family_rank"] = out["display_family"].map(MODEL_FAMILY_RANK).fillna(len(MODEL_FAMILY_ORDER)).astype(int)
     return out.sort_values(["country", "family_rank"]).reset_index(drop=True)
+
+
+def online_rmae_leaderboard(forecasts: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Return paired rMAE results and a model-family leaderboard.
+
+    rMAE is the model MAE divided by TSO MAE on the same fully realized runs.
+    Each zone-target comparison uses only run dates shared by every displayed
+    model family for that series.
+    """
+    if forecasts.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    frame = forecasts.dropna(subset=["actual_mw", "forecast_mw"]).copy()
+    required = {"run_date", "zone", "target", "model", "model_label", "horizon"}
+    if frame.empty or not required.issubset(frame.columns):
+        return pd.DataFrame(), pd.DataFrame()
+    frame["display_family"] = frame["model_label"].map(_normal_model_family)
+    group_cols = ["run_date", "zone", "target", "model", "display_family"]
+    complete = (
+        frame.groupby(group_cols)["horizon"]
+        .nunique()
+        .reset_index(name="realized_hours")
+    )
+    complete = complete[complete["realized_hours"].eq(DAY_AHEAD_HOURS)]
+    frame = frame.merge(complete[group_cols], on=group_cols, how="inner")
+    if frame.empty:
+        return pd.DataFrame(), pd.DataFrame()
+
+    rows: list[dict[str, object]] = []
+    for (zone, target), series in frame.groupby(["zone", "target"]):
+        dates_by_family = {
+            family: set(group["run_date"].astype(str))
+            for family, group in series.groupby("display_family")
+        }
+        if "TSO forecast" not in dates_by_family or len(dates_by_family) < 2:
+            continue
+        common_dates = set.intersection(*dates_by_family.values())
+        if not common_dates:
+            continue
+        paired = series[series["run_date"].astype(str).isin(common_dates)].copy()
+        paired["absolute_error"] = (paired["forecast_mw"] - paired["actual_mw"]).abs()
+        family_errors = paired.groupby("display_family", as_index=False).agg(
+            MAE=("absolute_error", "mean"),
+            observations=("absolute_error", "size"),
+            test_runs=("run_date", "nunique"),
+        )
+        tso = family_errors[family_errors["display_family"].eq("TSO forecast")]
+        if tso.empty or float(tso.iloc[0]["MAE"]) <= 0:
+            continue
+        tso_mae = float(tso.iloc[0]["MAE"])
+        series_label = f"{zone} · {target.replace('_', ' ').title()}"
+        for result in family_errors.itertuples(index=False):
+            rows.append(
+                {
+                    "zone": zone,
+                    "target": target,
+                    "series": series_label,
+                    "display_family": result.display_family,
+                    "rMAE": float(result.MAE / tso_mae),
+                    "MAE": float(result.MAE),
+                    "TSO_MAE": tso_mae,
+                    "observations": int(result.observations),
+                    "test_runs": int(result.test_runs),
+                }
+            )
+    detail = pd.DataFrame(rows)
+    if detail.empty:
+        return detail, pd.DataFrame()
+    summary = (
+        detail.groupby("display_family", as_index=False)
+        .agg(
+            mean_rMAE=("rMAE", "mean"),
+            median_rMAE=("rMAE", "median"),
+            series_covered=("series", "nunique"),
+            total_test_runs=("test_runs", "sum"),
+        )
+    )
+    wins = detail.assign(win=detail["rMAE"].lt(1.0)).groupby("display_family", as_index=False)["win"].sum()
+    summary = summary.merge(wins.rename(columns={"win": "series_beating_tso"}), on="display_family")
+    summary["rank"] = summary["mean_rMAE"].rank(method="min").astype(int)
+    summary["family_rank"] = summary["display_family"].map(MODEL_FAMILY_RANK).fillna(len(MODEL_FAMILY_ORDER)).astype(int)
+    return detail, summary.sort_values(["rank", "family_rank"]).reset_index(drop=True)
 
 
 def load_historical_forecasts(target: str) -> pd.DataFrame:
