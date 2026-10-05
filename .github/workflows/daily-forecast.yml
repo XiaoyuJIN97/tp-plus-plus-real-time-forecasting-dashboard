@@ -80,6 +80,7 @@ jobs:
             data/status.json
             data/run_history.csv
             data/hourly
+            data/dashboard/actuals_recent.parquet
 
       - if: steps.brussels_window.outputs.should_run == 'true'
         uses: actions/setup-python@v5
@@ -95,13 +96,13 @@ jobs:
             ~/.cache/huggingface
             ~/.cache/torch
             ~/.cache/tabpfn
-          key: ${{ runner.os }}-forecast-models-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-forecast-models-${{ hashFiles('requirements.txt', 'requirements-forecast.txt') }}
           restore-keys: |
             ${{ runner.os }}-forecast-models-
 
       - name: Install dashboard dependencies
         if: steps.brussels_window.outputs.should_run == 'true'
-        run: pip install -r requirements.txt -e .
+        run: pip install -r requirements-forecast.txt -e .
 
       - name: Verify optional model runtimes
         if: steps.brussels_window.outputs.should_run == 'true'
@@ -270,4 +271,18 @@ jobs:
           if [ "$failed" -ne 0 ]; then
             echo "::error::One or more recent forecast dates are incomplete after the rolling backfill attempt."
             exit 1
+          fi
+
+      - name: Build compact dashboard artifacts
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts \
+            --retention-days 90 \
+            --actuals external/entsoe-realtime-data/data/dashboard/actuals_recent.parquet
+          git add data/dashboard
+          if git diff --cached --quiet; then
+            echo "No compact dashboard artifact changes."
+          else
+            git commit -m "Update compact dashboard artifact"
+            git push
           fi
