@@ -12,6 +12,7 @@ from rt_forecast_dashboard.ui.analytics import (
     filter_last_n_days,
     online_forecast_accuracy,
     online_rmae_leaderboard,
+    summarize_rmae,
     valid_online_forecasts,
 )
 from rt_forecast_dashboard.ui.charts import (
@@ -305,7 +306,18 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     if detail.empty or leaderboard.empty:
         st.info("The leaderboard will appear after complete realized runs are available for every compared model.")
         return
-    leader = leaderboard.iloc[0]
+    total_series = detail["series"].nunique()
+    full_coverage = leaderboard[leaderboard["series_covered"].eq(total_series)].copy()
+    full_coverage["rank"] = full_coverage["mean_rMAE"].rank(method="min").astype(int)
+    full_coverage = full_coverage.sort_values(["rank", "family_rank"]).reset_index(drop=True)
+    if full_coverage.empty:
+        st.info("No model family currently covers every available forecasting series.")
+        return
+    st.markdown("#### Overall full-coverage leaderboard")
+    st.caption(
+        f"Only model families evaluated on all {total_series} available zone-target series are included in this ranking."
+    )
+    leader = full_coverage.iloc[0]
     cards = st.columns(4)
     cards[0].metric("Current leader", leader["display_family"])
     cards[1].metric("Mean rMAE", f"{leader['mean_rMAE']:.3f}")
@@ -313,9 +325,9 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     cards[3].metric("Common test runs", f"{int(detail['test_runs'].min())}–{int(detail['test_runs'].max())}")
     chart_col, table_col = st.columns([1.35, 1.0])
     with chart_col:
-        st.plotly_chart(rmae_leaderboard_chart(leaderboard), width="stretch")
+        st.plotly_chart(rmae_leaderboard_chart(full_coverage), width="stretch")
     with table_col:
-        table = leaderboard.rename(
+        table = full_coverage.rename(
             columns={
                 "rank": "Rank",
                 "display_family": "Model Family",
@@ -331,7 +343,65 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
             hide_index=True,
             column_config={"Mean rMAE": st.column_config.NumberColumn(format="%.3f"), "Median rMAE": st.column_config.NumberColumn(format="%.3f")},
         )
-    st.plotly_chart(rmae_heatmap_chart(detail), width="stretch")
+
+    st.markdown("#### Target-specific leaderboard")
+    controls = st.columns([1.0, 2.0])
+    target_options = ["all", *TARGET_ORDER]
+    selected_target = controls[0].selectbox(
+        "Leaderboard target",
+        target_options,
+        index=1,
+        format_func=lambda value: "All targets" if value == "all" else _target_label(value),
+        key="leaderboard_target",
+    )
+    target_detail = detail if selected_target == "all" else detail[detail["target"].eq(selected_target)].copy()
+    available_zones = sorted(target_detail["zone"].unique())
+    selected_zones = controls[1].multiselect(
+        "Leaderboard bidding zones",
+        available_zones,
+        default=available_zones,
+        key="leaderboard_zones",
+    )
+    target_detail = target_detail[target_detail["zone"].isin(selected_zones)].copy()
+    if target_detail.empty:
+        st.info("Select at least one bidding zone to display the target-specific leaderboard.")
+        return
+    target_leaderboard = summarize_rmae(target_detail)
+    target_total = target_detail["series"].nunique()
+    target_leaderboard["coverage"] = (
+        target_leaderboard["series_covered"].astype(str) + " / " + str(target_total)
+    )
+    target_chart, target_table = st.columns([1.35, 1.0])
+    with target_chart:
+        st.plotly_chart(rmae_leaderboard_chart(target_leaderboard), width="stretch")
+    with target_table:
+        display = target_leaderboard.rename(
+            columns={
+                "rank": "Rank",
+                "display_family": "Model Family",
+                "mean_rMAE": "Mean rMAE",
+                "median_rMAE": "Median rMAE",
+                "series_beating_tso": "Series beating TSO",
+                "coverage": "Coverage",
+            }
+        )
+        st.dataframe(
+            display[["Rank", "Model Family", "Mean rMAE", "Median rMAE", "Series beating TSO", "Coverage"]],
+            width="stretch",
+            hide_index=True,
+            column_config={"Mean rMAE": st.column_config.NumberColumn(format="%.3f"), "Median rMAE": st.column_config.NumberColumn(format="%.3f")},
+        )
+    if selected_target == "all":
+        tabs = st.tabs([_target_label(target) for target in TARGET_ORDER])
+        for tab, target in zip(tabs, TARGET_ORDER):
+            with tab:
+                target_heatmap = target_detail[target_detail["target"].eq(target)]
+                if target_heatmap.empty:
+                    st.info(f"No complete {_target_label(target).lower()} comparisons are available.")
+                else:
+                    st.plotly_chart(rmae_heatmap_chart(target_heatmap), width="stretch")
+    else:
+        st.plotly_chart(rmae_heatmap_chart(target_detail), width="stretch")
 
 
 def render_app() -> None:

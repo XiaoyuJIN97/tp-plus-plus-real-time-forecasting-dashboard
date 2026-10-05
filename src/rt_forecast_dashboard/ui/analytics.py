@@ -269,6 +269,12 @@ def online_rmae_leaderboard(forecasts: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
     detail = pd.DataFrame(rows)
     if detail.empty:
         return detail, pd.DataFrame()
+    return detail, summarize_rmae(detail)
+
+
+def summarize_rmae(detail: pd.DataFrame) -> pd.DataFrame:
+    if detail.empty:
+        return pd.DataFrame()
     summary = (
         detail.groupby("display_family", as_index=False)
         .agg(
@@ -282,7 +288,7 @@ def online_rmae_leaderboard(forecasts: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
     summary = summary.merge(wins.rename(columns={"win": "series_beating_tso"}), on="display_family")
     summary["rank"] = summary["mean_rMAE"].rank(method="min").astype(int)
     summary["family_rank"] = summary["display_family"].map(MODEL_FAMILY_RANK).fillna(len(MODEL_FAMILY_ORDER)).astype(int)
-    return detail, summary.sort_values(["rank", "family_rank"]).reset_index(drop=True)
+    return summary.sort_values(["rank", "family_rank"]).reset_index(drop=True)
 
 
 def load_historical_forecasts(target: str) -> pd.DataFrame:
