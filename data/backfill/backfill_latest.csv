@@ -1,6 +1,6 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-06T21:17:54+00:00,2026-10-02,2976,331.906,complete,complete 124 groups x 24 hours
-2026-10-06T21:22:11+00:00,2026-10-03,2976,256.782,complete,complete 124 groups x 24 hours
-2026-10-06T21:25:10+00:00,2026-10-04,2976,179.534,complete,complete 124 groups x 24 hours
-2026-10-06T21:27:13+00:00,2026-10-05,2976,122.795,complete,complete 124 groups x 24 hours
-2026-10-06T21:29:39+00:00,2026-10-06,2976,146.202,complete,complete 124 groups x 24 hours
+2026-10-06T21:32:16+00:00,2026-10-02,744,152.359,complete,complete 31 groups x 24 hours
+2026-10-06T21:34:44+00:00,2026-10-03,744,148.481,complete,complete 31 groups x 24 hours
+2026-10-06T21:37:16+00:00,2026-10-04,744,151.25,complete,complete 31 groups x 24 hours
+2026-10-06T21:39:50+00:00,2026-10-05,744,154.63,complete,complete 31 groups x 24 hours
+2026-10-06T21:42:24+00:00,2026-10-06,744,153.63,complete,complete 31 groups x 24 hours
