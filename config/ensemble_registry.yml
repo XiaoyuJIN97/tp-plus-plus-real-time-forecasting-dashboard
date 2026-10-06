@@ -12,8 +12,8 @@ settings:
     - 18
   - - 19
     - 24
-  selection_evidence: 2024 train / 2025 test using saved Chronos2, Ridge-or-XGBoost,
-    and optional TSO forecasts; TimesFM3 history unavailable for new zones
+  selection_evidence: 90-run historical mock backtest (2025-01-01 through 2025-03-31)
+    using saved Chronos2, Ridge-or-XGBoost, TimesFM3, and optional TSO forecasts
 selections:
   BE:
     load:
@@ -59,34 +59,34 @@ selections:
       method: constrained_learned
       include_tso: false
     solar:
-      method: constrained_learned
+      method: median
       include_tso: false
     wind_offshore:
-      method: constrained_learned
-      include_tso: true
+      method: median
+      include_tso: false
     wind_onshore:
-      method: constrained_learned
-      include_tso: true
+      method: median
+      include_tso: false
   DK2:
     load:
       method: constrained_learned
       include_tso: false
     solar:
-      method: constrained_learned
+      method: median
       include_tso: false
     wind_offshore:
-      method: constrained_learned
-      include_tso: true
+      method: median
+      include_tso: false
     wind_onshore:
       method: constrained_learned
-      include_tso: true
+      include_tso: false
   ES:
     load:
       method: constrained_learned
-      include_tso: true
+      include_tso: false
     solar:
       method: constrained_learned
-      include_tso: true
+      include_tso: false
     wind_onshore:
       method: median
       include_tso: true
@@ -95,23 +95,23 @@ selections:
       method: constrained_learned
       include_tso: false
     solar:
-      method: simple_mean
-      include_tso: false
-    wind_offshore:
       method: constrained_learned
       include_tso: true
+    wind_offshore:
+      method: constrained_learned
+      include_tso: false
     wind_onshore:
       method: constrained_learned
       include_tso: true
   PT:
     load:
       method: median
-      include_tso: true
+      include_tso: false
     solar:
-      method: median
+      method: constrained_learned
       include_tso: true
     wind_offshore:
-      method: constrained_learned
+      method: median
       include_tso: false
     wind_onshore:
       method: constrained_learned
