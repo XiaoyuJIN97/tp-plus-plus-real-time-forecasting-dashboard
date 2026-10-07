@@ -5,7 +5,7 @@ import hashlib
 import pandas as pd
 import streamlit as st
 
-from rt_forecast_dashboard.config import features
+from rt_forecast_dashboard.config import features, zones
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
@@ -414,6 +414,8 @@ def render_app() -> None:
     data_version = _data_version(store)
     issues, backfills = _load_auxiliary_data(data_version)
     prepared = _prepared_online_forecasts(data_version)
+    if "zone" in prepared.columns:
+        prepared = prepared[prepared["zone"].isin(zones())].copy()
     if prepared.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return

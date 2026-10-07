@@ -1,6 +1,6 @@
 # Real-Time Load and Renewables Forecast Dashboard
 
-Daily online forecasting dashboard for load, solar, and wind in the BE, FR, and DE bidding zones.
+Daily online forecasting dashboard for load, solar, and wind in the BE, FR, DE, DK1, DK2, ES, and PT bidding zones.
 
 The first online version runs once per day after the daily 18:00 Europe/Brussels ENTSO-E Transparency Platform publication point. The dashboard workflow is triggered around 18:30 Europe/Brussels, after the realtime data collector has had time to snapshot and push the latest TSO forecasts; under normal conditions the new dashboard results should be visible before about 19:00. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
 
@@ -108,7 +108,7 @@ flowchart TD
   C --> D["18:30+ Brussels: Dashboard daily forecast workflow starts after guarded GitHub cron trigger"]
   D --> E["Read ENTSO-E realtime-data raw/update files and checked-out Open-Meteo data branch"]
   E --> G["Build 92-day context plus 24-hour day-ahead TSO/weather covariates"]
-  G --> H["Run configured online models for BE, FR, DE: load, solar, onshore wind, offshore wind"]
+  G --> H["Run configured online models for BE, FR, DE, DK1, DK2, ES, and PT"]
   H --> I["Commit core model rows first, then append TimesFM3 rows when that run finishes"]
   I --> J["Streamlit Cloud rebuilds from GitHub and displays Europe/Brussels delivery times"]
   J --> K["After realized hours arrive, dashboard reads ENTSO-E actuals for scatter and accuracy"]
@@ -118,8 +118,8 @@ flowchart TD
 
 | Stage | Repository / service | Included data | Dashboard use |
 |---|---|---|---|
-| ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | Forecast and actual series under `data/hourly`; compact BE/FR/DE comparison actuals under `data/dashboard/actuals_recent.parquet` | TSO covariate, TSO benchmark, 3-month context values, and one-request realized actuals for dashboard diagnostics |
-| Open-Meteo weather collection | `XiaoyuJIN97/open-meteo-realtime-data`, `data` branch | Four-point target-specific files under `data/raw/{BE,FR,DE}/{load,solar,onshore,offshore}`. Load uses `temperature_2m`, `relative_humidity_2m`, `shortwave_radiation`, plus a derived degree proxy. The degree proxy is computed in the dashboard as the absolute distance between the mean four-point temperature and an 18 C comfort/reference temperature, so it summarizes heating/cooling stress with one covariate. Solar uses `shortwave_radiation` and `temperature_2m`. Wind uses `wind_speed_100m_ms`, `wind_dir_sin`, and `wind_dir_cos`. | Weather covariates for load, solar, onshore wind, offshore wind |
+| ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | Forecast and actual series under `data/hourly`; compact BE/FR/DE/DK1/DK2/ES/PT comparison actuals under `data/dashboard/actuals_recent.parquet` | TSO covariate, TSO benchmark, 3-month context values, and one-request realized actuals for dashboard diagnostics |
+| Open-Meteo weather collection | `XiaoyuJIN97/open-meteo-realtime-data`, `data` branch | Four-point target-specific files under `data/raw/{BE,FR,DE,DK1,DK2,ES,PT}/{load,solar,onshore,offshore}`. Load uses `temperature_2m`, `relative_humidity_2m`, `shortwave_radiation`, plus a derived degree proxy. The degree proxy is computed in the dashboard as the absolute distance between the mean four-point temperature and an 18 C comfort/reference temperature, so it summarizes heating/cooling stress with one covariate. Solar uses `shortwave_radiation` and `temperature_2m`. Wind uses `wind_speed_100m_ms`, `wind_dir_sin`, and `wind_dir_cos`. Spain does not include offshore wind because that ENTSO-E series is unavailable. | Weather covariates for load, solar, onshore wind, offshore wind |
 | Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` with 24 hourly delivery timestamps, forecasts, TSO benchmark, run metadata, context start/end | Reads public ENTSO-E hourly archive first, falls back to raw/update files when needed, reads checked-out Open-Meteo files, and displays deterministic forecast analysis, scatter diagnostics, accuracy, and run history |
 | Streamlit display | Streamlit Cloud | Live dashboard from committed forecast CSVs plus fetched realized actuals | Displays timestamps in Europe/Brussels; uses ENTSO-E actuals only for visualization/diagnostics, not as forecast inputs |
 
