@@ -450,13 +450,8 @@ def render_app() -> None:
         index=0,
     )
     available_zones = sorted(filtered.loc[filtered["target"].eq(selected_target), "zone"].dropna().unique())
-    selected_zones = st.multiselect(
-        "Bidding zones",
-        available_zones,
-        default=available_zones,
-    )
     _render_task_title(selected_target)
-    _render_target_section(selected_target, filtered, selected_zones)
+    _render_target_section(selected_target, filtered, available_zones)
 
     _render_timeline_and_inputs(filtered)
 
