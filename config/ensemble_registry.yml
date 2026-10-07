@@ -90,19 +90,6 @@ selections:
     wind_onshore:
       method: median
       include_tso: true
-  NL:
-    load:
-      method: constrained_learned
-      include_tso: false
-    solar:
-      method: constrained_learned
-      include_tso: true
-    wind_offshore:
-      method: constrained_learned
-      include_tso: false
-    wind_onshore:
-      method: constrained_learned
-      include_tso: true
   PT:
     load:
       method: median

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from rt_forecast_dashboard.config import features, zones
@@ -44,6 +45,8 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
 
     counts = {group: 0 for group in expected}
     timestamps: dict[tuple[str, str, str], set[str]] = {group: set() for group in expected}
+    first_delivery: dict[tuple[str, str, str], datetime] = {}
+    latest_context_end: dict[tuple[str, str, str], datetime] = {}
     try:
         with path.open("r", encoding="utf-8", newline="") as handle:
             reader = csv.DictReader(handle)
@@ -58,6 +61,11 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
                 if not row.get("timestamp") or not row.get("forecast_mw"):
                     continue
                 timestamps[group].add(str(row["timestamp"]))
+                delivery = datetime.fromisoformat(str(row["timestamp"]).replace("Z", "+00:00"))
+                first_delivery[group] = min(first_delivery.get(group, delivery), delivery)
+                if row.get("context_end"):
+                    context_end = datetime.fromisoformat(str(row["context_end"]).replace("Z", "+00:00"))
+                    latest_context_end[group] = max(latest_context_end.get(group, context_end), context_end)
     except Exception as exc:
         return False, f"cannot read {path}: {exc}"
 
@@ -68,6 +76,17 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
     if incomplete:
         sample = ", ".join(f"{zone}/{target}/{model}={count}" for (zone, target, model), count in sorted(incomplete.items())[:8])
         return False, f"incomplete groups: {sample}"
+    stale = {
+        group: (latest_context_end[group], delivery - timedelta(hours=1))
+        for group, delivery in first_delivery.items()
+        if group in latest_context_end and latest_context_end[group] < delivery - timedelta(hours=1)
+    }
+    if stale:
+        sample = ", ".join(
+            f"{zone}/{target}/{model} context_end={actual.isoformat()} expected>={expected_end.isoformat()}"
+            for (zone, target, model), (actual, expected_end) in sorted(stale.items())[:8]
+        )
+        return False, f"stale context: {sample}"
     return True, f"complete {len(expected)} groups x {HORIZON_HOURS} hours"
 
 

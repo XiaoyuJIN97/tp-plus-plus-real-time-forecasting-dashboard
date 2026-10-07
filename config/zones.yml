@@ -77,32 +77,6 @@ zones:
       latitude: 52.959999084472656
       longitude: 9.5
       weight: 0.25
-  NL:
-    name: Netherlands
-    entsoe_code: 10YNL----------L
-    timezone: Europe/Amsterdam
-    targets:
-    - load
-    - solar
-    - wind_onshore
-    - wind_offshore
-    weather_points:
-    - name: NL point 1
-      latitude: 52.02399826049805
-      longitude: 4.466000080108643
-      weight: 0.25
-    - name: NL point 2
-      latitude: 51.790000915527344
-      longitude: 5.509999752044678
-      weight: 0.25
-    - name: NL point 3
-      latitude: 52.72599792480469
-      longitude: 6.785999774932861
-      weight: 0.25
-    - name: NL point 4
-      latitude: 52.257999420166016
-      longitude: 5.046000003814697
-      weight: 0.25
   DK1:
     name: Denmark DK1
     entsoe_code: 10YDK-1--------W
