@@ -50,3 +50,17 @@ def test_forecast_completeness_rejects_partial_file(tmp_path) -> None:
 
     assert not complete
     assert "incomplete groups" in reason
+
+
+def test_forecast_completeness_rejects_stale_context(tmp_path) -> None:
+    path = tmp_path / "forecasts" / "forecasts_2026-08-30.csv"
+    path.parent.mkdir()
+    model_keys = {"tso_reference"}
+    frame = _forecast_rows(expected_groups(model_keys))
+    frame["context_end"] = "2026-08-30T14:00:00Z"
+    frame.to_csv(path, index=False)
+
+    complete, reason = is_forecast_complete(path, model_keys)
+
+    assert not complete
+    assert "stale context" in reason
