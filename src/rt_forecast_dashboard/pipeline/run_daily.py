@@ -7,6 +7,7 @@ import sys
 import pandas as pd
 
 from rt_forecast_dashboard.config import features, zones
+from rt_forecast_dashboard.context_quality import repair_context
 from rt_forecast_dashboard.covariates import covariates_for
 from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
 from rt_forecast_dashboard.data.weather_client import OpenMeteoClient
@@ -54,6 +55,25 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                     target=target,
                     context_hours=context_hours,
                 )
+                expected_context_end = pd.to_datetime(tso["timestamp"], utc=True).min() - pd.Timedelta(hours=1)
+                actual_context, context_quality = repair_context(
+                    actual_context,
+                    expected_end=expected_context_end,
+                    context_hours=context_hours,
+                )
+                if context_quality.imputed_hours:
+                    store.log_issue(
+                        run_date=run_date_str,
+                        zone=zone,
+                        target=target,
+                        stage="context_imputation",
+                        message=(
+                            f"Recovered {context_quality.imputed_hours} missing context hour(s) "
+                            f"using {context_quality.methods}."
+                        ),
+                        context={"records": list(context_quality.records)},
+                        status="recovered",
+                    )
                 feature_frame = build_feature_frame(tso, tso[["timestamp"]]).head(horizon)
                 context_frame = build_feature_frame(actual_context, actual_context[["timestamp"]]).dropna(subset=["actual_mw"]).tail(context_hours)
                 weather_loaded = False
@@ -109,6 +129,10 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                                     "actual_mw": pd.NA,
                                     "context_start": context_frame["timestamp"].min(),
                                     "context_end": context_frame["timestamp"].max(),
+                                    "context_missing_hours": context_quality.missing_hours,
+                                    "context_imputed_hours": context_quality.imputed_hours,
+                                    "context_imputation_method": context_quality.methods,
+                                    "data_quality": context_quality.quality,
                                 }
                             )
                         )
