@@ -90,7 +90,7 @@ class ForecastStore:
     def write_raw(self, frame: pd.DataFrame, run_date: str, zone: str, target: str) -> None:
         frame.to_csv(self.raw_path(run_date, zone, target), index=False)
 
-    def log_issue(self, *, run_date: str, zone: str, target: str, stage: str, message: str, context: dict[str, Any] | None = None) -> None:
+    def log_issue(self, *, run_date: str, zone: str, target: str, stage: str, message: str, context: dict[str, Any] | None = None, status: str = "open") -> None:
         row = pd.DataFrame(
             [
                 {
@@ -101,7 +101,7 @@ class ForecastStore:
                     "stage": stage,
                     "message": message,
                     "context": context or {},
-                    "status": "open",
+                    "status": status,
                 }
             ]
         )
