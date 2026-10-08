@@ -272,6 +272,55 @@ def online_rmae_leaderboard(forecasts: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
     return detail, summarize_rmae(detail)
 
 
+def online_win_rate_by_zone(forecasts: pd.DataFrame) -> pd.DataFrame:
+    """Compare each model family with TSO on matched, fully realized daily runs."""
+    if forecasts.empty:
+        return pd.DataFrame()
+    frame = forecasts.dropna(subset=["actual_mw", "forecast_mw"]).copy()
+    required = {"run_date", "zone", "target", "model", "model_label", "horizon"}
+    if frame.empty or not required.issubset(frame.columns):
+        return pd.DataFrame()
+
+    frame["display_family"] = frame["model_label"].map(_normal_model_family)
+    complete_keys = ["run_date", "zone", "target", "model", "display_family"]
+    complete = frame.groupby(complete_keys)["horizon"].nunique().reset_index(name="realized_hours")
+    complete = complete[complete["realized_hours"].eq(DAY_AHEAD_HOURS)]
+    frame = frame.merge(complete[complete_keys], on=complete_keys, how="inner")
+    if frame.empty:
+        return pd.DataFrame()
+
+    frame["absolute_error"] = (frame["forecast_mw"] - frame["actual_mw"]).abs()
+    run_errors = (
+        frame.groupby(["run_date", "zone", "target", "display_family"], as_index=False)
+        .agg(run_MAE=("absolute_error", "mean"))
+    )
+    tso = (
+        run_errors[run_errors["display_family"].eq("TSO forecast")]
+        .drop(columns="display_family")
+        .rename(columns={"run_MAE": "TSO_run_MAE"})
+    )
+    paired = run_errors[~run_errors["display_family"].eq("TSO forecast")].merge(
+        tso,
+        on=["run_date", "zone", "target"],
+        how="inner",
+    )
+    if paired.empty:
+        return pd.DataFrame()
+
+    tied = np.isclose(paired["run_MAE"], paired["TSO_run_MAE"], rtol=1e-9, atol=1e-9)
+    paired["win_score"] = paired["run_MAE"].lt(paired["TSO_run_MAE"]).astype(float)
+    paired.loc[tied, "win_score"] = 0.5
+    result = (
+        paired.groupby(["zone", "target", "display_family"], as_index=False)
+        .agg(win_score=("win_score", "sum"), compared_runs=("run_date", "nunique"))
+    )
+    result["win_rate"] = 100 * result["win_score"] / result["compared_runs"]
+    result["family_rank"] = (
+        result["display_family"].map(MODEL_FAMILY_RANK).fillna(len(MODEL_FAMILY_ORDER)).astype(int)
+    )
+    return result.sort_values(["target", "zone", "family_rank"]).reset_index(drop=True)
+
+
 def summarize_rmae(detail: pd.DataFrame) -> pd.DataFrame:
     if detail.empty:
         return pd.DataFrame()
