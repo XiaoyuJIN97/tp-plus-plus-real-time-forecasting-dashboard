@@ -66,6 +66,12 @@ def _inject_styles() -> None:
         }
         div[data-testid="stPageLink"] a p {
             color: inherit;
+            font-size: 1.55rem !important;
+            font-weight: 700 !important;
+            line-height: 1.25;
+        }
+        div[data-testid="stPageLink"] a span {
+            font-size: 1.45rem !important;
         }
         </style>
         """,
