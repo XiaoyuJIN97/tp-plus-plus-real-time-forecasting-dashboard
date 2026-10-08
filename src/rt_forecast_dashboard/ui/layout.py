@@ -42,6 +42,31 @@ def _inject_styles() -> None:
             margin: 3.25rem 0 0.45rem 0;
             color: #64748b;
         }
+        div[data-testid="stPageLink"] a {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            gap: 0.45rem;
+            margin-top: 1rem;
+            padding: 0.7rem 1rem;
+            border: 1px solid #1d4ed8;
+            border-radius: 0.65rem;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+            transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+        }
+        div[data-testid="stPageLink"] a:hover {
+            border-color: #1e40af;
+            background: #1d4ed8;
+            color: #ffffff;
+            transform: translateX(2px);
+        }
+        div[data-testid="stPageLink"] a p {
+            color: inherit;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -300,7 +325,7 @@ def _render_leaderboard_page(details_page: st.Page) -> None:
         return
     _render_data_warning(prepared)
     _render_rmae_landing(prepared)
-    st.page_link(details_page, label="Explore forecast details", icon="📈")
+    st.page_link(details_page, label="Explore forecast details →", icon="📈")
 
 
 def _render_forecast_details_page() -> None:
