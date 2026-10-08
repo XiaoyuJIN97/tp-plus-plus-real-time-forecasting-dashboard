@@ -74,83 +74,8 @@ def _target_label(target: str) -> str:
     return features()[target].get("label", target)
 
 
-def _task_expander_label(target: str) -> str:
-    return f"Open / close {_target_label(target)} display"
-
-
 def _render_task_title(target: str) -> None:
     st.markdown(f'<div class="task-section-title">{_target_label(target)}</div>', unsafe_allow_html=True)
-
-
-def _add_brussels_delivery_columns(frame: pd.DataFrame) -> pd.DataFrame:
-    frame = frame.copy()
-    delivery = pd.to_datetime(frame["timestamp"], utc=True).dt.tz_convert("Europe/Brussels")
-    frame["delivery_time_brussels"] = delivery.dt.strftime("%Y-%m-%d %H:%M %Z")
-    frame["delivery_hour_brussels"] = delivery.dt.strftime("%H:%M")
-    return frame
-
-
-def _format_brussels_timestamp(value: pd.Timestamp | None) -> str:
-    if value is None or pd.isna(value):
-        return "n/a"
-    return pd.Timestamp(value).tz_convert("Europe/Brussels").strftime("%Y-%m-%d %H:%M %Z")
-
-
-def _actual_status_table(frame: pd.DataFrame) -> pd.DataFrame:
-    if frame.empty or "actual_mw" not in frame.columns:
-        return pd.DataFrame()
-    actual = frame.dropna(subset=["actual_mw"]).copy()
-    if actual.empty:
-        return pd.DataFrame()
-    actual = actual.drop_duplicates(["zone", "target", "timestamp"])
-    status = (
-        actual.groupby(["zone", "target"], as_index=False)
-        .agg(actual_through=("timestamp", "max"), actual_points=("timestamp", "size"))
-        .sort_values(["zone", "target"])
-    )
-    status["Task"] = status["target"].map(_target_label)
-    status["Actual through"] = status["actual_through"].map(_format_brussels_timestamp)
-    status = status.rename(columns={"zone": "Zone", "actual_points": "Hourly actual points"})
-    return status[["Zone", "Task", "Actual through", "Hourly actual points"]]
-
-
-def _render_timeline_and_inputs(frame: pd.DataFrame) -> None:
-    with st.expander("Daily update timeline and data inputs", expanded=False):
-        st.markdown(
-            """
-            The forecast run is scheduled after the 18:00 Europe/Brussels publication point. Timestamps are stored in UTC, but dashboard plots use Europe/Brussels delivery time. A 24-hour run from 18:00 therefore has hourly delivery timestamps from 18:00 through 17:00; the 17:00 point is the 17:00-18:00 delivery hour.
-            """
-        )
-        timeline = pd.DataFrame(
-            [
-                ("Before 18:00 Brussels", "Open-Meteo collector updates four-point weather forecast archive."),
-                ("18:00 Brussels", "ENTSO-E TP TSO forecasts for the next delivery window should be available."),
-                ("18:02-18:27 Brussels", "ENTSO-E realtime-data collector snapshots TP forecast and realized-value files."),
-                ("18:30+ Brussels", "Dashboard workflow reads the latest ENTSO-E/Open-Meteo archives, runs forecasts, commits forecast CSVs."),
-                ("After realization", "Dashboard fetches realized ENTSO-E actuals for completed delivery hours and updates diagnostics."),
-            ],
-            columns=["Time", "Step"],
-        )
-        st.dataframe(timeline, width="stretch", hide_index=True)
-        actual_status = _actual_status_table(frame)
-        st.markdown("#### Current actual data display")
-        if actual_status.empty:
-            st.info("No realized actual values are currently attached for the selected tasks and zones.")
-        else:
-            st.dataframe(actual_status, width="stretch", hide_index=True)
-        inputs = pd.DataFrame(
-            [
-                ("ENTSO-E realtime-data", "load", "forecast_load + actual_load", "TSO covariate, TSO benchmark, realized load actuals"),
-                ("ENTSO-E realtime-data", "solar", "forecast_solar_generation + actual_solar_generation", "TSO covariate, TSO benchmark, realized solar actuals"),
-                ("ENTSO-E realtime-data", "onshore wind", "forecast_onshore_wind_generation + actual_onshore_wind_generation", "TSO covariate, TSO benchmark, realized onshore wind actuals"),
-                ("ENTSO-E realtime-data", "offshore wind", "forecast_offshore_wind_generation + actual_offshore_wind_generation", "TSO covariate, TSO benchmark, realized offshore wind actuals"),
-                ("Open-Meteo realtime-data", "load", "temperature_2m, relative_humidity_2m, shortwave_radiation at four selected points; degree proxy derived in dashboard", "Optimal load engineering covariates by country/model"),
-                ("Open-Meteo realtime-data", "solar", "shortwave_radiation + temperature_2m at four selected points", "Solar weather covariates"),
-                ("Open-Meteo realtime-data", "onshore/offshore wind", "wind_speed_100m_ms + wind_dir_sin + wind_dir_cos at four selected points", "Wind weather covariates"),
-            ],
-            columns=["Resource", "Task", "Included data", "Dashboard use"],
-        )
-        st.dataframe(inputs, width="stretch", hide_index=True)
 
 
 def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[str]) -> None:
@@ -231,21 +156,50 @@ def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFra
         metric_cols[2].metric("Backfill rows", len(backfills))
         metric_cols[3].metric("Failed backfills", len(failed_backfills))
 
-        issue_cols = ["logged_at", "run_date", "zone", "target", "stage", "message", "status"]
-        st.markdown("#### Recent failures")
-        if issues.empty:
-            st.success("No failures have been logged.")
-        else:
-            recent_issues = issues.sort_values("logged_at", ascending=False).head(30).copy()
-            st.dataframe(recent_issues[[c for c in issue_cols if c in recent_issues.columns]], width="stretch", hide_index=True)
+        issue_history = pd.DataFrame()
+        if not issues.empty:
+            issue_history = issues.rename(
+                columns={
+                    "logged_at": "Recorded at",
+                    "run_date": "Run date",
+                    "zone": "Zone",
+                    "target": "Task",
+                    "stage": "Stage",
+                    "message": "Message",
+                    "status": "Status",
+                }
+            )
+            issue_history["Type"] = "Failure"
+            issue_history["Rows"] = pd.NA
+            issue_history["Seconds"] = pd.NA
+            issue_history["Report"] = pd.NA
 
-        backfill_cols = ["report", "run_date", "rows", "seconds", "status", "message"]
-        st.markdown("#### Backfill reports")
-        if backfills.empty:
-            st.info("No backfill reports have been stored yet.")
-        else:
-            recent_backfills = backfills.sort_values(["report", "run_date"], ascending=[False, False]).head(30).copy()
-            st.dataframe(recent_backfills[[c for c in backfill_cols if c in recent_backfills.columns]], width="stretch", hide_index=True)
+        backfill_history = pd.DataFrame()
+        if not backfills.empty:
+            backfill_history = backfills.rename(
+                columns={
+                    "checked_at": "Recorded at",
+                    "run_date": "Run date",
+                    "rows": "Rows",
+                    "seconds": "Seconds",
+                    "message": "Message",
+                    "status": "Status",
+                    "report": "Report",
+                }
+            )
+            backfill_history["Type"] = "Backfill"
+            backfill_history["Zone"] = pd.NA
+            backfill_history["Task"] = pd.NA
+            backfill_history["Stage"] = "backfill"
+
+        history = pd.concat([issue_history, backfill_history], ignore_index=True)
+        if history.empty:
+            st.success("No failures or backfills have been recorded.")
+            return
+        history["Recorded at"] = pd.to_datetime(history["Recorded at"], utc=True, errors="coerce")
+        history = history.sort_values("Recorded at", ascending=False).head(60)
+        columns = ["Recorded at", "Type", "Run date", "Zone", "Task", "Stage", "Rows", "Seconds", "Status", "Message", "Report"]
+        st.dataframe(history[[column for column in columns if column in history]], width="stretch", hide_index=True)
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
@@ -313,43 +267,65 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         )
 
 
-def render_app() -> None:
-    st.set_page_config(page_title="Transparency++", page_icon="chart_with_upwards_trend", layout="wide")
+def _render_header() -> None:
     _inject_styles()
     st.title("Transparency++")
     st.subheader("Real-Time Load and Renewables Forecasting")
 
+
+def _load_dashboard() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
     data_version = _data_version(store)
     issues, backfills = _load_auxiliary_data(data_version)
     prepared = _prepared_online_forecasts(data_version)
     if "zone" in prepared.columns:
         prepared = prepared[prepared["zone"].isin(zones())].copy()
+    return prepared, issues, backfills
+
+
+def _render_data_warning(prepared: pd.DataFrame) -> None:
+    actual_errors = prepared.attrs.get("actual_fetch_errors", [])
+    artifact_age = prepared.attrs.get("actual_artifact_age_minutes")
+    if actual_errors and not prepared.empty and prepared["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
+        st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
+    elif artifact_age is not None and artifact_age > 60:
+        st.warning(f"ENTSO-E comparison data is delayed: the static actuals snapshot is {artifact_age:.0f} minutes old.")
+
+
+def _render_leaderboard_page(details_page: st.Page) -> None:
+    _render_header()
+    prepared, _, _ = _load_dashboard()
     if prepared.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
+    _render_data_warning(prepared)
+    _render_rmae_landing(prepared)
+    st.page_link(details_page, label="Explore forecast details", icon="📈")
 
-    actual_errors = prepared.attrs.get("actual_fetch_errors", [])
-    filtered = prepared.copy()
-    artifact_age = prepared.attrs.get("actual_artifact_age_minutes")
-    if actual_errors and not filtered.empty and filtered["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
-        st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
-    elif artifact_age is not None and artifact_age > 60:
-        st.warning(
-            f"ENTSO-E comparison data is delayed: the static actuals snapshot is {artifact_age:.0f} minutes old."
-        )
-    _render_rmae_landing(filtered)
+
+def _render_forecast_details_page() -> None:
+    _render_header()
+    prepared, issues, backfills = _load_dashboard()
+    if prepared.empty:
+        st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
+        return
+    _render_data_warning(prepared)
     st.markdown('<div class="task-section-title">Explore forecast details</div>', unsafe_allow_html=True)
-    selected_target = st.selectbox(
-        "Forecast target",
-        TARGET_ORDER,
-        format_func=_target_label,
-        index=0,
-    )
-    available_zones = sorted(filtered.loc[filtered["target"].eq(selected_target), "zone"].dropna().unique())
+    selected_target = st.selectbox("Forecast target", TARGET_ORDER, format_func=_target_label, index=0)
+    available_zones = sorted(prepared.loc[prepared["target"].eq(selected_target), "zone"].dropna().unique())
     _render_task_title(selected_target)
-    _render_target_section(selected_target, filtered, available_zones)
-
-    _render_timeline_and_inputs(filtered)
-
+    _render_target_section(selected_target, prepared, available_zones)
     _render_failure_backfill_history(issues, backfills)
+
+
+def render_app() -> None:
+    st.set_page_config(page_title="Transparency++", page_icon="chart_with_upwards_trend", layout="wide")
+    details_page = st.Page(_render_forecast_details_page, title="Explore forecast details", icon="📈")
+    leaderboard_page = st.Page(
+        lambda: _render_leaderboard_page(details_page),
+        title="Leaderboard",
+        icon="🏆",
+        default=True,
+    )
+    navigation = st.navigation([leaderboard_page, details_page])
+    navigation.run()
