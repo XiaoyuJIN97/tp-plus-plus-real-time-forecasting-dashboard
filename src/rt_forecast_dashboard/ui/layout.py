@@ -11,6 +11,7 @@ from rt_forecast_dashboard.ui.analytics import (
     filter_last_n_days,
     online_forecast_accuracy,
     online_rmae_leaderboard,
+    online_win_rate_by_zone,
     valid_online_forecasts,
 )
 from rt_forecast_dashboard.ui.charts import (
@@ -217,15 +218,6 @@ def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
                 accuracy_summary_chart(accuracy, metric, title=metric, show_legend=idx == 0),
                 width="stretch",
             )
-    display_cols = ["country", "display_family", "display_model", "case", "MAE", "RMSE", "R2", "n"]
-    table = accuracy.sort_values(["country", "family_rank"])
-    st.dataframe(
-        table[[c for c in display_cols if c in table.columns]],
-        width="stretch",
-        hide_index=True,
-    )
-
-
 def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
     st.markdown('<div class="ops-section-title">Failure and backfill history</div>', unsafe_allow_html=True)
     with st.expander("Open / close records", expanded=False):
@@ -258,6 +250,7 @@ def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFra
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
     detail, _ = online_rmae_leaderboard(frame)
+    win_rate_detail = online_win_rate_by_zone(frame)
     st.markdown('<div class="task-section-title">Leaderboard</div>', unsafe_allow_html=True)
     st.caption(
         "rMAE = model MAE / TSO forecast MAE over the same fully realized runs."
@@ -285,21 +278,13 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         .reset_index()
         .rename(columns={"display_family": "Model Family"})
     )
-    comparisons = target_detail[~target_detail["display_family"].eq("TSO forecast")].copy()
+    target_win_rates = win_rate_detail[win_rate_detail["target"].eq(selected_target)].copy()
     win_rate = (
-        comparisons.assign(
-            win_score=comparisons["rMAE"].lt(1.0).astype(float)
-            + 0.5 * comparisons["rMAE"].eq(1.0).astype(float)
-        )
-        .groupby("display_family", as_index=False)
-        .agg(WinScore=("win_score", "sum"), Compared=("zone", "nunique"))
+        target_win_rates.pivot(index="display_family", columns="zone", values="win_rate")
+        .reindex(index=[family for family in family_order if family != "TSO forecast"], columns=zone_order)
+        .reset_index()
         .rename(columns={"display_family": "Model Family"})
     )
-    win_rate["Win rate vs TSO"] = 100 * win_rate["WinScore"] / win_rate["Compared"]
-    win_rate["family_rank"] = win_rate["Model Family"].map(
-        {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
-    )
-    win_rate = win_rate.sort_values("family_rank").drop(columns="family_rank")
 
     rmae_col, wins_col = st.columns([1.55, 1.0])
     with rmae_col:
@@ -313,19 +298,19 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     with wins_col:
         st.markdown("#### Win rate vs TSO")
         st.caption(
-            "Percentage of bidding-zone tasks where the model has lower error than TSO; ties count as half-wins. "
-            "Above 50% means the model is more accurate than TSO on average."
+            "Win rate = lower-error runs + ½ tied runs; above 50% beats TSO on average."
         )
         st.dataframe(
-            win_rate[["Model Family", "Compared", "Win rate vs TSO"]],
+            win_rate,
             width="stretch",
             hide_index=True,
             column_config={
-                "Win rate vs TSO": st.column_config.ProgressColumn(
+                zone: st.column_config.ProgressColumn(
                     format="%.0f%%",
                     min_value=0.0,
                     max_value=100.0,
                 )
+                for zone in zone_order
             },
         )
 

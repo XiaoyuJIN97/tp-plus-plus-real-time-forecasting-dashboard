@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import pandas as pd
 
-from rt_forecast_dashboard.ui.analytics import online_forecast_accuracy, online_rmae_leaderboard
+from rt_forecast_dashboard.ui.analytics import (
+    online_forecast_accuracy,
+    online_rmae_leaderboard,
+    online_win_rate_by_zone,
+)
 from rt_forecast_dashboard.ui.charts import accuracy_summary_chart
 
 
@@ -69,3 +73,37 @@ def test_accuracy_chart_uses_model_family_axis_titles() -> None:
 
     assert figure.layout.xaxis.title.text == "Model Family"
     assert figure.layout.legend.title.text == "Model Family"
+
+
+def test_win_rate_is_reported_per_zone_with_half_credit_for_ties() -> None:
+    rows = []
+    errors = {
+        "BE": [(5.0, 10.0), (10.0, 10.0), (15.0, 10.0)],
+        "DE": [(5.0, 10.0), (5.0, 10.0), (5.0, 10.0)],
+    }
+    for zone, daily_errors in errors.items():
+        for day, (model_error, tso_error) in enumerate(daily_errors, start=1):
+            for model, label, error in [
+                ("timesfm3_online", "TimesFM3 with covariates", model_error),
+                ("tso_reference", "TSO forecast", tso_error),
+            ]:
+                for horizon in range(24):
+                    rows.append(
+                        {
+                            "run_date": f"2026-10-0{day}",
+                            "zone": zone,
+                            "target": "load",
+                            "model": model,
+                            "model_label": label,
+                            "horizon": horizon,
+                            "forecast_mw": 100.0 + error,
+                            "actual_mw": 100.0,
+                        }
+                    )
+
+    result = online_win_rate_by_zone(pd.DataFrame(rows))
+    timesfm = result[result["display_family"].eq("TimesFM3")].set_index("zone")
+
+    assert timesfm.loc["BE", "compared_runs"] == 3
+    assert timesfm.loc["BE", "win_rate"] == 50.0
+    assert timesfm.loc["DE", "win_rate"] == 100.0
