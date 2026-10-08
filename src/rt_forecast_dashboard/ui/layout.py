@@ -264,7 +264,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
 
     rmae_col, wins_col = st.columns([1.55, 1.0])
     with rmae_col:
-        st.markdown("#### rMAE by bidding zone")
+        st.markdown("#### rMAE vs TSO")
         st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
         st.dataframe(
             rmae,
