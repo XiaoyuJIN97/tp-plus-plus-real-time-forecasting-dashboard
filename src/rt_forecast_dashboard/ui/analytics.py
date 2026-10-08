@@ -177,6 +177,18 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
         frame = frame.merge(complete[["run_date", "zone", "target", "model"]], on=["run_date", "zone", "target", "model"], how="inner")
         if frame.empty:
             return pd.DataFrame()
+        paired_parts = []
+        for _, series in frame.groupby(["zone", "target"]):
+            dates_by_model = [
+                set(group["run_date"].astype(str))
+                for _, group in series.groupby("model_label")
+            ]
+            common_dates = set.intersection(*dates_by_model) if dates_by_model else set()
+            if common_dates:
+                paired_parts.append(series[series["run_date"].astype(str).isin(common_dates)])
+        if not paired_parts:
+            return pd.DataFrame()
+        frame = pd.concat(paired_parts, ignore_index=True)
     rows = []
     group_cols = ["zone", "model_label", "covariate_case"]
     for (country, model_label, case), group in frame.groupby(group_cols, dropna=False):
@@ -468,7 +480,7 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame["run_date"] = frame["run_date"].astype(str)
     frame = frame[frame["run_date"].le(latest_complete_run_date().isoformat())].copy()
     if "source" in frame.columns:
-        frame = frame[frame["source"].eq("online")].copy()
+        frame = frame[frame["source"].isin({"online", "historical_mock_ensemble"})].copy()
     frame["context_hours"] = pd.to_numeric(frame.get("context_hours", 0), errors="coerce").fillna(0).astype(int)
     if "context_end" in frame.columns:
         frame["context_end"] = pd.to_datetime(frame["context_end"], utc=True, errors="coerce")
