@@ -115,6 +115,7 @@ def build_selected_ensembles(
     *,
     actuals_path: Path,
     run_dates: list[str],
+    source: str = "online",
 ) -> pd.DataFrame:
     config = load_yaml("ensemble_registry.yml")
     settings = config["settings"]
@@ -209,7 +210,7 @@ def build_selected_ensembles(
                     {
                         "run_date": run_date,
                         "run_at": generated_at,
-                        "source": "online",
+                        "source": source,
                         "zone": zone,
                         "target": target,
                         "model": ENSEMBLE_MODEL_KEY,
@@ -241,6 +242,7 @@ def main() -> None:
     parser.add_argument("--date", action="append", default=[])
     parser.add_argument("--end")
     parser.add_argument("--recent-days", type=int, default=1)
+    parser.add_argument("--source", default="online")
     args = parser.parse_args()
     if args.date:
         run_dates = args.date
@@ -250,7 +252,12 @@ def main() -> None:
         run_dates = [day.date().isoformat() for day in pd.date_range(start, end, freq="D")]
     else:
         raise SystemExit("Provide --date or --end.")
-    result = build_selected_ensembles(ForecastStore(), actuals_path=args.actuals, run_dates=run_dates)
+    result = build_selected_ensembles(
+        ForecastStore(),
+        actuals_path=args.actuals,
+        run_dates=run_dates,
+        source=args.source,
+    )
     print(f"Wrote {len(result)} selected ensemble rows.")
 
 

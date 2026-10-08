@@ -98,8 +98,14 @@ def test_simple_mean_selected_configuration(tmp_path) -> None:
         }
     ).to_parquet(actuals_path, index=False)
 
-    result = build_selected_ensembles(store, actuals_path=actuals_path, run_dates=[run_date])
+    result = build_selected_ensembles(
+        store,
+        actuals_path=actuals_path,
+        run_dates=[run_date],
+        source="historical_mock_ensemble",
+    )
 
     assert len(result) == 24
     assert result["model_label"].unique().tolist() == ["Ensembled model"]
+    assert result["source"].unique().tolist() == ["historical_mock_ensemble"]
     np.testing.assert_allclose(result["forecast_mw"], actual + (10.0 - 5.0 + 2.0) / 3.0)

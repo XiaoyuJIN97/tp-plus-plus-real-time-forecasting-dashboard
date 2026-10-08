@@ -31,6 +31,35 @@ def test_selected_ensemble_accuracy_combines_daily_weight_metadata() -> None:
     assert result.loc[0, "MAE"] == 2.0
 
 
+def test_online_accuracy_uses_dates_shared_by_every_model() -> None:
+    rows = []
+    for run_date, model, label, error in [
+        ("2026-10-01", "ensemble_selected", "Ensembled model", 1.0),
+        ("2026-10-01", "timesfm3_online", "TimesFM3", 2.0),
+        ("2026-10-02", "timesfm3_online", "TimesFM3", 100.0),
+    ]:
+        for horizon in range(24):
+            rows.append(
+                {
+                    "run_date": run_date,
+                    "zone": "BE",
+                    "target": "load",
+                    "model": model,
+                    "model_label": label,
+                    "covariate_case": "test",
+                    "horizon": horizon,
+                    "forecast_mw": 100.0 + error,
+                    "actual_mw": 100.0,
+                }
+            )
+
+    result = online_forecast_accuracy(pd.DataFrame(rows)).set_index("display_family")
+
+    assert result.loc["Ensembled model", "n"] == 24
+    assert result.loc["TimesFM3", "n"] == 24
+    assert result.loc["TimesFM3", "MAE"] == 2.0
+
+
 def test_rmae_leaderboard_uses_paired_complete_runs() -> None:
     rows = []
     for model, label, error in [
