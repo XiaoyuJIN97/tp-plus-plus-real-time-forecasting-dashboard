@@ -252,9 +252,6 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     detail, _ = online_rmae_leaderboard(frame)
     win_rate_detail = online_win_rate_by_zone(frame)
     st.markdown('<div class="task-section-title">Leaderboard</div>', unsafe_allow_html=True)
-    st.caption(
-        "rMAE = model MAE / TSO forecast MAE over the same fully realized runs."
-    )
     if detail.empty:
         st.info("The leaderboard will appear after complete realized runs are available for every compared model.")
         return
@@ -289,6 +286,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     rmae_col, wins_col = st.columns([1.55, 1.0])
     with rmae_col:
         st.markdown("#### rMAE by bidding zone")
+        st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
         st.dataframe(
             rmae,
             width="stretch",
