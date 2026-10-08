@@ -9,17 +9,15 @@ from rt_forecast_dashboard.config import features, zones
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
+    MODEL_FAMILY_ORDER,
     filter_last_n_days,
     online_forecast_accuracy,
     online_rmae_leaderboard,
-    summarize_rmae,
     valid_online_forecasts,
 )
 from rt_forecast_dashboard.ui.charts import (
     accuracy_summary_chart,
     deterministic_forecast_chart,
-    rmae_heatmap_chart,
-    rmae_leaderboard_chart,
     scatter_diagnostics_chart,
 )
 
@@ -297,118 +295,78 @@ def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFra
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
-    detail, leaderboard = online_rmae_leaderboard(frame)
-    st.markdown('<div class="task-section-title">rMAE leaderboard</div>', unsafe_allow_html=True)
+    detail, _ = online_rmae_leaderboard(frame)
+    st.markdown('<div class="task-section-title">Leaderboard</div>', unsafe_allow_html=True)
     st.caption(
-        "Relative MAE (rMAE) compares each model with the TSO forecast on the same fully realized runs. "
-        "Values below 1.00 outperform TSO. Each forecasting series contributes equally to the mean."
+        "For each bidding zone, rMAE is the model's MAE divided by the TSO forecast's MAE over the same "
+        "fully realized runs. A value below 1.00 means the model is more accurate than the TSO forecast."
     )
-    if detail.empty or leaderboard.empty:
+    if detail.empty:
         st.info("The leaderboard will appear after complete realized runs are available for every compared model.")
         return
-    total_series = detail["series"].nunique()
-    full_coverage = leaderboard[leaderboard["series_covered"].eq(total_series)].copy()
-    full_coverage["rank"] = full_coverage["mean_rMAE"].rank(method="min").astype(int)
-    full_coverage = full_coverage.sort_values(["rank", "family_rank"]).reset_index(drop=True)
-    if full_coverage.empty:
-        st.info("No model family currently covers every available forecasting series.")
-        return
-    st.markdown("#### Overall full-coverage leaderboard")
-    st.caption(
-        f"Only model families evaluated on all {total_series} available zone-target series are included in this ranking."
-    )
-    leader = full_coverage.iloc[0]
-    cards = st.columns(4)
-    cards[0].metric("Current leader", leader["display_family"])
-    cards[1].metric("Mean rMAE", f"{leader['mean_rMAE']:.3f}")
-    cards[2].metric("Series beating TSO", f"{int(leader['series_beating_tso'])} / {int(leader['series_covered'])}")
-    cards[3].metric("Common test runs", f"{int(detail['test_runs'].min())}–{int(detail['test_runs'].max())}")
-    chart_col, table_col = st.columns([1.35, 1.0])
-    with chart_col:
-        st.plotly_chart(rmae_leaderboard_chart(full_coverage), width="stretch")
-    with table_col:
-        table = full_coverage.rename(
-            columns={
-                "rank": "Rank",
-                "display_family": "Model Family",
-                "mean_rMAE": "Mean rMAE",
-                "median_rMAE": "Median rMAE",
-                "series_beating_tso": "Series beating TSO",
-                "series_covered": "Series covered",
-            }
-        )
-        st.dataframe(
-            table[["Rank", "Model Family", "Mean rMAE", "Median rMAE", "Series beating TSO", "Series covered"]],
-            width="stretch",
-            hide_index=True,
-            column_config={"Mean rMAE": st.column_config.NumberColumn(format="%.3f"), "Median rMAE": st.column_config.NumberColumn(format="%.3f")},
-        )
-
-    st.markdown("#### Target-specific leaderboard")
-    controls = st.columns([1.0, 2.0])
-    target_options = ["all", *TARGET_ORDER]
-    selected_target = controls[0].selectbox(
-        "Leaderboard target",
-        target_options,
-        index=1,
-        format_func=lambda value: "All targets" if value == "all" else _target_label(value),
+    selected_target = st.selectbox(
+        "Forecast task",
+        TARGET_ORDER,
+        index=0,
+        format_func=_target_label,
         key="leaderboard_target",
     )
-    target_detail = detail if selected_target == "all" else detail[detail["target"].eq(selected_target)].copy()
-    available_zones = sorted(target_detail["zone"].unique())
-    selected_zones = controls[1].multiselect(
-        "Leaderboard bidding zones",
-        available_zones,
-        default=available_zones,
-        key="leaderboard_zones",
-    )
-    target_detail = target_detail[target_detail["zone"].isin(selected_zones)].copy()
+    target_detail = detail[detail["target"].eq(selected_target)].copy()
     if target_detail.empty:
-        st.info("Select at least one bidding zone to display the target-specific leaderboard.")
+        st.info("No complete comparisons are available for this forecasting task yet.")
         return
-    target_leaderboard = summarize_rmae(target_detail)
-    target_total = target_detail["series"].nunique()
-    target_leaderboard["coverage"] = (
-        target_leaderboard["series_covered"].astype(str) + " / " + str(target_total)
+
+    family_order = [family for family in MODEL_FAMILY_ORDER if family in set(target_detail["display_family"])]
+    zone_order = sorted(target_detail["zone"].unique())
+    rmae = (
+        target_detail.pivot(index="display_family", columns="zone", values="rMAE")
+        .reindex(index=family_order, columns=zone_order)
+        .reset_index()
+        .rename(columns={"display_family": "Model Family"})
     )
-    target_chart, target_table = st.columns([1.35, 1.0])
-    with target_chart:
-        st.plotly_chart(rmae_leaderboard_chart(target_leaderboard), width="stretch")
-    with target_table:
-        display = target_leaderboard.rename(
-            columns={
-                "rank": "Rank",
-                "display_family": "Model Family",
-                "mean_rMAE": "Mean rMAE",
-                "median_rMAE": "Median rMAE",
-                "series_beating_tso": "Series beating TSO",
-                "coverage": "Coverage",
-            }
-        )
+    comparisons = target_detail[~target_detail["display_family"].eq("TSO forecast")].copy()
+    win_rate = (
+        comparisons.assign(beat_tso=comparisons["rMAE"].lt(1.0))
+        .groupby("display_family", as_index=False)
+        .agg(Wins=("beat_tso", "sum"), Compared=("zone", "nunique"))
+        .rename(columns={"display_family": "Model Family"})
+    )
+    win_rate["Win rate vs TSO"] = 100 * win_rate["Wins"] / win_rate["Compared"]
+    win_rate["family_rank"] = win_rate["Model Family"].map(
+        {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
+    )
+    win_rate = win_rate.sort_values("family_rank").drop(columns="family_rank")
+
+    rmae_col, wins_col = st.columns([1.55, 1.0])
+    with rmae_col:
+        st.markdown("#### rMAE by bidding zone")
         st.dataframe(
-            display[["Rank", "Model Family", "Mean rMAE", "Median rMAE", "Series beating TSO", "Coverage"]],
+            rmae,
             width="stretch",
             hide_index=True,
-            column_config={"Mean rMAE": st.column_config.NumberColumn(format="%.3f"), "Median rMAE": st.column_config.NumberColumn(format="%.3f")},
+            column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
         )
-    if selected_target == "all":
-        tabs = st.tabs([_target_label(target) for target in TARGET_ORDER])
-        for tab, target in zip(tabs, TARGET_ORDER):
-            with tab:
-                target_heatmap = target_detail[target_detail["target"].eq(target)]
-                if target_heatmap.empty:
-                    st.info(f"No complete {_target_label(target).lower()} comparisons are available.")
-                else:
-                    st.plotly_chart(rmae_heatmap_chart(target_heatmap), width="stretch")
-    else:
-        st.plotly_chart(rmae_heatmap_chart(target_detail), width="stretch")
+    with wins_col:
+        st.markdown("#### Win rate vs TSO")
+        st.dataframe(
+            win_rate[["Model Family", "Wins", "Compared", "Win rate vs TSO"]],
+            width="stretch",
+            hide_index=True,
+            column_config={
+                "Win rate vs TSO": st.column_config.ProgressColumn(
+                    format="%.0f%%",
+                    min_value=0.0,
+                    max_value=100.0,
+                )
+            },
+        )
 
 
 def render_app() -> None:
-    st.set_page_config(page_title="Real-Time Energy Forecasting", page_icon="chart_with_upwards_trend", layout="wide")
+    st.set_page_config(page_title="Transparency++", page_icon="chart_with_upwards_trend", layout="wide")
     _inject_styles()
-    st.title("Real-Time Load and Renewables Forecasting")
-    st.caption("Daily 18:00 Europe/Brussels forecasts with latest 3-month context, selected 4-point weather covariates, and TSO forecast inputs.")
+    st.title("Transparency++")
+    st.subheader("Real-Time Load and Renewables Forecasting")
 
     store = ForecastStore()
     data_version = _data_version(store)
@@ -422,19 +380,7 @@ def render_app() -> None:
 
     actual_errors = prepared.attrs.get("actual_fetch_errors", [])
     filtered = prepared.copy()
-    latest_run = filtered["run_date"].max() if not filtered.empty else None
-
-    latest_actual = filtered.loc[filtered["actual_mw"].notna(), "timestamp"].max() if "actual_mw" in filtered else None
     artifact_age = prepared.attrs.get("actual_artifact_age_minutes")
-    metric_cols = st.columns(5)
-    metric_cols[0].metric("Latest run", latest_run or "n/a")
-    metric_cols[1].metric("Forecast rows", f"{len(filtered):,}")
-    metric_cols[2].metric("Zones", filtered["zone"].nunique() if not filtered.empty else 0)
-    metric_cols[3].metric("Comparison through", _format_brussels_timestamp(latest_actual))
-    metric_cols[4].metric(
-        "Actual snapshot age",
-        f"{artifact_age:.0f} min" if artifact_age is not None else "n/a",
-    )
     if actual_errors and not filtered.empty and filtered["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
         st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
     elif artifact_age is not None and artifact_age > 60:
