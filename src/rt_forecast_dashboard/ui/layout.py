@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import hashlib
-
 import pandas as pd
 import streamlit as st
 
@@ -18,7 +16,6 @@ from rt_forecast_dashboard.ui.analytics import (
 from rt_forecast_dashboard.ui.charts import (
     accuracy_summary_chart,
     deterministic_forecast_chart,
-    scatter_diagnostics_chart,
 )
 
 
@@ -169,22 +166,14 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
 
     view = st.radio(
         "View",
-        ["Deterministic forecast analysis", "Scatter diagnostics", "Model accuracy summary"],
+        ["Deterministic forecast analysis", "Model accuracy summary"],
         horizontal=True,
         key=f"{target}_view",
     )
-    control_cols = st.columns([1.0, 1.4, 1.0])
+    control_cols = st.columns([1.0, 1.0])
     selected_zone = control_cols[0].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
-    model_options = sorted(current.loc[current["zone"].eq(selected_zone), "model_label"].dropna().unique())
-    model_signature = hashlib.md5("|".join(model_options).encode("utf-8")).hexdigest()[:8]
-    selected_models = control_cols[1].multiselect(
-        "Model family",
-        model_options,
-        default=model_options,
-        key=f"{target}_{selected_zone}_online_models_{model_signature}",
-    )
     available_run_days = max(1, current["run_date"].nunique())
-    last_n_days = control_cols[2].slider(
+    last_n_days = control_cols[1].slider(
         "Plot last N days",
         1,
         60,
@@ -192,27 +181,12 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         key=f"{target}_online_last_n",
     )
 
-    if not selected_models:
-        st.warning("Select at least one model.")
-        return
-
-    current = current[current["model_label"].isin(selected_models) & current["zone"].eq(selected_zone)].copy()
+    current = current[current["zone"].eq(selected_zone)].copy()
     current = filter_last_n_days(current, last_n_days)
     if current.empty:
-        st.warning("No forecast rows match the selected models and time window.")
+        st.warning("No forecast rows match the selected zone and time window.")
         return
 
-    meta_cols = st.columns(5)
-    meta_cols[0].metric("Latest run", current["run_date"].max())
-    latest_primary = current.copy()
-    if not latest_primary.empty:
-        latest_primary = latest_primary[latest_primary["run_date"].eq(latest_primary["run_date"].max())]
-    horizon = latest_primary["horizon"].nunique() if not latest_primary.empty else current["horizon"].nunique()
-    meta_cols[1].metric("Day-ahead horizon", f"{int(horizon)} hours")
-    meta_cols[2].metric("Context", f"{int(current['context_hours'].max()):,} hours")
-    latest_actual = current.loc[current["actual_mw"].notna(), "timestamp"].max() if "actual_mw" in current else None
-    meta_cols[3].metric("Actual through", _format_brussels_timestamp(latest_actual))
-    meta_cols[4].metric("Models", current["model_label"].nunique())
     if actual_errors and current["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
         st.warning("Actual line unavailable: " + "; ".join(actual_errors[:3]))
 
@@ -221,8 +195,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
             deterministic_forecast_chart(current, f"{_target_label(target)} deterministic forecast analysis"),
             width="stretch",
         )
-    elif view == "Scatter diagnostics":
-        _render_scatter_diagnostics(target, current)
     elif view == "Model accuracy summary":
         _render_accuracy_section(target, current)
 
@@ -252,16 +224,6 @@ def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
         width="stretch",
         hide_index=True,
     )
-
-
-def _render_scatter_diagnostics(target: str, forecasts: pd.DataFrame) -> None:
-    st.subheader("Scatter diagnostics")
-    current = forecasts.dropna(subset=["actual_mw", "forecast_mw"]).copy()
-    if current.empty:
-        st.info("No realized actual values are attached to this target in the selected window yet.")
-        return
-
-    st.plotly_chart(scatter_diagnostics_chart(current, f"{_target_label(target)} actual vs forecast scatter"), width="stretch")
 
 
 def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
@@ -298,8 +260,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     detail, _ = online_rmae_leaderboard(frame)
     st.markdown('<div class="task-section-title">Leaderboard</div>', unsafe_allow_html=True)
     st.caption(
-        "For each bidding zone, rMAE is the model's MAE divided by the TSO forecast's MAE over the same "
-        "fully realized runs. A value below 1.00 means the model is more accurate than the TSO forecast."
+        "rMAE = model MAE / TSO forecast MAE over the same fully realized runs."
     )
     if detail.empty:
         st.info("The leaderboard will appear after complete realized runs are available for every compared model.")
@@ -326,12 +287,15 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     )
     comparisons = target_detail[~target_detail["display_family"].eq("TSO forecast")].copy()
     win_rate = (
-        comparisons.assign(beat_tso=comparisons["rMAE"].lt(1.0))
+        comparisons.assign(
+            win_score=comparisons["rMAE"].lt(1.0).astype(float)
+            + 0.5 * comparisons["rMAE"].eq(1.0).astype(float)
+        )
         .groupby("display_family", as_index=False)
-        .agg(Wins=("beat_tso", "sum"), Compared=("zone", "nunique"))
+        .agg(WinScore=("win_score", "sum"), Compared=("zone", "nunique"))
         .rename(columns={"display_family": "Model Family"})
     )
-    win_rate["Win rate vs TSO"] = 100 * win_rate["Wins"] / win_rate["Compared"]
+    win_rate["Win rate vs TSO"] = 100 * win_rate["WinScore"] / win_rate["Compared"]
     win_rate["family_rank"] = win_rate["Model Family"].map(
         {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
     )
@@ -348,8 +312,12 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         )
     with wins_col:
         st.markdown("#### Win rate vs TSO")
+        st.caption(
+            "Percentage of bidding-zone tasks where the model has lower error than TSO; ties count as half-wins. "
+            "Above 50% means the model is more accurate than TSO on average."
+        )
         st.dataframe(
-            win_rate[["Model Family", "Wins", "Compared", "Win rate vs TSO"]],
+            win_rate[["Model Family", "Compared", "Win rate vs TSO"]],
             width="stretch",
             hide_index=True,
             column_config={
