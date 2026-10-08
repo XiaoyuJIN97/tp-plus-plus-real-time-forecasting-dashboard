@@ -48,20 +48,20 @@ def _inject_styles() -> None:
             align-items: center;
             gap: 0.45rem;
             margin-top: 1rem;
-            padding: 0.7rem 1rem;
-            border: 1px solid #1d4ed8;
-            border-radius: 0.65rem;
-            background: #2563eb;
-            color: #ffffff;
+            padding: 0.2rem 0;
+            border: 0;
+            background: transparent;
+            color: #2563eb;
+            font-size: 1.3rem;
             font-weight: 700;
             text-decoration: none;
-            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
-            transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+            box-shadow: none;
+            transition: color 120ms ease, transform 120ms ease;
         }
         div[data-testid="stPageLink"] a:hover {
-            border-color: #1e40af;
-            background: #1d4ed8;
-            color: #ffffff;
+            background: transparent;
+            color: #1e40af;
+            text-decoration: underline;
             transform: translateX(2px);
         }
         div[data-testid="stPageLink"] a p {
