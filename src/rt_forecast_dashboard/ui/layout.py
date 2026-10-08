@@ -281,7 +281,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     with wins_col:
         st.markdown("#### Win rate vs TSO")
         st.caption(
-            "Share of matched daily runs where the model has lower MAE than TSO; ties receive half credit. Above 50% means the model wins more often than TSO."
+            "Win rate: Percentage of tasks where Model 1 achieves lower error than Model 2 (ties count as half-wins). A value above 50% means Model 1 is more accurate than Model 2 on average."
         )
         st.dataframe(
             win_rate,
