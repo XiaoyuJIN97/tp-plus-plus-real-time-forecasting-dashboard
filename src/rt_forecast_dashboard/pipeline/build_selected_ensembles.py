@@ -20,6 +20,9 @@ MODEL_COLUMNS = {
     "timesfm3_online": "TimesFM3",
     "tso_reference": "TSO",
 }
+OFFLINE_WEIGHTS_PATH = Path("docs/new_zone_ensemble_weights.csv")
+
+
 def _component_columns(target: str, include_tso: bool) -> list[str]:
     ml_model = "ridge_3mo_context" if target == "load" else "xgboost_online"
     columns = ["chronos2_online", ml_model, "timesfm3_online"]
@@ -110,18 +113,49 @@ def _band_for_horizon(horizon: int, bands: list[list[int]]) -> int:
     raise ValueError(f"Horizon {horizon} is not covered by the configured bands.")
 
 
+def _offline_fallback_weights(
+    weights: pd.DataFrame,
+    *,
+    zone: str,
+    target: str,
+    band: list[int],
+    components: list[str],
+    include_tso: bool,
+) -> np.ndarray | None:
+    if weights.empty:
+        return None
+    band_label = f"{band[0]:02d}-{band[1]:02d}"
+    component_set = "With TSO" if include_tso else "Without TSO"
+    selected = weights[
+        weights["zone"].eq(zone)
+        & weights["target"].eq(target)
+        & weights["horizon_band"].astype(str).eq(band_label)
+        & weights["component_set"].eq(component_set)
+    ]
+    by_model = selected.set_index("model")["mean_weight"] if not selected.empty else pd.Series(dtype=float)
+    labels = [MODEL_COLUMNS[component] for component in components]
+    if not set(labels).issubset(by_model.index):
+        return None
+    result = by_model.reindex(labels).to_numpy(float)
+    if not np.all(np.isfinite(result)) or result.sum() <= 0:
+        return None
+    return result / result.sum()
+
+
 def build_selected_ensembles(
     store: ForecastStore,
     *,
     actuals_path: Path,
     run_dates: list[str],
     source: str = "online",
+    offline_weights_path: Path = OFFLINE_WEIGHTS_PATH,
 ) -> pd.DataFrame:
     config = load_yaml("ensemble_registry.yml")
     settings = config["settings"]
     selections = config["selections"]
     forecasts = store.read_forecasts()
     actuals = _load_actuals(actuals_path)
+    offline_weights = pd.read_csv(offline_weights_path) if offline_weights_path.exists() else pd.DataFrame()
     panel = _forecast_panel(forecasts, actuals)
     outputs: list[pd.DataFrame] = []
     generated_at = datetime.now(UTC).isoformat(timespec="seconds")
@@ -146,6 +180,7 @@ def build_selected_ensembles(
 
                 values = current[components].to_numpy(float)
                 weights_by_band: dict[int, np.ndarray] = {}
+                weight_source = method
                 if method == "simple_mean":
                     ensemble = values.mean(axis=1)
                 elif method == "median":
@@ -166,28 +201,49 @@ def build_selected_ensembles(
                         prepared_runs.append(prepared)
                     window = int(settings["training_window_runs"])
                     minimum = int(settings["minimum_training_runs"])
-                    if len(prepared_runs) < minimum:
-                        print(
-                            f"Skip ensemble {run_date} {zone} {target}: "
-                            f"{len(prepared_runs)} complete training runs, need {minimum}."
-                        )
-                        continue
-                    training = pd.concat(prepared_runs[-window:], ignore_index=True)
                     bands = settings["horizon_bands"]
-                    training["horizon_band"] = training["horizon"].map(lambda value: _band_for_horizon(value, bands))
                     current["horizon_band"] = current["horizon"].map(lambda value: _band_for_horizon(value, bands))
-                    ensemble = np.zeros(24, dtype=float)
-                    for band_index, band_rows in current.groupby("horizon_band"):
-                        band_training = training[training["horizon_band"].eq(band_index)]
-                        weights = _fit_weights(
-                            band_training[components].to_numpy(float),
-                            band_training["actual_mw"].to_numpy(float),
-                            regularization=float(settings["regularization"]),
-                            maximum_weight=float(settings["maximum_component_weight"]),
-                        )
-                        positions = current.index.get_indexer(band_rows.index)
-                        ensemble[positions] = band_rows[components].to_numpy(float) @ weights
-                        weights_by_band[int(band_index)] = weights
+                    if len(prepared_runs) < minimum:
+                        fallback_by_band = {
+                            band_index: _offline_fallback_weights(
+                                offline_weights,
+                                zone=zone,
+                                target=target,
+                                band=band,
+                                components=components,
+                                include_tso=include_tso,
+                            )
+                            for band_index, band in enumerate(bands)
+                        }
+                        if any(value is None for value in fallback_by_band.values()):
+                            print(
+                                f"Skip ensemble {run_date} {zone} {target}: "
+                                f"{len(prepared_runs)} complete training runs, need {minimum}, and no complete fallback weights."
+                            )
+                            continue
+                        weight_source = "offline_weight_fallback"
+                        ensemble = np.zeros(24, dtype=float)
+                        for band_index, band_rows in current.groupby("horizon_band"):
+                            weights = fallback_by_band[int(band_index)]
+                            positions = current.index.get_indexer(band_rows.index)
+                            ensemble[positions] = band_rows[components].to_numpy(float) @ weights
+                            weights_by_band[int(band_index)] = weights
+                    else:
+                        weight_source = "rolling_prior_actuals"
+                        training = pd.concat(prepared_runs[-window:], ignore_index=True)
+                        training["horizon_band"] = training["horizon"].map(lambda value: _band_for_horizon(value, bands))
+                        ensemble = np.zeros(24, dtype=float)
+                        for band_index, band_rows in current.groupby("horizon_band"):
+                            band_training = training[training["horizon_band"].eq(band_index)]
+                            weights = _fit_weights(
+                                band_training[components].to_numpy(float),
+                                band_training["actual_mw"].to_numpy(float),
+                                regularization=float(settings["regularization"]),
+                                maximum_weight=float(settings["maximum_component_weight"]),
+                            )
+                            positions = current.index.get_indexer(band_rows.index)
+                            ensemble[positions] = band_rows[components].to_numpy(float) @ weights
+                            weights_by_band[int(band_index)] = weights
                 else:
                     raise ValueError(f"Unknown ensemble method: {method}")
 
@@ -215,7 +271,7 @@ def build_selected_ensembles(
                         "target": target,
                         "model": ENSEMBLE_MODEL_KEY,
                         "model_label": "Ensembled model",
-                        "covariate_case": f"offline_selected:{'+'.join(component_labels)}",
+                        "covariate_case": f"{weight_source}:{'+'.join(component_labels)}",
                         "ensemble_weights": weight_note,
                         "context_hours": int(reference["context_hours"].max()),
                         "timestamp": current["timestamp"].to_numpy(),

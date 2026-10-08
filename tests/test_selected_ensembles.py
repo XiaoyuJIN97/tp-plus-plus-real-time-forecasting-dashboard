@@ -109,3 +109,26 @@ def test_simple_mean_selected_configuration(tmp_path) -> None:
     assert result["model_label"].unique().tolist() == ["Ensembled model"]
     assert result["source"].unique().tolist() == ["historical_mock_ensemble"]
     np.testing.assert_allclose(result["forecast_mw"], actual + (10.0 - 5.0 + 2.0) / 3.0)
+
+
+def test_constrained_ensemble_uses_offline_weights_before_training_minimum(tmp_path) -> None:
+    store = ForecastStore(data_dir=tmp_path / "forecast-data")
+    run_date = "2026-10-02"
+    actual = np.linspace(100.0, 200.0, 24)
+    store.append_forecasts(_component_rows(run_date, "DK2", "load", actual), run_date)
+    timestamps = pd.date_range(f"{run_date}T00:00:00Z", periods=24, freq="h")
+    actuals_path = tmp_path / "actuals.parquet"
+    pd.DataFrame(
+        {
+            "timestamp_utc": timestamps,
+            "zone": "DK2",
+            "target": "load",
+            "actual_mw": actual,
+        }
+    ).to_parquet(actuals_path, index=False)
+
+    result = build_selected_ensembles(store, actuals_path=actuals_path, run_dates=[run_date])
+
+    assert len(result) == 24
+    assert result["covariate_case"].str.startswith("offline_weight_fallback:").all()
+    assert result["ensemble_weights"].str.len().gt(0).all()
