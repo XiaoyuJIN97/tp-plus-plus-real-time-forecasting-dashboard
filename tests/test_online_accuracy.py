@@ -7,7 +7,7 @@ from rt_forecast_dashboard.ui.analytics import (
     online_rmae_leaderboard,
     online_win_rate_by_zone,
 )
-from rt_forecast_dashboard.ui.charts import accuracy_summary_chart
+from rt_forecast_dashboard.ui.charts import accuracy_summary_chart, deterministic_forecast_chart
 
 
 def test_selected_ensemble_accuracy_combines_daily_weight_metadata() -> None:
@@ -102,6 +102,25 @@ def test_accuracy_chart_uses_model_family_axis_titles() -> None:
 
     assert figure.layout.xaxis.title.text == "Model Family"
     assert figure.layout.legend.title.text == "Model Family"
+
+
+def test_forecast_chart_uses_market_timezone_label_and_reserves_footer_space() -> None:
+    frame = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(["2026-09-26T00:00:00Z", "2026-09-26T01:00:00Z"]),
+            "run_date": ["2026-09-25", "2026-09-25"],
+            "zone": ["BE", "BE"],
+            "model_label": ["TimesFM3", "TimesFM3"],
+            "forecast_mw": [100.0, 110.0],
+        }
+    )
+
+    figure = deterministic_forecast_chart(frame, "Load forecast")
+
+    assert figure.layout.xaxis.title.text == "Delivery time (CET/CEST)"
+    assert figure.layout.height >= 500
+    assert figure.layout.margin.b >= 150
+    assert figure.layout.xaxis.automargin is True
 
 
 def test_win_rate_is_reported_per_zone_with_half_credit_for_ties() -> None:

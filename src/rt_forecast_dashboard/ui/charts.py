@@ -40,16 +40,25 @@ def forecast_line_chart(frame: pd.DataFrame) -> go.Figure:
         line_dash="target",
         line_group="line_id",
         facet_row="target",
-        labels={"forecast_mw": "Forecast (MW)", "delivery_time_brussels": "Delivery time (Europe/Brussels)", "model_label": "Model"},
+        labels={"forecast_mw": "Forecast (MW)", "delivery_time_brussels": "Delivery time (CET/CEST)", "model_label": "Model"},
         height=680,
     )
     fig.update_layout(
-        margin=dict(l=20, r=20, t=40, b=105),
-        legend=dict(orientation="h", yanchor="top", y=-0.16, xanchor="center", x=0.5),
+        margin=dict(l=20, r=20, t=40, b=155),
+        legend=dict(orientation="h", yanchor="top", y=-0.20, xanchor="center", x=0.5),
         hovermode="x unified",
     )
     fig.update_yaxes(matches=None)
-    fig.update_xaxes(showspikes=True, spikemode="across", spikesnap="cursor", spikedash="dash", spikecolor="#111827", spikethickness=1)
+    fig.update_xaxes(
+        showspikes=True,
+        spikemode="across",
+        spikesnap="cursor",
+        spikedash="dash",
+        spikecolor="#111827",
+        spikethickness=1,
+        automargin=True,
+        title_standoff=18,
+    )
     fig.update_traces(connectgaps=False)
     return fig
 
@@ -95,17 +104,26 @@ def deterministic_forecast_chart(frame: pd.DataFrame, title: str) -> go.Figure:
         color="series",
         line_group="line_id",
         facet_row="zone",
-        labels={"value": "MW", "delivery_time_brussels": "Delivery time (Europe/Brussels)", "series": "Model"},
+        labels={"value": "MW", "delivery_time_brussels": "Delivery time (CET/CEST)", "series": "Model"},
         title=title,
-        height=max(420, 260 * max(1, plot_long["zone"].nunique())),
+        height=max(500, 280 * max(1, plot_long["zone"].nunique())),
     )
     fig.update_yaxes(matches=None)
     fig.update_layout(
-        margin=dict(l=20, r=20, t=60, b=115),
-        legend=dict(orientation="h", yanchor="top", y=-0.14, xanchor="center", x=0.5),
+        margin=dict(l=20, r=20, t=60, b=165),
+        legend=dict(orientation="h", yanchor="top", y=-0.20, xanchor="center", x=0.5),
         hovermode="x unified",
     )
-    fig.update_xaxes(showspikes=True, spikemode="across", spikesnap="cursor", spikedash="dash", spikecolor="#111827", spikethickness=1)
+    fig.update_xaxes(
+        showspikes=True,
+        spikemode="across",
+        spikesnap="cursor",
+        spikedash="dash",
+        spikecolor="#111827",
+        spikethickness=1,
+        automargin=True,
+        title_standoff=18,
+    )
     fig.update_traces(connectgaps=False)
     return fig
 
