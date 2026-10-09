@@ -1,6 +1,6 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-09T21:50:16+00:00,2026-10-05,0,0.034,skipped_complete,complete 108 groups x 24 hours
-2026-10-09T21:50:16+00:00,2026-10-06,0,0.031,skipped_complete,complete 108 groups x 24 hours
-2026-10-09T22:00:34+00:00,2026-10-07,1872,617.39,incomplete,"incomplete groups: DK1/load/chronos2_online=0, DK1/load/persistence=0, DK1/load/ridge_3mo_context=0, DK1/load/tso_reference=0, DK1/solar/chronos2_online=0, DK1/solar/persistence=0, DK1/solar/tso_reference=0, DK1/solar/xgboost_online=0"
-2026-10-09T22:09:17+00:00,2026-10-08,1920,523.681,incomplete,"incomplete groups: DK1/load/chronos2_online=0, DK1/load/persistence=0, DK1/load/ridge_3mo_context=0, DK1/load/tso_reference=0, DK1/solar/chronos2_online=0, DK1/solar/persistence=0, DK1/solar/tso_reference=0, DK1/solar/xgboost_online=0"
-2026-10-09T22:18:01+00:00,2026-10-09,1920,523.203,incomplete,"incomplete groups: DK1/load/chronos2_online=0, DK1/load/persistence=0, DK1/load/ridge_3mo_context=0, DK1/load/tso_reference=0, DK1/solar/chronos2_online=0, DK1/solar/persistence=0, DK1/solar/tso_reference=0, DK1/solar/xgboost_online=0"
+2026-10-09T22:18:04+00:00,2026-10-05,0,0.031,skipped_complete,complete 27 groups x 24 hours
+2026-10-09T22:18:04+00:00,2026-10-06,0,0.028,skipped_complete,complete 27 groups x 24 hours
+2026-10-09T22:19:22+00:00,2026-10-07,480,78.008,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
+2026-10-09T22:20:35+00:00,2026-10-08,480,72.856,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
+2026-10-09T22:21:49+00:00,2026-10-09,480,73.585,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
