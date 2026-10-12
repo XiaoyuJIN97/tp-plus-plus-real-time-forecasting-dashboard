@@ -113,7 +113,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
     if not countries:
         st.info("Select at least one bidding zone.")
         return
-    actual_errors = prepared.attrs.get("actual_fetch_errors", [])
     current = prepared[(prepared["target"] == target) & (prepared["zone"].isin(countries))].copy()
 
     if current.empty:
@@ -143,9 +142,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
     if current.empty:
         st.warning("No forecast rows match the selected zone and time window.")
         return
-
-    if actual_errors and current["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
-        st.warning("Actual line unavailable: " + "; ".join(actual_errors[:3]))
 
     if view == "Deterministic forecast analysis":
         st.plotly_chart(
@@ -315,12 +311,7 @@ def _load_dashboard() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
 
 def _render_data_warning(prepared: pd.DataFrame) -> None:
-    actual_errors = prepared.attrs.get("actual_fetch_errors", [])
-    artifact_age = prepared.attrs.get("actual_artifact_age_minutes")
-    if actual_errors and not prepared.empty and prepared["timestamp"].lt(pd.Timestamp.now(tz="UTC")).any():
-        st.warning("ENTSO-E realized actuals were not loaded: " + "; ".join(actual_errors[:3]))
-    elif artifact_age is not None and artifact_age > 60:
-        st.warning(f"ENTSO-E comparison data is delayed: the static actuals snapshot is {artifact_age:.0f} minutes old.")
+    return
 
 
 def _render_leaderboard_page(details_page: st.Page) -> None:
