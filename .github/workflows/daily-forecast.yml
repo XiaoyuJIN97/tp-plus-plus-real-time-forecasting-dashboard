@@ -37,7 +37,14 @@ jobs:
             if [ -n "${{ github.event.inputs.run_date }}" ]; then
               echo "run_date=${{ github.event.inputs.run_date }}" >> "$GITHUB_OUTPUT"
             else
-              echo "run_date=$(TZ=Europe/Brussels date +%F)" >> "$GITHUB_OUTPUT"
+              local_hour="$(TZ=Europe/Brussels date +%H)"
+              local_minute="$(TZ=Europe/Brussels date +%M)"
+              if [ "$local_hour" -lt 18 ] || { [ "$local_hour" = "18" ] && [ "$local_minute" -lt 30 ]; }; then
+                echo "Manual run before Brussels forecast window; using the latest eligible run date."
+                echo "run_date=$(TZ=Europe/Brussels date -d 'yesterday' +%F)" >> "$GITHUB_OUTPUT"
+              else
+                echo "run_date=$(TZ=Europe/Brussels date +%F)" >> "$GITHUB_OUTPUT"
+              fi
             fi
             echo "should_run=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -256,8 +263,7 @@ jobs:
             fi
           done
           if [ "$failed" -ne 0 ]; then
-            echo "::error::One or more recent forecast dates are incomplete after the rolling backfill attempt."
-            exit 1
+            echo "::warning::One or more recent forecast dates are incomplete after the rolling backfill attempt. Available forecasts will still be compacted and published."
           fi
 
       - name: Build selected ensembles and compact dashboard artifacts
