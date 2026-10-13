@@ -20,7 +20,7 @@ from rt_forecast_dashboard.ui.charts import (
 )
 
 
-TARGET_ORDER = ["load", "solar", "wind_onshore", "wind_offshore"]
+TARGET_ORDER = ["wind_onshore", "wind_offshore", "solar", "load"]
 HIDDEN_MODEL_KEYS = {"tabpfn_online"}
 
 
