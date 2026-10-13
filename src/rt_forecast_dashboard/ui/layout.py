@@ -264,34 +264,31 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         .rename(columns={"display_family": "Model Family"})
     )
 
-    rmae_col, wins_col = st.columns([1.55, 1.0])
-    with rmae_col:
-        st.markdown("#### rMAE vs TSO")
-        st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
-        st.dataframe(
-            rmae,
-            width="stretch",
-            hide_index=True,
-            column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
-        )
-    with wins_col:
-        st.markdown("#### Win rate vs TSO")
-        st.caption(
-            "Win rate: Percentage of tasks where Model 1 achieves lower error than Model 2 (ties count as half-wins). A value above 50% means Model 1 is more accurate than Model 2 on average."
-        )
-        st.dataframe(
-            win_rate,
-            width="stretch",
-            hide_index=True,
-            column_config={
-                zone: st.column_config.ProgressColumn(
-                    format="%.0f%%",
-                    min_value=0.0,
-                    max_value=100.0,
-                )
-                for zone in zone_order
-            },
-        )
+    st.markdown("#### rMAE vs TSO")
+    st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
+    st.dataframe(
+        rmae,
+        width="stretch",
+        hide_index=True,
+        column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
+    )
+    st.markdown("#### Win rate vs TSO")
+    st.caption(
+        "Win rate: Percentage of tasks where Model 1 achieves lower error than Model 2 (ties count as half-wins). A value above 50% means Model 1 is more accurate than Model 2 on average."
+    )
+    st.dataframe(
+        win_rate,
+        width="stretch",
+        hide_index=True,
+        column_config={
+            zone: st.column_config.ProgressColumn(
+                format="%.0f%%",
+                min_value=0.0,
+                max_value=100.0,
+            )
+            for zone in zone_order
+        },
+    )
 
 
 def _render_header() -> None:
