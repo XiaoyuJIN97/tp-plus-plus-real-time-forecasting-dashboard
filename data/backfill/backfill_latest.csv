@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-14T11:34:06+00:00,2026-10-04,0,0.038,skipped_complete,complete 27 groups x 24 hours
-2026-10-14T11:34:06+00:00,2026-10-05,0,0.039,skipped_complete,complete 27 groups x 24 hours
-2026-10-14T11:34:06+00:00,2026-10-06,0,0.037,skipped_complete,complete 27 groups x 24 hours
-2026-10-14T11:45:50+00:00,2026-10-07,624,703.232,incomplete,incomplete groups (1): FR/wind_onshore/timesfm3_online=0
-2026-10-14T12:03:18+00:00,2026-10-08,504,1048.57,complete,complete 27 groups x 24 hours
-2026-10-14T12:18:52+00:00,2026-10-09,624,933.908,complete,complete 27 groups x 24 hours
-2026-10-14T12:35:50+00:00,2026-10-10,648,1017.705,complete,complete 27 groups x 24 hours
-2026-10-14T12:49:48+00:00,2026-10-11,648,838.38,complete,complete 27 groups x 24 hours
-2026-10-14T13:02:52+00:00,2026-10-12,648,783.3,complete,complete 27 groups x 24 hours
-2026-10-14T13:02:52+00:00,2026-10-13,0,0.039,skipped_complete,complete 27 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-05,0,0.053,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-06,0,0.04,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-07,0,0.093,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-08,0,0.047,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-09,0,0.077,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-10,0,0.065,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-11,0,0.059,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-12,0,0.09,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:20:57+00:00,2026-10-13,0,0.071,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T20:35:45+00:00,2026-10-14,2592,887.79,complete,complete 108 groups x 24 hours
