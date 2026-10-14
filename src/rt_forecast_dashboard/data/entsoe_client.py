@@ -109,6 +109,13 @@ class EntsoeForecastClient:
         if not self.api_key:
             raise RuntimeError(f"No 3-month realtime-data context coverage for {zone} {target}, and ENTSOE_API_KEY is not configured.")
 
+        return self.fetch_direct_actual_context(run_date=run_date, zone_code=zone_code, target=target, context_hours=context_hours)
+
+    def fetch_direct_actual_context(self, *, run_date: date, zone_code: str, target: str, context_hours: int) -> pd.DataFrame:
+        if not self.api_key:
+            return pd.DataFrame(columns=["timestamp", "actual_mw", "tso_forecast_mw"])
+        end = brussels_cutoff_timestamp(run_date)
+        start = end - pd.Timedelta(hours=context_hours + 72)
         # Production note: ENTSO-E actual generation split by onshore/offshore can vary by TSO.
         # Keep this isolated so the realtime data archive/backfill code can substitute curated actuals.
         from entsoe import EntsoePandasClient

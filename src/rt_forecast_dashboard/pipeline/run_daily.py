@@ -7,7 +7,7 @@ import sys
 import pandas as pd
 
 from rt_forecast_dashboard.config import features, zones
-from rt_forecast_dashboard.context_quality import repair_context
+from rt_forecast_dashboard.context_quality import ContextDataQualityError, repair_context
 from rt_forecast_dashboard.covariates import covariates_for
 from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
 from rt_forecast_dashboard.data.weather_client import OpenMeteoClient
@@ -56,11 +56,40 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                     context_hours=context_hours,
                 )
                 expected_context_end = pd.to_datetime(tso["timestamp"], utc=True).min() - pd.Timedelta(hours=1)
-                actual_context, context_quality = repair_context(
-                    actual_context,
-                    expected_end=expected_context_end,
-                    context_hours=context_hours,
-                )
+                try:
+                    actual_context, context_quality = repair_context(
+                        actual_context,
+                        expected_end=expected_context_end,
+                        context_hours=context_hours,
+                    )
+                except ContextDataQualityError as archive_exc:
+                    direct_context = entsoe.fetch_direct_actual_context(
+                        run_date=run_date,
+                        zone_code=zcfg["entsoe_code"],
+                        target=target,
+                        context_hours=context_hours,
+                    )
+                    if direct_context.empty:
+                        raise archive_exc
+                    combined_context = pd.concat([actual_context, direct_context], ignore_index=True)
+                    combined_context["timestamp"] = pd.to_datetime(combined_context["timestamp"], utc=True)
+                    combined_context = combined_context.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
+                    actual_context, context_quality = repair_context(
+                        combined_context,
+                        expected_end=expected_context_end,
+                        context_hours=context_hours,
+                    )
+                    store.log_issue(
+                        run_date=run_date_str,
+                        zone=zone,
+                        target=target,
+                        stage="context_direct_fetch",
+                        message=(
+                            "Recovered missing archive context with direct ENTSO-E fetch after "
+                            f"archive repair failed: {archive_exc}"
+                        ),
+                        status="recovered",
+                    )
                 if context_quality.imputed_hours:
                     store.log_issue(
                         run_date=run_date_str,

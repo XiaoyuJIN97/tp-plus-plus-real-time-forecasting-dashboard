@@ -74,8 +74,8 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
 
     incomplete = {group: count for group, count in counts.items() if count != HORIZON_HOURS}
     if incomplete:
-        sample = ", ".join(f"{zone}/{target}/{model}={count}" for (zone, target, model), count in sorted(incomplete.items())[:8])
-        return False, f"incomplete groups: {sample}"
+        listed = ", ".join(f"{zone}/{target}/{model}={count}" for (zone, target, model), count in sorted(incomplete.items()))
+        return False, f"incomplete groups ({len(incomplete)}): {listed}"
     stale = {
         group: (latest_context_end[group], delivery - timedelta(hours=1))
         for group, delivery in first_delivery.items()
