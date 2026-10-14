@@ -1,6 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-13T22:27:10+00:00,2026-10-09,480,92.892,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
-2026-10-13T22:28:37+00:00,2026-10-10,480,87.77,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
-2026-10-13T22:30:05+00:00,2026-10-11,480,87.752,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
-2026-10-13T22:31:34+00:00,2026-10-12,480,88.654,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
-2026-10-13T22:33:02+00:00,2026-10-13,480,88.295,incomplete,"incomplete groups: DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, DK2/solar/timesfm3_online=0, FR/solar/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0, FR/wind_onshore/timesfm3_online=0"
+2026-10-14T10:18:13+00:00,2026-10-04,0,0.042,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T10:18:13+00:00,2026-10-05,0,0.042,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T10:18:13+00:00,2026-10-06,0,0.04,skipped_complete,complete 108 groups x 24 hours
+2026-10-14T10:29:42+00:00,2026-10-07,2592,689.476,complete,complete 108 groups x 24 hours
+2026-10-14T10:43:10+00:00,2026-10-08,2592,807.807,complete,complete 108 groups x 24 hours
+2026-10-14T10:54:47+00:00,2026-10-09,2592,696.852,complete,complete 108 groups x 24 hours
+2026-10-14T11:07:49+00:00,2026-10-10,2592,782.409,complete,complete 108 groups x 24 hours
+2026-10-14T11:22:29+00:00,2026-10-11,2592,879.436,complete,complete 108 groups x 24 hours
+2026-10-14T11:34:02+00:00,2026-10-12,2592,692.879,complete,complete 108 groups x 24 hours
+2026-10-14T11:34:02+00:00,2026-10-13,0,0.04,skipped_complete,complete 108 groups x 24 hours
