@@ -20,8 +20,10 @@ from rt_forecast_dashboard.ui.charts import (
 )
 
 
-TARGET_ORDER = ["wind_onshore", "wind_offshore", "solar", "load"]
+TARGET_ORDER = ["wind_offshore", "wind_onshore", "solar", "load"]
 HIDDEN_MODEL_KEYS = {"tabpfn_online"}
+FORECAST_VISUALIZATION_VIEW = "Forecast visualization and analysis"
+MODEL_ACCURACY_VIEW = "Model accuracy summary"
 
 
 def _inject_styles() -> None:
@@ -109,6 +111,26 @@ def _render_task_title(target: str) -> None:
     st.markdown(f'<div class="task-section-title">{_target_label(target)}</div>', unsafe_allow_html=True)
 
 
+def _analysis_window_sentence(frame: pd.DataFrame) -> str | None:
+    if frame.empty or "timestamp" not in frame.columns or "actual_mw" not in frame.columns:
+        return None
+    realized = frame.dropna(subset=["actual_mw"]).copy()
+    if realized.empty:
+        return None
+    timestamps = pd.to_datetime(realized["timestamp"], utc=True, errors="coerce").dropna()
+    if timestamps.empty:
+        return None
+    start = timestamps.min().tz_convert("Europe/Brussels").date().isoformat()
+    end = timestamps.max().tz_convert("Europe/Brussels").date().isoformat()
+    return f"These results were compiled with data from ENTSO-E TP from {start} to {end}."
+
+
+def _render_analysis_window(frame: pd.DataFrame) -> None:
+    sentence = _analysis_window_sentence(frame)
+    if sentence:
+        st.caption(sentence)
+
+
 def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[str]) -> None:
     if not countries:
         st.info("Select at least one bidding zone.")
@@ -122,7 +144,7 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
 
     view = st.radio(
         "View",
-        ["Deterministic forecast analysis", "Model accuracy summary"],
+        [FORECAST_VISUALIZATION_VIEW, MODEL_ACCURACY_VIEW],
         horizontal=True,
         key=f"{target}_view",
     )
@@ -143,12 +165,12 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         st.warning("No forecast rows match the selected zone and time window.")
         return
 
-    if view == "Deterministic forecast analysis":
+    if view == FORECAST_VISUALIZATION_VIEW:
         st.plotly_chart(
-            deterministic_forecast_chart(current, f"{_target_label(target)} deterministic forecast analysis"),
+            deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
             width="stretch",
         )
-    elif view == "Model accuracy summary":
+    elif view == MODEL_ACCURACY_VIEW:
         _render_accuracy_section(target, current)
 
 
@@ -170,63 +192,7 @@ def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
                 accuracy_summary_chart(accuracy, metric, title=metric, show_legend=idx == 0),
                 width="stretch",
             )
-def _render_failure_backfill_history(issues: pd.DataFrame, backfills: pd.DataFrame) -> None:
-    st.markdown('<div class="ops-section-title">Failure and backfill history</div>', unsafe_allow_html=True)
-    with st.expander("Open / close records", expanded=False):
-        metric_cols = st.columns(4)
-        issue_status = issues["status"].astype(str) if "status" in issues.columns else pd.Series("", index=issues.index)
-        backfill_status = backfills["status"].astype(str) if "status" in backfills.columns else pd.Series("", index=backfills.index)
-        open_issues = issues[issue_status.eq("open")] if not issues.empty else pd.DataFrame()
-        failed_backfills = backfills[backfill_status.ne("ok")] if not backfills.empty else pd.DataFrame()
-        metric_cols[0].metric("Logged issues", len(issues))
-        metric_cols[1].metric("Open issues", len(open_issues))
-        metric_cols[2].metric("Backfill rows", len(backfills))
-        metric_cols[3].metric("Failed backfills", len(failed_backfills))
-
-        issue_history = pd.DataFrame()
-        if not issues.empty:
-            issue_history = issues.rename(
-                columns={
-                    "logged_at": "Recorded at",
-                    "run_date": "Run date",
-                    "zone": "Zone",
-                    "target": "Task",
-                    "stage": "Stage",
-                    "message": "Message",
-                    "status": "Status",
-                }
-            )
-            issue_history["Type"] = "Failure"
-            issue_history["Rows"] = pd.NA
-            issue_history["Seconds"] = pd.NA
-            issue_history["Report"] = pd.NA
-
-        backfill_history = pd.DataFrame()
-        if not backfills.empty:
-            backfill_history = backfills.rename(
-                columns={
-                    "checked_at": "Recorded at",
-                    "run_date": "Run date",
-                    "rows": "Rows",
-                    "seconds": "Seconds",
-                    "message": "Message",
-                    "status": "Status",
-                    "report": "Report",
-                }
-            )
-            backfill_history["Type"] = "Backfill"
-            backfill_history["Zone"] = pd.NA
-            backfill_history["Task"] = pd.NA
-            backfill_history["Stage"] = "backfill"
-
-        history = pd.concat([issue_history, backfill_history], ignore_index=True)
-        if history.empty:
-            st.success("No failures or backfills have been recorded.")
-            return
-        history["Recorded at"] = pd.to_datetime(history["Recorded at"], utc=True, errors="coerce")
-        history = history.sort_values("Recorded at", ascending=False).head(60)
-        columns = ["Recorded at", "Type", "Run date", "Zone", "Task", "Stage", "Rows", "Seconds", "Status", "Message", "Report"]
-        st.dataframe(history[[column for column in columns if column in history]], width="stretch", hide_index=True)
+    _render_analysis_window(forecasts)
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
@@ -266,6 +232,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
 
     st.markdown("#### rMAE vs TSO")
     st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
+    st.caption("A value below 1 means the model is more accurate than the TSO model on average. Lower is better.")
     st.dataframe(
         rmae,
         width="stretch",
@@ -289,12 +256,13 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
             for zone in zone_order
         },
     )
+    _render_analysis_window(frame[frame["target"].eq(selected_target)])
 
 
 def _render_header() -> None:
     _inject_styles()
     st.title("Transparency++")
-    st.subheader("Real-Time Load and Renewables Forecasting")
+    st.subheader("Day-ahead Load and Renewables Forecasting")
 
 
 def _load_dashboard() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -319,27 +287,26 @@ def _render_leaderboard_page(details_page: st.Page) -> None:
         return
     _render_data_warning(prepared)
     _render_rmae_landing(prepared)
-    st.page_link(details_page, label="Explore forecast details →", icon="📈")
+    st.page_link(details_page, label="More detailed insights →", icon="📈")
 
 
 def _render_forecast_details_page() -> None:
     _render_header()
-    prepared, issues, backfills = _load_dashboard()
+    prepared, _, _ = _load_dashboard()
     if prepared.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
     _render_data_warning(prepared)
-    st.markdown('<div class="task-section-title">Explore forecast details</div>', unsafe_allow_html=True)
+    st.markdown('<div class="task-section-title">More detailed insights</div>', unsafe_allow_html=True)
     selected_target = st.selectbox("Forecast target", TARGET_ORDER, format_func=_target_label, index=0)
     available_zones = sorted(prepared.loc[prepared["target"].eq(selected_target), "zone"].dropna().unique())
     _render_task_title(selected_target)
     _render_target_section(selected_target, prepared, available_zones)
-    _render_failure_backfill_history(issues, backfills)
 
 
 def render_app() -> None:
     st.set_page_config(page_title="Transparency++", page_icon="chart_with_upwards_trend", layout="wide")
-    details_page = st.Page(_render_forecast_details_page, title="Explore forecast details", icon="📈")
+    details_page = st.Page(_render_forecast_details_page, title="More detailed insights", icon="📈")
     leaderboard_page = st.Page(
         lambda: _render_leaderboard_page(details_page),
         title="Leaderboard",
