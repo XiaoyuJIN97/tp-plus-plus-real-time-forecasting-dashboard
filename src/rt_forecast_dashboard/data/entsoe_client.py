@@ -20,8 +20,23 @@ def _entsoe_response_to_hourly_frame(response: pd.Series | pd.DataFrame, value_c
         values = numeric.sum(axis=1) if len(numeric.columns) > 1 else numeric.iloc[:, 0]
     else:
         values = response
-    frame = values.rename(value_col).reset_index().rename(columns={"index": "timestamp"})
-    timestamp_col = "timestamp" if "timestamp" in frame.columns else frame.columns[0]
+    values = values.rename(value_col)
+    if isinstance(values.index, pd.MultiIndex):
+        date_level = next(
+            (
+                index
+                for index, level in enumerate(values.index.levels)
+                if pd.api.types.is_datetime64_any_dtype(level.dtype)
+            ),
+            None,
+        )
+        if date_level is not None:
+            values.index = values.index.get_level_values(date_level)
+    frame = values.reset_index().rename(columns={"index": "timestamp"})
+    timestamp_col = "timestamp" if "timestamp" in frame.columns else next(
+        (column for column in frame.columns if pd.api.types.is_datetime64_any_dtype(frame[column])),
+        frame.columns[0],
+    )
     frame = frame.rename(columns={timestamp_col: "timestamp"})
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
     frame[value_col] = pd.to_numeric(frame[value_col], errors="coerce")
