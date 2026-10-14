@@ -151,9 +151,9 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models "$MODELS"
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 5 --models "$MODELS"
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 10 --models "$MODELS"
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 5 --models "$MODELS"
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 10 --models "$MODELS"
           fi
 
       - name: Commit core forecast outputs
@@ -179,9 +179,9 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models timesfm3_online --keep-issues
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 5 --models timesfm3_online
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 10 --models timesfm3_online
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 5 --models timesfm3_online
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 10 --models timesfm3_online
           fi
 
       - name: Commit TimesFM3 forecast outputs
@@ -233,9 +233,9 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models tabpfn_online --keep-issues
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 5 --models tabpfn_online
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 10 --models tabpfn_online
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 5 --models tabpfn_online
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 10 --models tabpfn_online
           fi
 
       - name: Commit TabPFN forecast outputs
@@ -277,7 +277,7 @@ jobs:
             python -m rt_forecast_dashboard.pipeline.build_selected_ensembles \
               --actuals external/entsoe-realtime-data/data/dashboard/actuals_recent.parquet \
               --end "${{ steps.brussels_window.outputs.run_date }}" \
-              --recent-days 5
+              --recent-days 10
           fi
           python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts \
             --retention-days 90 \
