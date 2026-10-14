@@ -6,7 +6,6 @@ import pandas as pd
 
 
 MAX_IMPUTED_HOURS = 48
-MAX_CONSECUTIVE_MISSING_HOURS = 6
 MAX_BOUNDARY_FILL_HOURS = 2
 
 
@@ -51,13 +50,7 @@ def repair_context(
         raise ContextDataQualityError(
             f"context has {missing_count} missing actual hours; maximum automatic imputation is {MAX_IMPUTED_HOURS}"
         )
-    longest_missing_run = max_consecutive_true(missing)
-    if longest_missing_run > MAX_CONSECUTIVE_MISSING_HOURS:
-        raise ContextDataQualityError(
-            "context has a contiguous missing actual block of "
-            f"{longest_missing_run} hours; maximum automatic contiguous imputation is "
-            f"{MAX_CONSECUTIVE_MISSING_HOURS}"
-        )
+    long_block_timestamps = missing_block_timestamps(missing, min_length=MAX_BOUNDARY_FILL_HOURS + 1)
 
     tso = pd.to_numeric(work.get("tso_forecast_mw"), errors="coerce")
     tso = tso.interpolate(method="time", limit_direction="both")
@@ -92,7 +85,7 @@ def repair_context(
         bias = float((paired["actual"] - paired["tso"]).median())
         for timestamp in repaired.index[remaining]:
             repaired.loc[timestamp] = max(0.0, float(tso.loc[timestamp] + bias))
-            methods[timestamp] = "bias_adjusted_tso"
+            methods[timestamp] = "synthetic_tso_block" if timestamp in long_block_timestamps else "bias_adjusted_tso"
 
     work["actual_mw"] = repaired
     work["tso_forecast_mw"] = tso
@@ -105,7 +98,14 @@ def repair_context(
         for timestamp in sorted(methods)
     )
     method_list = sorted(set(methods.values()))
-    quality = "interpolated" if set(method_list) <= {"linear_interpolation", "forward_fill"} else "degraded"
+    if "synthetic_tso_block" in method_list:
+        quality = "synthetic_block"
+    elif "bias_adjusted_tso" in method_list:
+        quality = "synthetic_tso"
+    elif set(method_list) <= {"linear_interpolation", "forward_fill"}:
+        quality = "interpolated"
+    else:
+        quality = "degraded"
     return work.reset_index(), ContextQualityReport(
         quality=quality,
         missing_hours=missing_count,
@@ -115,13 +115,16 @@ def repair_context(
     )
 
 
-def max_consecutive_true(values: pd.Series) -> int:
-    longest = 0
-    current = 0
-    for value in values.astype(bool):
+def missing_block_timestamps(values: pd.Series, *, min_length: int) -> set[pd.Timestamp]:
+    block: list[pd.Timestamp] = []
+    timestamps: set[pd.Timestamp] = set()
+    for timestamp, value in values.astype(bool).items():
         if value:
-            current += 1
-            longest = max(longest, current)
+            block.append(timestamp)
         else:
-            current = 0
-    return longest
+            if len(block) >= min_length:
+                timestamps.update(block)
+            block = []
+    if len(block) >= min_length:
+        timestamps.update(block)
+    return timestamps

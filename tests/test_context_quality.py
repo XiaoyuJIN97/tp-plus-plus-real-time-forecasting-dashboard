@@ -57,8 +57,8 @@ def test_larger_gap_uses_bias_adjusted_tso() -> None:
 
     assert repaired["actual_mw"].notna().all()
     assert report.imputed_hours == 4
-    assert report.methods == "bias_adjusted_tso"
-    assert report.quality == "degraded"
+    assert report.methods == "synthetic_tso_block"
+    assert report.quality == "synthetic_block"
 
 
 def test_many_scattered_missing_hours_use_bias_adjusted_tso() -> None:
@@ -74,18 +74,23 @@ def test_many_scattered_missing_hours_use_bias_adjusted_tso() -> None:
     assert repaired["actual_mw"].notna().all()
     assert report.imputed_hours == 20
     assert "bias_adjusted_tso" in report.methods
-    assert report.quality == "degraded"
+    assert report.quality == "synthetic_tso"
 
 
-def test_contiguous_missing_block_is_rejected() -> None:
+def test_contiguous_missing_block_is_filled_and_marked() -> None:
     frame = _context().drop(index=list(range(7))).reset_index(drop=True)
 
-    with pytest.raises(ContextDataQualityError, match="contiguous missing actual block"):
-        repair_context(
-            frame,
-            expected_end=pd.Timestamp("2026-10-05T15:00:00Z"),
-            context_hours=12,
-        )
+    repaired, report = repair_context(
+        frame,
+        expected_end=pd.Timestamp("2026-10-05T15:00:00Z"),
+        context_hours=12,
+    )
+
+    assert repaired["actual_mw"].notna().all()
+    assert report.imputed_hours == 7
+    assert report.methods == "synthetic_tso_block"
+    assert report.quality == "synthetic_block"
+    assert all(record["method"] == "synthetic_tso_block" for record in report.records)
 
 
 def test_more_than_total_imputation_limit_is_rejected() -> None:
