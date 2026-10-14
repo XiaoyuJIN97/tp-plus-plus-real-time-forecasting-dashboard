@@ -61,12 +61,39 @@ def test_larger_gap_uses_bias_adjusted_tso() -> None:
     assert report.quality == "degraded"
 
 
-def test_more_than_six_missing_hours_is_rejected() -> None:
+def test_many_scattered_missing_hours_use_bias_adjusted_tso() -> None:
+    missing_index = [index for start in range(1, 60, 6) for index in (start, start + 1)]
+    frame = _context(hours=60).drop(index=missing_index).reset_index(drop=True)
+
+    repaired, report = repair_context(
+        frame,
+        expected_end=pd.Timestamp("2026-10-07T15:00:00Z"),
+        context_hours=60,
+    )
+
+    assert repaired["actual_mw"].notna().all()
+    assert report.imputed_hours == 20
+    assert "bias_adjusted_tso" in report.methods
+    assert report.quality == "degraded"
+
+
+def test_contiguous_missing_block_is_rejected() -> None:
     frame = _context().drop(index=list(range(7))).reset_index(drop=True)
 
-    with pytest.raises(ContextDataQualityError, match="maximum automatic imputation"):
+    with pytest.raises(ContextDataQualityError, match="contiguous missing actual block"):
         repair_context(
             frame,
             expected_end=pd.Timestamp("2026-10-05T15:00:00Z"),
             context_hours=12,
+        )
+
+
+def test_more_than_total_imputation_limit_is_rejected() -> None:
+    frame = _context(hours=120).drop(index=list(range(1, 120, 2))).reset_index(drop=True)
+
+    with pytest.raises(ContextDataQualityError, match="maximum automatic imputation"):
+        repair_context(
+            frame,
+            expected_end=pd.Timestamp("2026-10-10T03:00:00Z"),
+            context_hours=120,
         )

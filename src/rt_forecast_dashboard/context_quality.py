@@ -5,7 +5,8 @@ from dataclasses import dataclass
 import pandas as pd
 
 
-MAX_IMPUTED_HOURS = 6
+MAX_IMPUTED_HOURS = 48
+MAX_CONSECUTIVE_MISSING_HOURS = 6
 MAX_BOUNDARY_FILL_HOURS = 2
 
 
@@ -49,6 +50,13 @@ def repair_context(
     if missing_count > MAX_IMPUTED_HOURS:
         raise ContextDataQualityError(
             f"context has {missing_count} missing actual hours; maximum automatic imputation is {MAX_IMPUTED_HOURS}"
+        )
+    longest_missing_run = max_consecutive_true(missing)
+    if longest_missing_run > MAX_CONSECUTIVE_MISSING_HOURS:
+        raise ContextDataQualityError(
+            "context has a contiguous missing actual block of "
+            f"{longest_missing_run} hours; maximum automatic contiguous imputation is "
+            f"{MAX_CONSECUTIVE_MISSING_HOURS}"
         )
 
     tso = pd.to_numeric(work.get("tso_forecast_mw"), errors="coerce")
@@ -105,3 +113,15 @@ def repair_context(
         methods="+".join(method_list),
         records=records,
     )
+
+
+def max_consecutive_true(values: pd.Series) -> int:
+    longest = 0
+    current = 0
+    for value in values.astype(bool):
+        if value:
+            current += 1
+            longest = max(longest, current)
+        else:
+            current = 0
+    return longest
