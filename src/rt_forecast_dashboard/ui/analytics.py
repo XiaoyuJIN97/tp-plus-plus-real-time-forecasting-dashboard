@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from rt_forecast_dashboard.config import model_registry
-from rt_forecast_dashboard.time_utils import latest_complete_run_date
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, latest_complete_run_date
 
 
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
@@ -480,7 +480,7 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame["run_date"] = frame["run_date"].astype(str)
     frame = frame[frame["run_date"].le(latest_complete_run_date().isoformat())].copy()
     if "source" in frame.columns:
-        frame = frame[frame["source"].isin({"online", "historical_mock_ensemble"})].copy()
+        frame = frame[frame["source"].isin({"online", "historical_mock_ensemble", "historical_mock_replay", "historical_mock_realized"})].copy()
     frame["context_hours"] = pd.to_numeric(frame.get("context_hours", 0), errors="coerce").fillna(0).astype(int)
     if "context_end" in frame.columns:
         frame["context_end"] = pd.to_datetime(frame["context_end"], utc=True, errors="coerce")
@@ -503,12 +503,21 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
             frame.groupby(group_cols, as_index=False)
             .agg(first_delivery=("timestamp", "min"), context_end=("context_end", "max"))
         )
-        coverage = coverage[coverage["context_end"].ge(coverage["first_delivery"] - pd.Timedelta(hours=1))]
+        coverage = coverage[coverage["context_end"].eq(coverage["first_delivery"] - pd.Timedelta(hours=1))]
         frame = frame.merge(coverage[group_cols], on=group_cols, how="inner")
         if frame.empty:
             return frame
-    frame["horizon"] = frame.groupby(group_cols).cumcount()
-    frame = frame[frame["horizon"].between(0, DAY_AHEAD_HOURS - 1)].copy()
+    # A run must contain the exact hourly delivery grid, not merely 24 rows.
+    cutoffs = {
+        value: brussels_cutoff_timestamp(pd.Timestamp(value).date())
+        for value in frame["run_date"].unique()
+    }
+    offsets = (frame["timestamp"] - frame["run_date"].map(cutoffs)) / pd.Timedelta(hours=1)
+    frame["horizon"] = offsets
+    correct_grid = offsets.between(0, DAY_AHEAD_HOURS - 1) & offsets.mod(1).eq(0)
+    correct_grid &= np.isfinite(pd.to_numeric(frame["forecast_mw"], errors="coerce"))
+    valid_groups = correct_grid.groupby([frame[column] for column in group_cols]).transform("all")
+    frame = frame[valid_groups].copy()
     complete = (
         frame.groupby(group_cols)["horizon"]
         .nunique()

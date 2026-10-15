@@ -132,3 +132,20 @@ def test_constrained_ensemble_uses_offline_weights_before_training_minimum(tmp_p
     assert len(result) == 24
     assert result["covariate_case"].str.startswith("offline_weight_fallback:").all()
     assert result["ensemble_weights"].str.len().gt(0).all()
+
+
+def test_history_repair_preserves_saved_ensembles_but_refreshes_recent_dates(tmp_path) -> None:
+    store = ForecastStore(data_dir=tmp_path / "data")
+    day = "2026-07-24"
+    actual = np.linspace(100.0, 200.0, 24)
+    store.append_forecasts(_component_rows(day, "DE", "wind_offshore", actual), day)
+    path = tmp_path / "actuals.parquet"
+    pd.DataFrame({"timestamp_utc": pd.date_range(day, periods=24, freq="h", tz="UTC"),
+                  "zone": "DE", "target": "wind_offshore", "actual_mw": actual}).to_parquet(path)
+    first = build_selected_ensembles(store, actuals_path=path, run_dates=[day])
+    assert len(first) == 24
+    assert build_selected_ensembles(store, actuals_path=path, run_dates=[day], only_missing=True).empty
+    refreshed = build_selected_ensembles(store, actuals_path=path, run_dates=[day],
+                                          only_missing=True, refresh_dates={day})
+    assert len(refreshed) == 24
+    assert len(store.read_forecasts().query("model == 'ensemble_selected'")) == 24

@@ -277,7 +277,7 @@ jobs:
             python -m rt_forecast_dashboard.pipeline.build_selected_ensembles \
               --actuals external/entsoe-realtime-data/data/dashboard/actuals_recent.parquet \
               --end "${{ steps.brussels_window.outputs.run_date }}" \
-              --recent-days 10
+              --recent-days 10 --repair-history
           fi
           python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts \
             --retention-days 90 \

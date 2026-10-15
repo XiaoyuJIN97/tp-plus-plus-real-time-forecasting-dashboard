@@ -1,0 +1,13 @@
+# Model history alignment, 15 October 2026
+
+The dashboard now has complete forecast coverage from 24 July through 14 October 2026 for every displayed model in every active zone and task. The audit covers 162 model series across 27 zone/task combinations in BE, DE, DK1, DK2, ES, FR and PT. Each series has 83 daily runs with 24 hourly forecasts, totaling 322,704 displayed forecast rows.
+
+The earliest verified forecasts were TimesFM3 replays on 24 July. Other early models used an 18:00 UTC window while TimesFM3 used 18:00 Europe/Brussels (16:00 UTC during summer). Their delivery timestamps did not match, so ensembles could not form full 24-hour runs. Older source labels and missing deployed copies of saved replays also shortened the displayed history. Constrained ensembles skipped their initial training period when no offline fallback weights existed.
+
+The repair imports 120,600 previously saved replay rows for the newer zones, reruns missing or incorrectly timed base forecasts against archived inputs, and builds 37,464 missing or stale ensemble rows. Replays retain `historical_mock_replay` or `historical_mock_ensemble` provenance. The app identifies retrospective history. Archived inputs can contain later revisions, so retrospective forecasts do not establish what the system published live at the historical cutoff.
+
+The dashboard now requires the exact 24-hour delivery grid beginning at 18:00 Europe/Brussels, including daylight saving changes, and context ending one hour before delivery. Verified historical sources remain visible. Ensemble warmup uses recorded equal weights when neither 21 prior complete training runs nor offline weights are available. Training uses strictly earlier run dates. The daily workflow repairs missing ensembles throughout the retained 90-day history while refreshing its recent window. Realized observations persist in daily forecast files so a later compact rebuild cannot lose them when the collector prunes older actuals.
+
+Validation: all 44 tests pass, including regression tests for time windows, replay provenance, preservation of valid forecasts, ensemble warmup and actuals retention. The data audit asserts complete coverage and zero missing model/date groups for the entire period. Forecast coverage does not imply that every delivery hour already has a verified actual value. Accuracy comparisons continue to use shared runs with all 24 observed outcomes.
+
+See `model_history_alignment_2026-10-15.csv` for the start, end, forecast coverage and realized observation counts of each displayed series. NL and TabPFN remain outside the current displayed model set.

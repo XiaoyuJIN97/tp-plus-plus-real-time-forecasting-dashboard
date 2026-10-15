@@ -49,6 +49,14 @@ def build_dashboard_forecasts(
         recent = recent.merge(actual_lookup, on=["zone", "target", "timestamp"], how="left")
         stored = pd.to_numeric(recent.get("actual_mw"), errors="coerce")
         recent["actual_mw"] = stored.fillna(recent.pop("artifact_actual_mw"))
+        # Keep observed outcomes with daily history as well as the compact file.
+        # Otherwise rebuilding after the collector prunes its shorter history
+        # silently removes realized outcomes from older model comparisons.
+        filled_dates = recent.loc[
+            stored.isna() & recent["actual_mw"].notna(), "run_date"
+        ].unique()
+        for run_date in filled_dates:
+            store.append_forecasts(recent[recent["run_date"].eq(run_date)].copy(), str(run_date))
 
     sort_columns = [column for column in ["run_date", "zone", "target", "model", "timestamp"] if column in recent]
     recent = recent.sort_values(sort_columns).reset_index(drop=True)

@@ -100,7 +100,8 @@ def _complete_run(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     if frame.empty or not set(columns).issubset(frame.columns):
         return pd.DataFrame()
     complete = frame.dropna(subset=columns).sort_values("timestamp").copy()
-    if len(complete) != 24 or complete["timestamp"].nunique() != 24:
+    if (len(complete) != 24 or complete["timestamp"].nunique() != 24
+            or not complete["timestamp"].diff().dropna().eq(pd.Timedelta(hours=1)).all()):
         return pd.DataFrame()
     complete["horizon"] = np.arange(1, 25)
     return complete
@@ -149,14 +150,21 @@ def build_selected_ensembles(
     run_dates: list[str],
     source: str = "online",
     offline_weights_path: Path = OFFLINE_WEIGHTS_PATH,
+    only_missing: bool = False,
+    refresh_dates: set[str] | None = None,
 ) -> pd.DataFrame:
     config = load_yaml("ensemble_registry.yml")
     settings = config["settings"]
     selections = config["selections"]
     forecasts = store.read_forecasts()
+    forecasts["run_date"] = forecasts["run_date"].astype(str)
     actuals = _load_actuals(actuals_path)
     offline_weights = pd.read_csv(offline_weights_path) if offline_weights_path.exists() else pd.DataFrame()
     panel = _forecast_panel(forecasts, actuals)
+    forecast_runs = {
+        key: frame for key, frame in forecasts.groupby(["run_date", "zone", "target"])
+    }
+    panel_series = {key: frame for key, frame in panel.groupby(["zone", "target"])}
     outputs: list[pd.DataFrame] = []
     generated_at = datetime.now(UTC).isoformat(timespec="seconds")
 
@@ -166,17 +174,23 @@ def build_selected_ensembles(
                 method = selection["method"]
                 include_tso = bool(selection["include_tso"])
                 components = _component_columns(target, include_tso)
-                current = _complete_run(
-                    panel[
-                        panel["run_date"].astype(str).eq(run_date)
-                        & panel["zone"].eq(zone)
-                        & panel["target"].eq(target)
-                    ],
-                    components,
-                )
+                series = panel_series.get((zone, target), panel.iloc[:0])
+                current = _complete_run(series[series["run_date"].eq(run_date)], components)
                 if current.empty:
                     print(f"Skip ensemble {run_date} {zone} {target}: component forecasts are incomplete.")
                     continue
+
+                if only_missing and run_date not in (refresh_dates or set()):
+                    run_forecasts = forecast_runs.get((run_date, zone, target), forecasts.iloc[:0])
+                    saved = run_forecasts[run_forecasts["model"].eq(ENSEMBLE_MODEL_KEY)].copy()
+                    saved["timestamp"] = pd.to_datetime(saved["timestamp"], utc=True)
+                    saved = _complete_run(saved, ["forecast_mw"])
+                    context_end = pd.to_datetime(saved.get("context_end"), utc=True)
+                    if (not saved.empty
+                            and saved["timestamp"].tolist() == current["timestamp"].tolist()
+                            and context_end.eq(current["timestamp"].min() - pd.Timedelta(hours=1)).all()
+                            and np.isfinite(saved["forecast_mw"].to_numpy(float)).all()):
+                        continue
 
                 values = current[components].to_numpy(float)
                 weights_by_band: dict[int, np.ndarray] = {}
@@ -186,11 +200,7 @@ def build_selected_ensembles(
                 elif method == "median":
                     ensemble = np.median(values, axis=1)
                 elif method == "constrained_learned":
-                    earlier = panel[
-                        panel["run_date"].astype(str).lt(run_date)
-                        & panel["zone"].eq(zone)
-                        & panel["target"].eq(target)
-                    ].copy()
+                    earlier = series[series["run_date"].lt(run_date)].copy()
                     complete_dates: list[str] = []
                     prepared_runs: list[pd.DataFrame] = []
                     for prior_date, prior in earlier.groupby("run_date"):
@@ -216,12 +226,15 @@ def build_selected_ensembles(
                             for band_index, band in enumerate(bands)
                         }
                         if any(value is None for value in fallback_by_band.values()):
-                            print(
-                                f"Skip ensemble {run_date} {zone} {target}: "
-                                f"{len(prepared_runs)} complete training runs, need {minimum}, and no complete fallback weights."
-                            )
-                            continue
-                        weight_source = "offline_weight_fallback"
+                            # Before enough prior realized runs exist, use a disclosed
+                            # equal-weight warmup. Never train with future outcomes.
+                            fallback_by_band = {
+                                index: np.full(len(components), 1.0 / len(components))
+                                for index in range(len(bands))
+                            }
+                            weight_source = "equal_weight_warmup"
+                        else:
+                            weight_source = "offline_weight_fallback"
                         ensemble = np.zeros(24, dtype=float)
                         for band_index, band_rows in current.groupby("horizon_band"):
                             weights = fallback_by_band[int(band_index)]
@@ -254,19 +267,20 @@ def build_selected_ensembles(
                         f"{band}:{','.join(f'{label}={weight:.4f}' for label, weight in zip(component_labels, weights))}"
                         for band, weights in sorted(weights_by_band.items())
                     )
-                reference = forecasts[
-                    forecasts["run_date"].astype(str).eq(run_date)
-                    & forecasts["zone"].eq(zone)
-                    & forecasts["target"].eq(target)
-                    & forecasts["model"].isin(components)
-                ].copy()
+                run_forecasts = forecast_runs.get((run_date, zone, target), forecasts.iloc[:0])
+                reference = run_forecasts[run_forecasts["model"].isin(components)].copy()
                 reference["timestamp"] = pd.to_datetime(reference["timestamp"], utc=True)
                 reference = reference.sort_values("run_at").drop_duplicates("timestamp", keep="last").set_index("timestamp")
                 result = pd.DataFrame(
                     {
                         "run_date": run_date,
                         "run_at": generated_at,
-                        "source": source,
+                        "source": (
+                            "historical_mock_ensemble"
+                            if source == "online" and only_missing
+                            and run_date not in (refresh_dates or set())
+                            else source
+                        ),
                         "zone": zone,
                         "target": target,
                         "model": ENSEMBLE_MODEL_KEY,
@@ -299,6 +313,8 @@ def main() -> None:
     parser.add_argument("--end")
     parser.add_argument("--recent-days", type=int, default=1)
     parser.add_argument("--source", default="online")
+    parser.add_argument("--repair-history", action="store_true",
+                        help="Also fill missing ensembles throughout retained 90-day history.")
     args = parser.parse_args()
     if args.date:
         run_dates = args.date
@@ -308,11 +324,22 @@ def main() -> None:
         run_dates = [day.date().isoformat() for day in pd.date_range(start, end, freq="D")]
     else:
         raise SystemExit("Provide --date or --end.")
+    refresh_dates = set(run_dates)
+    store = ForecastStore()
+    if args.repair_history and not args.date:
+        history = store.read_forecasts()
+        latest = pd.Timestamp(args.end or history["run_date"].max())
+        first = latest - pd.Timedelta(days=89)
+        run_dates = sorted(set(run_dates) | set(history.loc[
+            pd.to_datetime(history["run_date"]).between(first, latest), "run_date"
+        ].astype(str)))
     result = build_selected_ensembles(
-        ForecastStore(),
+        store,
         actuals_path=args.actuals,
         run_dates=run_dates,
         source=args.source,
+        only_missing=args.repair_history,
+        refresh_dates=refresh_dates,
     )
     print(f"Wrote {len(result)} selected ensemble rows.")
 

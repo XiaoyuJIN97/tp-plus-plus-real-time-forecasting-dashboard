@@ -62,3 +62,21 @@ def test_dashboard_forecasts_falls_back_to_daily_csvs(tmp_path) -> None:
     store.append_forecasts(frame, "2026-10-01")
 
     assert len(store.read_dashboard_forecasts()) == 1
+
+
+def test_realized_outcomes_survive_collector_history_retention(tmp_path) -> None:
+    store = ForecastStore(data_dir=tmp_path / "data")
+    frame = pd.DataFrame({"run_date": ["2026-07-24"], "run_at": ["2026-07-24T16:30:00Z"],
+                          "zone": ["BE"], "target": ["load"], "model": ["test"],
+                          "timestamp": ["2026-07-24T16:00:00Z"], "forecast_mw": [90.0]})
+    store.append_forecasts(frame, "2026-07-24")
+    actuals_path = tmp_path / "actuals.parquet"
+    pd.DataFrame({"timestamp_utc": ["2026-07-24T16:00:00Z"], "zone": ["BE"],
+                  "target": ["load"], "actual_mw": [100.0]}).to_parquet(actuals_path)
+    build_dashboard_forecasts(store, actuals_path=actuals_path)
+    assert store.read_forecasts().actual_mw.tolist() == [100.0]
+    # A later collector snapshot no longer includes that delivery timestamp.
+    pd.DataFrame({"timestamp_utc": ["2026-09-01T16:00:00Z"], "zone": ["BE"],
+                  "target": ["load"], "actual_mw": [200.0]}).to_parquet(actuals_path)
+    path, _ = build_dashboard_forecasts(store, actuals_path=actuals_path)
+    assert pd.read_parquet(path).actual_mw.tolist() == [100.0]
