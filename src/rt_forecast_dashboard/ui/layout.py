@@ -9,13 +9,11 @@ from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
     MODEL_FAMILY_ORDER,
     filter_last_n_days,
-    online_forecast_accuracy,
     online_rmae_leaderboard,
     online_win_rate_by_zone,
     valid_online_forecasts,
 )
 from rt_forecast_dashboard.ui.charts import (
-    accuracy_summary_chart,
     deterministic_forecast_chart,
 )
 
@@ -23,7 +21,6 @@ from rt_forecast_dashboard.ui.charts import (
 TARGET_ORDER = ["wind_offshore", "wind_onshore", "solar", "load"]
 HIDDEN_MODEL_KEYS = {"tabpfn_online"}
 FORECAST_VISUALIZATION_VIEW = "Forecast visualization and analysis"
-MODEL_ACCURACY_VIEW = "Model accuracy summary"
 
 
 def _inject_styles() -> None:
@@ -142,12 +139,6 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         return
     available_zones = sorted(current["zone"].dropna().unique())
 
-    view = st.radio(
-        "View",
-        [FORECAST_VISUALIZATION_VIEW, MODEL_ACCURACY_VIEW],
-        horizontal=True,
-        key=f"{target}_view",
-    )
     control_cols = st.columns([1.0, 1.0])
     selected_zone = control_cols[0].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
     available_run_days = max(1, current["run_date"].nunique())
@@ -165,39 +156,31 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         st.warning("No forecast rows match the selected zone and time window.")
         return
 
-    if view == FORECAST_VISUALIZATION_VIEW:
-        st.plotly_chart(
-            deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
-            width="stretch",
-        )
-    elif view == MODEL_ACCURACY_VIEW:
-        _render_accuracy_section(target, current)
+    st.plotly_chart(
+        deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
+        width="stretch",
+    )
 
 
-def _render_accuracy_section(target: str, forecasts: pd.DataFrame) -> None:
-    accuracy = online_forecast_accuracy(forecasts)
-    st.subheader(f"{_target_label(target)} model accuracy summary")
-    if accuracy.empty:
-        st.info("No realized actual values are attached to this target in the selected window yet.")
-        return
-    metrics = ["MAE", "RMSE", "R2"] if target == "load" else ["MAE", "R2"]
-    available_metrics = [metric for metric in metrics if metric in accuracy.columns and accuracy[metric].notna().any()]
-    if not available_metrics:
-        st.info("No accuracy metrics are available for the selected rows yet.")
-        return
-    chart_cols = st.columns(2)
-    for idx, metric in enumerate(available_metrics):
-        with chart_cols[idx % 2]:
-            st.plotly_chart(
-                accuracy_summary_chart(accuracy, metric, title=metric, show_legend=idx == 0),
-                width="stretch",
-            )
-    _render_analysis_window(forecasts)
+
+@st.cache_data(show_spinner=False)
+def _fallback_daily_leaderboard(day: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    store = ForecastStore()
+    frame = _prepared_online_forecasts(_data_version(store))
+    frame = frame[frame.zone.isin(zones())]
+    detail, _ = online_rmae_leaderboard(frame)
+    return detail, online_win_rate_by_zone(frame)
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
-    detail, _ = online_rmae_leaderboard(frame)
-    win_rate_detail = online_win_rate_by_zone(frame)
+    snapshot = ForecastStore().dashboard_dir() / "leaderboard_daily.parquet"
+    if snapshot.exists():
+        detail = pd.read_parquet(snapshot)
+        win_rate_detail = detail
+    else:
+        detail, win_rate_detail = _fallback_daily_leaderboard(
+            pd.Timestamp.now(tz="Europe/Brussels").date().isoformat()
+        )
     st.markdown('<div class="task-section-title">Leaderboard</div>', unsafe_allow_html=True)
     if detail.empty:
         st.info("The leaderboard will appear after complete realized runs are available for every compared model.")
@@ -222,6 +205,11 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         .reset_index()
         .rename(columns={"display_family": "Model Family"})
     )
+    mae = (
+        target_detail.pivot(index="display_family", columns="zone", values="MAE")
+        .reindex(index=family_order, columns=zone_order)
+        .reset_index().rename(columns={"display_family": "Model Family"})
+    )
     target_win_rates = win_rate_detail[win_rate_detail["target"].eq(selected_target)].copy()
     win_rate = (
         target_win_rates.pivot(index="display_family", columns="zone", values="win_rate")
@@ -230,6 +218,14 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         .rename(columns={"display_family": "Model Family"})
     )
 
+    st.markdown("#### MAE (MW)")
+    st.caption("Mean absolute error on the same fully realized runs for all compared models. Lower is better.")
+    if "snapshot_date" in target_detail.columns:
+        st.caption(f"Updated once daily. Snapshot date: {target_detail['snapshot_date'].iloc[0]} (Europe/Brussels).")
+    st.dataframe(
+        mae, width="stretch", hide_index=True,
+        column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
+    )
     st.markdown("#### rMAE vs TSO")
     st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
     st.caption("A value below 1 means the model is more accurate than the TSO model on average. Lower is better.")

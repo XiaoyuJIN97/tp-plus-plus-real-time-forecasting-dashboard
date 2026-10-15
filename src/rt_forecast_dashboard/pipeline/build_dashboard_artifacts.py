@@ -71,6 +71,9 @@ def build_dashboard_forecasts(
         "targets": int(recent["target"].nunique()),
         "models": int(recent["model"].nunique()),
     }
+    from rt_forecast_dashboard.pipeline.leaderboard_snapshot import build_daily_leaderboard
+    build_daily_leaderboard(store, recent)
+
     metadata_path = path.with_name("forecasts_status.json")
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     return path, metadata
