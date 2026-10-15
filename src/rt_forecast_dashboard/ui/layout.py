@@ -218,14 +218,6 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         .rename(columns={"display_family": "Model Family"})
     )
 
-    st.markdown("#### MAE (MW)")
-    st.caption("Mean absolute error on the same fully realized runs for all compared models. Lower is better.")
-    if "snapshot_date" in target_detail.columns:
-        st.caption(f"Updated once daily. Snapshot date: {target_detail['snapshot_date'].iloc[0]} (Europe/Brussels).")
-    st.dataframe(
-        mae, width="stretch", hide_index=True,
-        column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
-    )
     st.markdown("#### rMAE vs TSO")
     st.caption("rMAE = model MAE / TSO forecast MAE over the same fully realized runs.")
     st.caption("A value below 1 means the model is more accurate than the TSO model on average. Lower is better.")
@@ -251,6 +243,14 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
             )
             for zone in zone_order
         },
+    )
+    st.markdown("#### MAE (MW)")
+    st.caption("Mean absolute error on the same fully realized runs for all compared models. Lower is better.")
+    if "snapshot_date" in target_detail.columns:
+        st.caption(f"Updated once daily. Snapshot date: {target_detail['snapshot_date'].iloc[0]} (Europe/Brussels).")
+    st.dataframe(
+        mae, width="stretch", hide_index=True,
+        column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
     )
     _render_analysis_window(frame[frame["target"].eq(selected_target)])
 
