@@ -1,0 +1,11 @@
+checked_at,run_date,rows,seconds,status,message
+2026-10-15T20:02:36+00:00,2026-10-06,0,0.026,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-07,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-08,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-09,0,0.024,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-10,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-11,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-12,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-13,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:02:36+00:00,2026-10-14,0,0.023,skipped_complete,complete 108 groups x 24 hours
+2026-10-15T20:25:14+00:00,2026-10-15,2496,1357.514,incomplete,"incomplete groups (4): FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
