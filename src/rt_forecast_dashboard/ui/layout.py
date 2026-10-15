@@ -246,8 +246,6 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
     )
     st.markdown("#### MAE (MW)")
     st.caption("Mean absolute error on the same fully realized runs for all compared models. Lower is better.")
-    if "snapshot_date" in target_detail.columns:
-        st.caption(f"Updated once daily. Snapshot date: {target_detail['snapshot_date'].iloc[0]} (Europe/Brussels).")
     st.dataframe(
         mae, width="stretch", hide_index=True,
         column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},

@@ -1,4 +1,4 @@
-"""Streamlit entry point. Leaderboard layout revision: MAE last, 2026-10-15."""
+"""Streamlit entry point. Leaderboard layout revision: MAE last without snapshot caption."""
 
 from pathlib import Path
 import sys
