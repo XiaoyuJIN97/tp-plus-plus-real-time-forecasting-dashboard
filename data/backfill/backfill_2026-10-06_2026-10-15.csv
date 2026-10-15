@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-15T21:40:59+00:00,2026-10-06,0,0.05,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-07,0,0.046,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-08,0,0.048,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-09,0,0.045,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-10,0,0.045,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-11,0,0.048,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-12,0,0.047,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-13,0,0.047,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:40:59+00:00,2026-10-14,0,0.043,skipped_complete,complete 108 groups x 24 hours
-2026-10-15T21:57:30+00:00,2026-10-15,2496,990.016,incomplete,"incomplete groups (4): FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-10-15T21:57:34+00:00,2026-10-06,0,0.044,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-07,0,0.041,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-08,0,0.041,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-09,0,0.04,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-10,0,0.04,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-11,0,0.04,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-12,0,0.04,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-13,0,0.041,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T21:57:34+00:00,2026-10-14,0,0.04,skipped_complete,complete 27 groups x 24 hours
+2026-10-15T22:03:02+00:00,2026-10-15,624,328.042,incomplete,incomplete groups (1): FR/wind_offshore/timesfm3_online=0
