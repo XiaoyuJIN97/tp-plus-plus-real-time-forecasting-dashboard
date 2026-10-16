@@ -1,9 +1,9 @@
 {
-  "generated_at_utc": "2026-10-15T22:04:05.309570+00:00",
+  "generated_at_utc": "2026-10-16T21:07:13.781229+00:00",
   "retention_days": 90,
   "first_run_date": "2026-07-24",
-  "latest_run_date": "2026-10-15",
-  "rows": 333168,
+  "latest_run_date": "2026-10-16",
+  "rows": 336720,
   "zones": 8,
   "targets": 4,
   "models": 8
