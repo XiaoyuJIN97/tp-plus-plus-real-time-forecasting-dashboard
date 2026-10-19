@@ -1,0 +1,11 @@
+checked_at,run_date,rows,seconds,status,message
+2026-10-19T21:15:15+00:00,2026-10-10,0,0.035,skipped_complete,complete 108 groups x 24 hours
+2026-10-19T21:15:15+00:00,2026-10-11,0,0.033,skipped_complete,complete 108 groups x 24 hours
+2026-10-19T21:15:15+00:00,2026-10-12,0,0.039,skipped_complete,complete 108 groups x 24 hours
+2026-10-19T21:15:15+00:00,2026-10-13,0,0.033,skipped_complete,complete 108 groups x 24 hours
+2026-10-19T21:15:15+00:00,2026-10-14,0,0.032,skipped_complete,complete 108 groups x 24 hours
+2026-10-19T21:31:14+00:00,2026-10-15,2496,958.289,incomplete,"incomplete groups (4): FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-10-19T21:59:35+00:00,2026-10-16,2496,1701.804,incomplete,"incomplete groups (4): FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-10-19T22:24:33+00:00,2026-10-17,2400,1498.032,incomplete,"incomplete groups (8): BE/wind_offshore/chronos2_online=0, BE/wind_offshore/persistence=0, BE/wind_offshore/tso_reference=0, BE/wind_offshore/xgboost_online=0, FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-10-19T22:46:22+00:00,2026-10-18,2400,1308.305,incomplete,"incomplete groups (8): BE/wind_offshore/chronos2_online=0, BE/wind_offshore/persistence=0, BE/wind_offshore/tso_reference=0, BE/wind_offshore/xgboost_online=0, FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
+2026-10-19T23:11:13+00:00,2026-10-19,2400,1491.05,incomplete,"incomplete groups (8): BE/wind_offshore/chronos2_online=0, BE/wind_offshore/persistence=0, BE/wind_offshore/tso_reference=0, BE/wind_offshore/xgboost_online=0, FR/wind_offshore/chronos2_online=0, FR/wind_offshore/persistence=0, FR/wind_offshore/tso_reference=0, FR/wind_offshore/xgboost_online=0"
