@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-20T20:30:36+00:00,2026-10-11,0,0.051,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:30:36+00:00,2026-10-12,0,0.049,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:30:36+00:00,2026-10-13,0,0.048,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:30:36+00:00,2026-10-14,0,0.049,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:30:36+00:00,2026-10-15,0,0.048,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:30:36+00:00,2026-10-16,0,0.048,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:30:36+00:00,2026-10-17,0,0.047,skipped_complete,complete 54 groups x 24 hours
-2026-10-20T20:58:41+00:00,2026-10-18,1176,1684.63,complete,complete 54 groups x 24 hours
-2026-10-20T21:17:54+00:00,2026-10-19,1272,1153.642,complete,complete 54 groups x 24 hours
-2026-10-20T21:38:36+00:00,2026-10-20,1296,1241.39,complete,complete 54 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-11,0,0.054,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-12,0,0.051,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-13,0,0.05,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-14,0,0.052,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-15,0,0.051,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-16,0,0.05,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-17,0,0.05,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-18,0,0.05,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-19,0,0.051,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T21:50:35+00:00,2026-10-20,0,0.05,skipped_complete,complete 108 groups x 24 hours
