@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 from rt_forecast_dashboard.covariates import covariates_for
+from rt_forecast_dashboard.config import zones
 from rt_forecast_dashboard.models.adapters import make_adapter
 from rt_forecast_dashboard.models.foundation_online import FoundationOnlineAdapter
 from rt_forecast_dashboard.pipeline.check_forecast_complete import expected_groups
@@ -11,8 +12,8 @@ from rt_forecast_dashboard.ui.analytics import online_enabled_model_families
 
 @pytest.mark.parametrize("key", ["t0_gamma_online", "timestral_online"])
 def test_same_covariate_policy_and_online_visibility(key):
-    for zone in ("BE", "FR", "DE"):
-        for target in ("load", "solar", "wind_onshore", "wind_offshore"):
+    for zone, config in zones().items():
+        for target in config.get("targets", ("load", "solar", "wind_onshore", "wind_offshore")):
             assert covariates_for(target, zone, key) == covariates_for(target, zone, "timesfm3_online")
             assert (zone, target, key) in expected_groups({key})
     family = "T0 Gamma" if key.startswith("t0") else "Timestral"
