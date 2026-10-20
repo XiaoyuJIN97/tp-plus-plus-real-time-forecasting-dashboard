@@ -87,8 +87,15 @@ jobs:
           RECOVERY_START: ${{ inputs.start }}
           RECOVERY_END: ${{ inputs.end }}
         run: |
-          days=$(python -c 'import os; from datetime import date; print((date.fromisoformat(os.environ["RECOVERY_END"]) - date.fromisoformat(os.environ["RECOVERY_START"])).days + 1)')
-          python -m rt_forecast_dashboard.pipeline.build_selected_ensembles --actuals external/entsoe/data/dashboard/actuals_recent.parquet --end "$RECOVERY_END" --recent-days "$days" --source historical_mock_ensemble
+          python - <<'PYTHON'
+          import os
+          import pandas as pd
+          from pathlib import Path
+          from rt_forecast_dashboard.storage import ForecastStore
+          from rt_forecast_dashboard.pipeline.build_selected_ensembles import build_selected_ensembles
+          days = [day.date().isoformat() for day in pd.date_range(os.environ['RECOVERY_START'], os.environ['RECOVERY_END'])]
+          build_selected_ensembles(ForecastStore(), actuals_path=Path('external/entsoe/data/dashboard/actuals_recent.parquet'), run_dates=days, source='historical_mock_ensemble', only_missing=True, refresh_dates=set())
+          PYTHON
           python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts --retention-days 90 --actuals external/entsoe/data/dashboard/actuals_recent.parquet
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

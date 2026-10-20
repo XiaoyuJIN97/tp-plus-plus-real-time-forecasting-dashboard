@@ -5,6 +5,8 @@ on:
       - 'src/rt_forecast_dashboard/data/entsoe_client.py'
       - 'tests/test_entsoe_response_normalization.py'
       - 'requirements-forecast.txt'
+      - 'scripts/recover_missing_offshore.py'
+      - '.github/workflows/recover-offshore.yml'
       - '.github/workflows/entsoe-ingestion-check.yml'
   workflow_dispatch:
 jobs:
