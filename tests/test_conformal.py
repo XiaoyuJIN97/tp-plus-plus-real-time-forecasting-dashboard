@@ -109,9 +109,14 @@ def test_model_and_coverage_controls(tmp_path, monkeypatch):
     at.multiselect[0].set_value([]).run()
     assert len(at.get('plotly_chart')) == 0
     at.multiselect[0].set_value(['a', 'b']).run()
-    at.multiselect[1].set_value([]).run()
+    at.selectbox[0].set_value(1).run()
     assert not at.exception
-    assert len(at.get('plotly_chart')) == 0
+    assert len(at.get('plotly_chart')) == 2
+    assert len(at.expander) == 0
+    import json
+    for chart in at.get('plotly_chart'):
+        traces = json.loads(chart.proto.spec)['data']
+        assert {trace.get('name') for trace in traces if trace.get('fill') == 'tonexty'} == {'80% band'}
 
 
 def test_artifact_contains_every_valid_model_and_preserves_warmup(tmp_path):

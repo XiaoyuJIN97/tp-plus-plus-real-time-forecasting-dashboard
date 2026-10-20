@@ -1,10 +1,14 @@
-# Conformal forecast panels
+# Probabilistic forecast panels
 
 The Forecast visualization and analysis page has parallel Point forecasts and
-Conformal prediction tabs. Existing target, zone and date controls apply to both.
-In the conformal tab, choose models, 80/90/95% coverage levels, and one or two
-plots per row. Each model has its own forecast, actuals and nested interval bands.
-The coverage table scores only displayed hours with both actuals and bands.
+Probabilistic forecasts tabs. Existing target, zone and date controls apply to both.
+In the probabilistic tab, choose models and one or two plots per row.
+The displayed band has 80% nominal coverage, matching the interval coverage
+of Elia’s P10–P90 wind and solar forecasts. The conformal bounds are symmetric
+absolute-error intervals, not separately calibrated P10 and P90 quantiles.
+See [Elia wind forecast fields](https://opendata.elia.be/explore/dataset/ods086/information/)
+and [Elia solar forecast fields](https://opendata.elia.be/explore/dataset/ods087/information/). Each model has its own forecast, actuals and an 80% interval band.
+Coverage diagnostics remain available in the generated CSV artifact.
 
 Calibration uses absolute errors separately for each model, zone, target and
 six-hour horizon bucket. For every forecast origin, use at most 60 earlier,
