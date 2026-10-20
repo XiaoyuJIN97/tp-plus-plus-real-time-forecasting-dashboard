@@ -18,6 +18,7 @@ from rt_forecast_dashboard.covariates import covariates_for
 from rt_forecast_dashboard.data.entsoe_realtime_archive import ACTUAL_VARIABLES, FORECAST_VARIABLES
 from rt_forecast_dashboard.data.weather_archive import TARGET_MAP
 from rt_forecast_dashboard.models.foundation_online import FoundationOnlineAdapter, close_workers
+from rt_forecast_dashboard.models.foundation_runtime import REVISIONS
 from rt_forecast_dashboard.storage import ForecastStore
 
 
@@ -140,7 +141,8 @@ def main():
                 if saved.exists() and not args.preflight:
                     saved_rows = pd.read_csv(saved)
                     match = saved_rows[(saved_rows.zone == zone) & (saved_rows.target == target) & (saved_rows.model == name + "_online")]
-                    if len(match) == 24 and match.timestamp.nunique() == 24 and np.isfinite(match.forecast_mw).all():
+                    aligned = np.array_equal(pd.to_datetime(match.timestamp, utc=True).sort_values().to_numpy(), template.timestamp.sort_values().to_numpy())
+                    if len(match) == 24 and match.timestamp.nunique() == 24 and np.isfinite(match.forecast_mw).all() and aligned:
                         continue
                 try:
                     x, cov, output = prepare(template, actual, tso, weather, covs)
@@ -167,7 +169,7 @@ def main():
                     store.append_forecasts(output, str(output.run_date.iloc[0]))
                 print(name, zone, target, min(offset + len(chunk), len(pending)), "/", len(pending), round(time.monotonic()-started, 1), "s", flush=True)
         close_workers()
-    (args.output / "replay_config.json").write_text(json.dumps({k: str(v) for k,v in vars(args).items()}, indent=2))
+    (args.output / "replay_config.json").write_text(json.dumps(dict(arguments={k: str(v) for k,v in vars(args).items()}, model_revisions=REVISIONS, provenance="reconstructed historical mock, not original issue-time vintages"), indent=2))
     print("Ready windows", len(audit), "blocked windows", len(issues), flush=True)
 
 

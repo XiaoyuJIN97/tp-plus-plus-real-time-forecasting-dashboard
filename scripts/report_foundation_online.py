@@ -22,7 +22,7 @@ def main():
         frame["timestamp"] = pd.to_datetime(frame.timestamp, utc=True)
         frame["run_date"] = frame.run_date.astype(str)
     old = old.drop_duplicates(KEYS + ["model"], keep="last")
-    if new.duplicated(KEYS + ["model"]).any() or not np.isfinite(new.forecast_mw).all():
+    if new.duplicated(KEYS + ["model"]).any() or not np.isfinite(new.forecast_mw).all() or (new.forecast_mw < 0).any():
         raise ValueError("Duplicate or invalid replay forecasts")
     counts = new.groupby(["run_date", "zone", "target", "model"]).timestamp.nunique()
     if not counts.eq(24).all():
@@ -41,15 +41,16 @@ def main():
         for base, reference in baselines.groupby("model"):
             if base in {"tabpfn_online", "t0_gamma_online", "timestral_online"}:
                 continue
-            matched = group[KEYS + ["forecast_mw", "actual_mw"]].merge(
-                reference[KEYS + ["forecast_mw"]], on=KEYS, suffixes=("", "_baseline"), validate="one_to_one")
+            matched = group[KEYS + ["forecast_mw", "actual_mw", "context_end"]].merge(
+                reference[KEYS + ["forecast_mw", "context_end"]], on=KEYS, suffixes=("", "_baseline"), validate="one_to_one")
             matched = matched.dropna(subset=["actual_mw", "forecast_mw", "forecast_mw_baseline"])
             if matched.empty:
                 continue
             error = matched.forecast_mw - matched.actual_mw
             baseline_error = matched.forecast_mw_baseline - matched.actual_mw
             mae, base_mae = error.abs().mean(), baseline_error.abs().mean()
-            metrics.append(dict(zone=zone, target=target, model=model, baseline=base,
+            origins = pd.to_datetime(matched.context_end, utc=True).eq(pd.to_datetime(matched.context_end_baseline, utc=True))
+            metrics.append(dict(same_origin_rows=int(origins.sum()), origin_aligned=bool(origins.all()), zone=zone, target=target, model=model, baseline=base,
                                 n=len(matched), windows=matched.run_date.nunique(),
                                 mae=mae, baseline_mae=base_mae,
                                 mae_change_pct=100 * (mae / base_mae - 1) if base_mae else np.nan,
@@ -60,7 +61,7 @@ def main():
     lines = ["# T0 Gamma and Timestral online mock replay", "",
              "Mock forecasts follow each saved TimesFM3 delivery window from 24 July through 19 October 2026, with 2,208 context hours and 24 forecast hours. Actual context ends one hour before delivery. The model checkpoints and inference settings match the validated offline evaluation.", "",
              "All rows are labeled `historical_mock_replay`. Collector archives and retained outcomes reconstruct past inputs. October weather gaps use the Open-Meteo historical forecast API; these are not certified original issue-time vintages. This is a reconstructed mock comparison, not a claim of contemporaneous live performance.", "",
-             "Coverage gaps remain excluded under production context-quality limits. Some older baseline horizons differ by two hours; all comparisons below match the exact run date and delivery timestamp, using the same realized actuals for both models.", "",
+             "Coverage gaps remain excluded under production context-quality limits. Some older baseline horizons differ by two hours; all comparisons below match the exact run date and delivery timestamp, using the same realized actuals for both models. Pairs with different forecast origins are marked in the comparison CSV and are descriptive rather than controlled comparisons.", "",
              f"Saved predictions: **{len(new):,} rows / {len(counts):,} complete daily windows** across {new.zone.nunique()} zones.", "",
              "## Matched comparison with TimesFM3", "",
              "| Zone | Target | Model | Scored hours | MAE (MW) | TimesFM3 MAE | Change |",

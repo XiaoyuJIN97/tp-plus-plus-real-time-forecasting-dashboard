@@ -5,6 +5,8 @@ on:
       - 'src/rt_forecast_dashboard/models/foundation_*.py'
       - 'scripts/requirements-foundation-online.txt'
       - 'tests/test_foundation_online.py'
+      - 'tests/test_foundation_replay.py'
+      - 'scripts/replay_foundation_online.py'
       - '.github/workflows/foundation-models-check.yml'
   workflow_dispatch:
 jobs:
@@ -31,7 +33,7 @@ jobs:
           .foundation-env/bin/pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
           .foundation-env/bin/pip install -r scripts/requirements-foundation-online.txt
       - name: Test policy and input handling
-        run: pytest tests/test_foundation_online.py -q
+        run: pytest tests/test_foundation_online.py tests/test_foundation_replay.py -q
       - name: Run real CPU inference through both isolated workers
         env:
           HF_HUB_DISABLE_XET: '1'

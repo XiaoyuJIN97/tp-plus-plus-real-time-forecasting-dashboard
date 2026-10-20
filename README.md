@@ -152,3 +152,8 @@ Historical rows from the July–October rollout are explicitly labeled
 `historical_mock_replay`. They reconstruct historical inputs and are not certified
 issue-time vintages. Replay excludes context gaps beyond the existing quality
 limits; coverage and matched comparison reports document the exclusions.
+
+To append a validated mock export and align realized observations across models,
+run `scripts/import_foundation_replay.py --replay PATH --data-dir data`, followed
+by `python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts`. The
+import audits every existing prediction and records revisions to shared actuals.
