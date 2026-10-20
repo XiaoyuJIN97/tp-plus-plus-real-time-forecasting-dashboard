@@ -39,3 +39,19 @@ def test_incomplete_actuals_do_not_lock_an_empty_snapshot_for_the_day(tmp_path) 
     assert build_daily_leaderboard(store,frame,now=now).empty
     assert not (store.dashboard_dir()/'leaderboard_daily.parquet').exists()
     assert not build_daily_leaderboard(store,forecasts(),now=now).empty
+
+
+def test_new_outcomes_refresh_an_existing_snapshot_on_the_same_day(tmp_path) -> None:
+    store = ForecastStore(data_dir=tmp_path)
+    frame = forecasts()
+    now = pd.Timestamp('2026-10-15T12:00:00Z')
+    first = build_daily_leaderboard(store, frame, now=now)
+    later = frame.copy()
+    later['run_date'] = '2026-07-25'
+    later['timestamp'] += pd.Timedelta(days=1)
+    later['context_end'] += pd.Timedelta(days=1)
+    later.loc[later.model.eq('chronos2_online'), 'forecast_mw'] = 115
+    refreshed = build_daily_leaderboard(store, pd.concat([frame, later]), now=now)
+    assert first.test_runs.eq(1).all()
+    assert refreshed.test_runs.eq(2).all()
+    assert refreshed.set_index('display_family').loc['Chronos2', 'MAE'] == 10

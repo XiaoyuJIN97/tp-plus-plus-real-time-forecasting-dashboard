@@ -1,0 +1,40 @@
+name: Refresh observed outcomes and leaderboard
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 8 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: dashboard-results-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: Energy-Data-Science/entsoe-realtime-data
+          ref: data
+          path: external/entsoe-realtime-data
+          filter: blob:none
+          sparse-checkout: data/dashboard/actuals_recent.parquet
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install dashboard dependencies
+        run: pip install -r requirements.txt -e .
+      - name: Refresh outcomes and daily scores
+        run: |
+          python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts \
+            --retention-days 90 \
+            --actuals external/entsoe-realtime-data/data/dashboard/actuals_recent.parquet
+      - name: Publish refreshed results
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          scripts/commit_dashboard_data.sh 'Refresh observed outcomes and leaderboard' data/forecasts data/dashboard

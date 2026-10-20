@@ -270,7 +270,21 @@ def _load_dashboard() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
 
 def _render_data_warning(prepared: pd.DataFrame) -> None:
-    return
+    if prepared.empty:
+        return
+    latest_run = str(prepared["run_date"].max())
+    st.caption(f"Latest forecast run: {latest_run} (Europe/Brussels).")
+    actual_times = pd.to_datetime(
+        prepared.loc[prepared["actual_mw"].notna(), "timestamp"], utc=True, errors="coerce"
+    )
+    if actual_times.empty or actual_times.dropna().empty:
+        st.warning("Observed ENTSO-E outcomes are unavailable; accuracy results cannot advance yet.")
+    elif pd.Timestamp.now(tz="UTC") - actual_times.max() > pd.Timedelta(days=2):
+        latest_actual = actual_times.max().tz_convert("Europe/Brussels").date().isoformat()
+        st.warning(
+            f"ENTSO-E observed outcomes have only reached {latest_actual}. "
+            "Newer forecasts are available, but their accuracy cannot be scored until outcomes arrive."
+        )
 
 
 def _render_leaderboard_page(details_page: st.Page) -> None:
