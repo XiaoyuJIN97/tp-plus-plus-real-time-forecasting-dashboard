@@ -1,4 +1,4 @@
-"""Streamlit entry point. Freshness revision: independent outcome refresh and explicit forecast date."""
+"""Streamlit entry point. Freshness revision: recovered outcomes and lightweight leaderboard loading."""
 
 from pathlib import Path
 import sys

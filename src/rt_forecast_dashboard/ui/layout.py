@@ -86,18 +86,62 @@ def _data_version(store: ForecastStore) -> tuple[int, int]:
     return (stat.st_mtime_ns, stat.st_size)
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(max_entries=1, show_spinner=False)
 def _load_auxiliary_data(version: tuple[int, int]) -> tuple[pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
     return store.read_issues(), store.read_backfill_history()
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=3600, max_entries=1, show_spinner=False)
 def _prepared_online_forecasts(version: tuple[int, int]) -> pd.DataFrame:
-    prepared = valid_online_forecasts(ForecastStore().read_dashboard_forecasts())
+    store = ForecastStore()
+    path = store.dashboard_forecast_path()
+    if path.exists():
+        import pyarrow.parquet as pq
+        needed = ["run_date", "zone", "target", "model", "model_label", "timestamp", "forecast_mw",
+                  "actual_mw", "source", "context_hours", "context_end"]
+        names = pq.read_schema(path).names
+        forecasts = pd.read_parquet(path, columns=[c for c in needed if c in names])
+    else:
+        forecasts = store.read_dashboard_forecasts()
+    prepared = valid_online_forecasts(forecasts)
     if "model" in prepared.columns:
         prepared = prepared[~prepared["model"].isin(HIDDEN_MODEL_KEYS)].copy()
-    return attach_display_actuals(prepared)
+    prepared = attach_display_actuals(prepared)
+    keep = ["run_date", "zone", "target", "model", "model_label", "timestamp", "forecast_mw",
+            "actual_mw", "source", "horizon", "context_hours", "context_end"]
+    prepared = prepared[[c for c in keep if c in prepared]].copy()
+    for column in ["run_date", "zone", "target", "model", "model_label", "source"]:
+        if column in prepared:
+            prepared[column] = prepared[column].astype("category")
+    return prepared
+
+
+@st.cache_data(ttl=3600, max_entries=1, show_spinner=False)
+def _leaderboard_summary(version: tuple[int, int]) -> pd.DataFrame:
+    """Load only coverage endpoints; the landing page uses precomputed scores."""
+    path = ForecastStore().dashboard_forecast_path()
+    if not path.exists():
+        return _prepared_online_forecasts(version)
+    frame = pd.read_parquet(path, columns=["target", "timestamp", "actual_mw", "run_date", "source"])
+    return _coverage_endpoints(frame)
+
+
+def _coverage_endpoints(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return frame
+    frame = frame.copy()
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+    realized = frame.dropna(subset=["actual_mw"])
+    indices = [pd.to_datetime(frame["run_date"]).idxmax()]
+    if not realized.empty:
+        grouped = realized.groupby("target")["timestamp"]
+        indices.extend(grouped.idxmin().tolist())
+        indices.extend(grouped.idxmax().tolist())
+    historical = frame[frame["source"].astype(str).str.startswith("historical_mock")]
+    if not historical.empty:
+        indices.append(historical.index[0])
+    return frame.loc[list(dict.fromkeys(indices))].copy()
 
 
 def _target_label(target: str) -> str:
@@ -163,7 +207,7 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
 
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(max_entries=1, show_spinner=False)
 def _fallback_daily_leaderboard(day: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     store = ForecastStore()
     frame = _prepared_online_forecasts(_data_version(store))
@@ -272,7 +316,7 @@ def _load_dashboard() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 def _render_data_warning(prepared: pd.DataFrame) -> None:
     if prepared.empty:
         return
-    latest_run = str(prepared["run_date"].max())
+    latest_run = str(prepared["run_date"].astype(str).max())
     st.caption(f"Latest forecast run: {latest_run} (Europe/Brussels).")
     actual_times = pd.to_datetime(
         prepared.loc[prepared["actual_mw"].notna(), "timestamp"], utc=True, errors="coerce"
@@ -289,7 +333,7 @@ def _render_data_warning(prepared: pd.DataFrame) -> None:
 
 def _render_leaderboard_page(details_page: st.Page) -> None:
     _render_header()
-    prepared, _, _ = _load_dashboard()
+    prepared = _leaderboard_summary(_data_version(ForecastStore()))
     if prepared.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
