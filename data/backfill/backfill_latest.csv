@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-19T23:11:17+00:00,2026-10-10,0,0.032,skipped_complete,complete 27 groups x 24 hours
-2026-10-19T23:11:17+00:00,2026-10-11,0,0.03,skipped_complete,complete 27 groups x 24 hours
-2026-10-19T23:11:17+00:00,2026-10-12,0,0.029,skipped_complete,complete 27 groups x 24 hours
-2026-10-19T23:11:17+00:00,2026-10-13,0,0.029,skipped_complete,complete 27 groups x 24 hours
-2026-10-19T23:11:17+00:00,2026-10-14,0,0.029,skipped_complete,complete 27 groups x 24 hours
-2026-10-19T23:29:07+00:00,2026-10-15,624,1070.04,incomplete,incomplete groups (1): FR/wind_offshore/timesfm3_online=0
-2026-10-19T23:54:39+00:00,2026-10-16,624,1531.205,incomplete,incomplete groups (1): FR/wind_offshore/timesfm3_online=0
-2026-10-20T00:19:06+00:00,2026-10-17,600,1467.126,incomplete,"incomplete groups (2): BE/wind_offshore/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0"
-2026-10-20T00:39:22+00:00,2026-10-18,600,1216.603,incomplete,"incomplete groups (2): BE/wind_offshore/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0"
-2026-10-20T00:58:33+00:00,2026-10-19,600,1150.626,incomplete,"incomplete groups (2): BE/wind_offshore/timesfm3_online=0, FR/wind_offshore/timesfm3_online=0"
+2026-10-20T20:07:34+00:00,2026-10-11,0,0.137,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-12,0,0.052,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-13,0,0.051,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-14,0,0.054,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-15,0,0.052,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-16,0,0.051,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-17,0,0.051,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-18,0,0.053,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:07:34+00:00,2026-10-19,0,0.05,skipped_complete,complete 108 groups x 24 hours
+2026-10-20T20:25:20+00:00,2026-10-20,2592,1065.219,complete,complete 108 groups x 24 hours
