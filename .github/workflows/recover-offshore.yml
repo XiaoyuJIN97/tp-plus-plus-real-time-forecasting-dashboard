@@ -1,0 +1,102 @@
+name: Recover missing offshore forecasts
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: First run date
+        default: '2026-10-15'
+        required: true
+      end:
+        description: Last run date
+        default: '2026-10-19'
+        required: true
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    concurrency:
+      group: daily-forecast-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    env:
+      ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
+      FORECAST_DEMO_MODE: 'false'
+      ENTSOE_REALTIME_DATA: external/entsoe
+      ENTSOE_REALTIME_GIT_REF: HEAD
+      ENTSOE_REALTIME_PREFER_LOCAL: 'true'
+      OPEN_METEO_REALTIME_DATA: external/weather
+      OPEN_METEO_REALTIME_GIT_REF: HEAD
+      SELECTED_WEATHER_POINTS: external/weather/config/selected_weather_points_for_tp_v01_4p.csv
+      LOAD_SELECTED_WEATHER_POINTS: external/weather/config/selected_load_weather_points_for_tp_v01_4p.csv
+      FOUNDATION_PYTHON: .foundation-env/bin/python
+      FOUNDATION_THREADS: '2'
+      HF_HUB_DISABLE_XET: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: Energy-Data-Science/entsoe-realtime-data
+          ref: data
+          path: external/entsoe
+          filter: blob:none
+          sparse-checkout: |
+            data/update_manifest.csv
+            data/hourly
+            data/dashboard/actuals_recent.parquet
+      - uses: actions/checkout@v4
+        with:
+          repository: XiaoyuJIN97/open-meteo-realtime-data
+          ref: data
+          path: external/weather
+          filter: blob:none
+          sparse-checkout: |
+            config
+            data/raw/BE
+            data/raw/FR
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+            ~/.cache/torch
+          key: ${{ runner.os }}-offshore-recovery-${{ hashFiles('requirements-forecast.txt', 'scripts/requirements-foundation-online.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-forecast-models-
+            ${{ runner.os }}-foundation-check-
+      - name: Install tested CPU runtimes
+        run: |
+          pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-forecast.txt -e .
+          python -m venv .foundation-env
+          .foundation-env/bin/pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+          .foundation-env/bin/pip install -r scripts/requirements-foundation-online.txt
+      - name: Recover missing model windows
+        env:
+          RECOVERY_START: ${{ inputs.start }}
+          RECOVERY_END: ${{ inputs.end }}
+        run: python -u scripts/recover_missing_offshore.py --start "$RECOVERY_START" --end "$RECOVERY_END"
+      - name: Publish recovered forecasts and dashboard artifacts
+        if: always()
+        env:
+          RECOVERY_START: ${{ inputs.start }}
+          RECOVERY_END: ${{ inputs.end }}
+        run: |
+          python - <<'PYTHON'
+          import os
+          import pandas as pd
+          from pathlib import Path
+          from rt_forecast_dashboard.storage import ForecastStore
+          from rt_forecast_dashboard.pipeline.build_selected_ensembles import build_selected_ensembles
+          days = [day.date().isoformat() for day in pd.date_range(os.environ['RECOVERY_START'], os.environ['RECOVERY_END'])]
+          build_selected_ensembles(ForecastStore(), actuals_path=Path('external/entsoe/data/dashboard/actuals_recent.parquet'), run_dates=days, source='historical_mock_ensemble', only_missing=True, refresh_dates=set())
+          PYTHON
+          python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts --retention-days 90 --actuals external/entsoe/data/dashboard/actuals_recent.parquet
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          scripts/commit_dashboard_data.sh 'Recover missing offshore forecasts and refresh dashboard' data

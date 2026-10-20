@@ -17,7 +17,20 @@ _STORED_FORECAST_CACHE: pd.DataFrame | None = None
 def _entsoe_response_to_hourly_frame(response: pd.Series | pd.DataFrame, value_col: str) -> pd.DataFrame:
     if isinstance(response, pd.DataFrame):
         numeric = response.select_dtypes(include="number")
-        values = numeric.sum(axis=1) if len(numeric.columns) > 1 else numeric.iloc[:, 0]
+        # Generation and plant consumption are different measures, not assets
+        # to add together. ENTSO-E drops this column level in months with only
+        # one measure, so accept both shapes before stitching monthly windows.
+        aggregated = [column for column in numeric.columns
+                      if "Actual Aggregated" in (column if isinstance(column, tuple) else (column,))]
+        consumption = [column for column in numeric.columns
+                       if "Actual Consumption" in (column if isinstance(column, tuple) else (column,))]
+        if aggregated:
+            numeric = numeric.loc[:, aggregated]
+        elif consumption:
+            numeric = numeric.drop(columns=consumption)
+        if numeric.empty:
+            raise ValueError("ENTSO-E response has no numeric generation columns")
+        values = numeric.sum(axis=1, min_count=1)
     else:
         values = response
     values = values.rename(value_col)
@@ -50,6 +63,36 @@ def _entsoe_response_to_hourly_frame(response: pd.Series | pd.DataFrame, value_c
         .reset_index()
     )
     return hourly[["timestamp", value_col]]
+
+
+def _query_entsoe_hourly(query, value_col: str, *, start: pd.Timestamp,
+                         end: pd.Timestamp, **kwargs) -> pd.DataFrame:
+    """Normalize each month before entsoe-py can concatenate mixed headers.
+
+    Version 0.8.1 splits long calls internally and concatenates raw responses.
+    A single-measure month has flat columns; a generation/consumption month
+    has MultiIndex columns. Combining those fails on pandas 3 before our usual
+    response converter is reached. Limit each public API call to one month.
+    """
+    from entsoe.exceptions import NoMatchingDataError
+
+    start, end = pd.Timestamp(start).tz_convert("UTC"), pd.Timestamp(end).tz_convert("UTC")
+    frames = []
+    cursor = start
+    while cursor < end:
+        stop = min(cursor + pd.DateOffset(months=1), end)
+        try:
+            response = query(start=cursor, end=stop, **kwargs)
+        except NoMatchingDataError:
+            cursor = stop
+            continue
+        frame = _entsoe_response_to_hourly_frame(response, value_col)
+        frames.append(frame[frame.timestamp.ge(cursor) & frame.timestamp.lt(stop)])
+        cursor = stop
+    if not frames:
+        raise NoMatchingDataError("No ENTSO-E observations in requested interval")
+    frame = pd.concat(frames, ignore_index=True)
+    return frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last").reset_index(drop=True)
 
 
 class EntsoeForecastClient:
@@ -137,14 +180,16 @@ class EntsoeForecastClient:
 
         client = EntsoePandasClient(api_key=self.api_key)
         if target == "load":
-            actual = client.query_load(zone_code, start=start, end=end)
-            tso = client.query_load_forecast(zone_code, start=start, end=end)
+            actual_query, forecast_query = client.query_load, client.query_load_forecast
+            kwargs = {}
         else:
             psr_type = {"solar": "B16", "wind_onshore": "B19", "wind_offshore": "B18"}[target]
-            actual = client.query_generation(zone_code, start=start, end=end, psr_type=psr_type)
-            tso = client.query_wind_and_solar_forecast(zone_code, start=start, end=end, psr_type=psr_type)
-        actual_frame = _entsoe_response_to_hourly_frame(actual, "actual_mw")
-        tso_frame = _entsoe_response_to_hourly_frame(tso, "tso_forecast_mw")
+            actual_query, forecast_query = client.query_generation, client.query_wind_and_solar_forecast
+            kwargs = {"psr_type": psr_type}
+        actual_frame = _query_entsoe_hourly(actual_query, "actual_mw", country_code=zone_code,
+                                           start=start, end=end, **kwargs)
+        tso_frame = _query_entsoe_hourly(forecast_query, "tso_forecast_mw", country_code=zone_code,
+                                        start=start, end=end, **kwargs)
         frame = actual_frame.merge(tso_frame, on="timestamp", how="inner")
         return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
 
@@ -227,8 +272,9 @@ class EntsoeForecastClient:
         start = pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else pd.Timestamp(start, tz="UTC")
         end = pd.Timestamp(end).tz_convert("UTC") if pd.Timestamp(end).tzinfo else pd.Timestamp(end, tz="UTC")
         if target == "load":
-            actual = client.query_load(zone_code, start=start, end=end)
+            query, kwargs = client.query_load, {}
         else:
             psr_type = {"solar": "B16", "wind_onshore": "B19", "wind_offshore": "B18"}[target]
-            actual = client.query_generation(zone_code, start=start, end=end, psr_type=psr_type)
-        return _entsoe_response_to_hourly_frame(actual, "actual_mw").dropna()
+            query, kwargs = client.query_generation, {"psr_type": psr_type}
+        return _query_entsoe_hourly(query, "actual_mw", country_code=zone_code,
+                                    start=start, end=end, **kwargs).dropna()

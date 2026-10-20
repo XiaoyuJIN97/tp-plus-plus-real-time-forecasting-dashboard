@@ -342,3 +342,8 @@ jobs:
             --actuals external/entsoe-realtime-data/data/dashboard/actuals_recent.parquet
           git add data/forecasts data/dashboard
           scripts/commit_dashboard_data.sh "Update compact dashboard artifact" data/forecasts data/dashboard
+
+      - name: Fail visibly when the published latest run is incomplete
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          python -m rt_forecast_dashboard.pipeline.check_forecast_complete --date "${{ steps.brussels_window.outputs.run_date }}"

@@ -1,7 +1,8 @@
 -r requirements.txt
 altair>=5.3
 chronos-forecasting>=2.0
-entsoe-py>=0.6.18
+entsoe-py==0.8.1
+pandas==3.0.6
 joblib>=1.4
 openmeteo-requests>=1.2
 pytest>=8.0
