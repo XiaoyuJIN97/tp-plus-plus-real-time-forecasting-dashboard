@@ -9,10 +9,10 @@ from rt_forecast_dashboard.config import features, zones
 
 
 TARGET_MODELS = {
-    "load": {"tso_reference", "persistence", "ridge_3mo_context", "chronos2_online", "timesfm3_online"},
-    "solar": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
-    "wind_onshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
-    "wind_offshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online"},
+    "load": {"tso_reference", "persistence", "ridge_3mo_context", "chronos2_online", "timesfm3_online", "t0_gamma_online", "timestral_online"},
+    "solar": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online", "t0_gamma_online", "timestral_online"},
+    "wind_onshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online", "t0_gamma_online", "timestral_online"},
+    "wind_offshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online", "t0_gamma_online", "timestral_online"},
 }
 HORIZON_HOURS = 24
 

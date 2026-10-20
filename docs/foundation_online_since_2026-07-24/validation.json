@@ -1,0 +1,8 @@
+{
+  "rows": 108048,
+  "windows": 4502,
+  "finite": true,
+  "complete_horizons": true,
+  "duplicate_free": true,
+  "context_before_delivery": true
+}

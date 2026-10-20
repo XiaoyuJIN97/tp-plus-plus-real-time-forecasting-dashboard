@@ -1,0 +1,7 @@
+# Dedicated runtime: do not resolve together with Chronos2/transformers.
+# Linux CI installs the CPU torch wheel before resolving these packages.
+numpy>=1.26
+tfc-t0[torch]==0.6.0
+torch==2.11.0
+huggingface-hub==1.33.0
+timestral @ git+https://github.com/mistralai/timestral.git@a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff

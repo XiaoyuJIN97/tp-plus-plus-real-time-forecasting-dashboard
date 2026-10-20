@@ -1,0 +1,14 @@
+{
+  "local_tests": "55 production tests passed",
+  "native_cpu_check": "https://github.com/XiaoyuJIN97/tp-plus-plus-real-time-forecasting-dashboard/actions/runs/39396801667",
+  "native_cpu_result": "success",
+  "python": "3.11",
+  "torch": "2.11.0+cpu",
+  "models": [
+    "t0_gamma",
+    "timestral"
+  ],
+  "separate_from_chronos_runtime": true,
+  "saved_forecast_cpu_gpu_parity_cases": 8,
+  "maximum_cpu_gpu_difference_mw": 0.00244140625
+}

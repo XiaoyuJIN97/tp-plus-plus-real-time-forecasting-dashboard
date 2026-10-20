@@ -18,3 +18,5 @@ open-meteo-realtime-data/data/updates/**/*.csv
 models/*.joblib
 models/*.pkl
 models/*.pickle
+
+.foundation-env/
