@@ -1,4 +1,4 @@
-"""Streamlit entry point. Leaderboard layout revision: MAE last without snapshot caption."""
+"""Streamlit entry point. Freshness revision: independent outcome refresh and explicit forecast date."""
 
 from pathlib import Path
 import sys
