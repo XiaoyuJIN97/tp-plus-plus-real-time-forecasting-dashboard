@@ -109,7 +109,7 @@ jobs:
             ~/.cache/huggingface
             ~/.cache/torch
             ~/.cache/tabpfn
-          key: ${{ runner.os }}-forecast-models-${{ hashFiles('requirements.txt', 'requirements-forecast.txt') }}
+          key: ${{ runner.os }}-forecast-models-${{ hashFiles('requirements.txt', 'requirements-forecast.txt', 'scripts/requirements-foundation-online.txt') }}
           restore-keys: |
             ${{ runner.os }}-forecast-models-
 
@@ -211,6 +211,47 @@ jobs:
           if [ "$failed" -ne 0 ]; then
             echo "::warning::One or more recent TimesFM3 forecast dates are incomplete after the rolling backfill attempt. Core forecasts will still be validated and published."
           fi
+
+      - name: Install isolated foundation model runtime
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          python -m venv .foundation-env
+          .foundation-env/bin/pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+          .foundation-env/bin/pip install -r scripts/requirements-foundation-online.txt
+
+      - name: Run T0 Gamma and Timestral daily forecasts
+        if: steps.brussels_window.outputs.should_run == 'true'
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
+          FORECAST_DEMO_MODE: "false"
+          ENTSOE_REALTIME_DATA: external/entsoe-realtime-data
+          ENTSOE_REALTIME_GIT_REF: HEAD
+          ENTSOE_REALTIME_PREFER_LOCAL: "true"
+          OPEN_METEO_REALTIME_DATA: external/open-meteo-realtime-data
+          OPEN_METEO_REALTIME_GIT_REF: HEAD
+          SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_weather_points_for_tp_v01_4p.csv
+          LOAD_SELECTED_WEATHER_POINTS: external/open-meteo-realtime-data/config/selected_load_weather_points_for_tp_v01_4p.csv
+          FOUNDATION_PYTHON: .foundation-env/bin/python
+          HF_HUB_DISABLE_XET: "1"
+        run: |
+          MODELS="t0_gamma_online,timestral_online"
+          END_DATE="${{ steps.brussels_window.outputs.run_date }}"
+          if [ -n "${{ github.event.inputs.run_date }}" ]; then
+            python -m rt_forecast_dashboard.pipeline.run_daily --date "$END_DATE" --models "$MODELS" --keep-issues
+          else
+            python -m rt_forecast_dashboard.pipeline.backfill --end "$END_DATE" --recent-days 10 --models "$MODELS"
+          fi
+
+      - name: Commit foundation model forecasts
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          scripts/commit_dashboard_data.sh "Update daily T0 Gamma and Timestral forecasts" data
+
+      - name: Validate foundation forecast completeness
+        continue-on-error: true
+        if: steps.brussels_window.outputs.should_run == 'true'
+        run: |
+          python -m rt_forecast_dashboard.pipeline.check_forecast_complete --date "${{ steps.brussels_window.outputs.run_date }}" --models t0_gamma_online,timestral_online
 
       - name: Run TabPFN daily forecast
         if: steps.brussels_window.outputs.should_run == 'true'

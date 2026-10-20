@@ -1,0 +1,51 @@
+name: Foundation model integration
+on:
+  pull_request:
+    paths:
+      - 'src/rt_forecast_dashboard/models/foundation_*.py'
+      - 'scripts/requirements-foundation-online.txt'
+      - 'tests/test_foundation_online.py'
+      - '.github/workflows/foundation-models-check.yml'
+  workflow_dispatch:
+jobs:
+  cpu-inference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+          key: ${{ runner.os }}-foundation-check-${{ hashFiles('scripts/requirements-foundation-online.txt') }}
+      - name: Install host and isolated model runtimes
+        run: |
+          pip install -r requirements.txt pytest scikit-learn joblib -e .
+          python -m venv .foundation-env
+          .foundation-env/bin/pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+          .foundation-env/bin/pip install -r scripts/requirements-foundation-online.txt
+      - name: Test policy and input handling
+        run: pytest tests/test_foundation_online.py -q
+      - name: Run real CPU inference through both isolated workers
+        env:
+          HF_HUB_DISABLE_XET: '1'
+          FOUNDATION_THREADS: '2'
+        run: |
+          python - <<'PY'
+          import numpy as np
+          from rt_forecast_dashboard.models.foundation_online import FoundationOnlineAdapter, close_workers
+          x = 100 + np.arange(2208, dtype=float) % 24
+          cov = 102 + np.arange(2232, dtype=float)[None, :] % 24
+          for name in ('t0_gamma', 'timestral'):
+              prediction = FoundationOnlineAdapter(name).predict_batch([x], [cov])
+              assert prediction.shape == (1, 24)
+              assert np.isfinite(prediction).all() and (prediction >= 0).all()
+              print(name, prediction.shape, float(prediction.mean()))
+              close_workers()
+          PY

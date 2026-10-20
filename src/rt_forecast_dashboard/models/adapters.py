@@ -317,6 +317,9 @@ def make_adapter(config: dict) -> ForecastAdapter:
             standardize_covariates=bool(config.get("standardize_covariates", False)),
             local_files_only=bool(config.get("local_files_only", False)),
         )
+    if adapter in {"t0_gamma_online", "timestral_online"}:
+        from rt_forecast_dashboard.models.foundation_online import FoundationOnlineAdapter
+        return FoundationOnlineAdapter("t0_gamma" if adapter == "t0_gamma_online" else "timestral", config.get("device", "cpu"))
     if adapter == "artifact_model":
         return ArtifactModelAdapter(config.get("artifact_path"))
     raise ValueError(f"Unknown model adapter: {adapter}")

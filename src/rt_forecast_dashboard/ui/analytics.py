@@ -12,7 +12,7 @@ from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, latest_c
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
 DAY_AHEAD_HOURS = 24
 ONLINE_CONTEXT_HOURS = 2208
-MODEL_FAMILY_ORDER = ["Ensembled model", "Chronos2", "TimesFM3", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
+MODEL_FAMILY_ORDER = ["Ensembled model", "Chronos2", "TimesFM3", "T0 Gamma", "Timestral", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
 MODEL_FAMILY_RANK = {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
 
 
@@ -23,6 +23,10 @@ def _normal_model_family(value: object) -> str:
         return "Chronos2"
     if "ensemble" in lowered:
         return "Ensembled model"
+    if "t0 gamma" in lowered:
+        return "T0 Gamma"
+    if "timestral" in lowered:
+        return "Timestral"
     if "timesfm" in lowered:
         return "TimesFM3"
     if "ridge" in lowered:

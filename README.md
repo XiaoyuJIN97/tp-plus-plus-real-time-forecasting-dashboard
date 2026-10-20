@@ -124,3 +124,31 @@ flowchart TD
 | Streamlit display | Streamlit Cloud | Live dashboard from committed forecast CSVs plus fetched realized actuals | Displays timestamps in Europe/Brussels; uses ENTSO-E actuals only for visualization/diagnostics, not as forecast inputs |
 
 The dashboard forecast workflow is scheduled to run after about `18:30 Europe/Brussels` each day. GitHub Actions cron is UTC-only and can be delayed, so the workflow uses several UTC fallback triggers with a Brussels-time guard. Only a trigger after the Brussels forecast window proceeds when the daily forecast file is missing. This deliberately leaves a buffer after the 18:00 Brussels publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.
+
+
+### T0 Gamma and Timestral online forecasts
+
+Both use TimesFM3's covariate policy and the same 2,208-hour context / 24-hour
+horizon. Checkpoints are pinned in `models/foundation_runtime.py`. The scheduled
+workflow appends their predictions after TimesFM3 and before building the compact
+leaderboard artifacts.
+
+Their Hugging Face Hub dependency conflicts with the Chronos2 runtime, so they
+run in persistent subprocesses in a dedicated environment:
+
+```bash
+python -m venv .foundation-env
+.foundation-env/bin/pip install -r scripts/requirements-foundation-online.txt
+python -m rt_forecast_dashboard.pipeline.run_daily --date YYYY-MM-DD --models t0_gamma_online,timestral_online --keep-issues
+```
+
+On Linux CPU runners, install the CPU Torch wheel from the official PyTorch CPU
+index before the requirements file, as done in the workflow. `FOUNDATION_PYTHON`
+overrides the isolated interpreter, `FOUNDATION_DEVICE` defaults to the configured
+CPU device, and `FOUNDATION_CACHE` overrides the checkpoint cache. Dependency or
+model failures become pipeline issues; they never silently return a TSO forecast.
+
+Historical rows from the July–October rollout are explicitly labeled
+`historical_mock_replay`. They reconstruct historical inputs and are not certified
+issue-time vintages. Replay excludes context gaps beyond the existing quality
+limits; coverage and matched comparison reports document the exclusions.
