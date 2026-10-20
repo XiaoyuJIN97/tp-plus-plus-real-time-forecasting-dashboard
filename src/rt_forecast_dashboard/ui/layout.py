@@ -316,8 +316,6 @@ def _load_dashboard() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 def _render_data_warning(prepared: pd.DataFrame) -> None:
     if prepared.empty:
         return
-    latest_run = str(prepared["run_date"].astype(str).max())
-    st.caption(f"Latest forecast run: {latest_run} (Europe/Brussels).")
     actual_times = pd.to_datetime(
         prepared.loc[prepared["actual_mw"].notna(), "timestamp"], utc=True, errors="coerce"
     )
