@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from rt_forecast_dashboard.config import features, zones
-from rt_forecast_dashboard.conformal import conformal_intervals, interval_diagnostics
+from rt_forecast_dashboard.conformal import conformal_intervals
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
@@ -203,7 +203,7 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         st.warning("No forecast rows match the selected zone and time window.")
         return
 
-    point_tab, conformal_tab = st.tabs(["Point forecasts", "Conformal prediction"])
+    point_tab, conformal_tab = st.tabs(["Point forecasts", "Probabilistic forecasts"])
     with point_tab:
         st.plotly_chart(
             deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
@@ -230,17 +230,13 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
         family = _normal_model_family(labels[key])
         return (MODEL_FAMILY_ORDER.index(family) if family in MODEL_FAMILY_ORDER else len(MODEL_FAMILY_ORDER), labels[key])
     options = sorted(labels, key=rank)
-    controls = st.columns([2, 1, 1])
+    controls = st.columns([3, 1])
     selected = controls[0].multiselect("Show model plots", options, default=options,
                                       format_func=lambda key: labels[key], key=f"{target}_{zone}_cp_models")
-    levels = controls[1].multiselect("Coverage levels (%)", [80, 90, 95], default=[80, 95],
-                                     key=f"{target}_{zone}_cp_levels")
-    columns = controls[2].selectbox("Plots per row", [2, 1], key=f"{target}_{zone}_cp_columns")
+    levels = [80]
+    columns = controls[1].selectbox("Plots per row", [2, 1], key=f"{target}_{zone}_cp_columns")
     if not selected:
         st.info("Select one or more models to show their plots.")
-        return
-    if not levels:
-        st.info("Select at least one coverage level to display prediction bands.")
         return
     store = ForecastStore()
     path = store.dashboard_dir() / "conformal_forecasts.parquet"
@@ -250,7 +246,7 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
         bands = _conformal_series(version, target, zone)
     # Match the displayed timestamps without reducing the calibration history.
     bands = bands[bands.timestamp.between(current.timestamp.min(), current.timestamp.max()) & bands.model.isin(selected)].copy()
-    st.caption("Model-specific rolling calibration: up to 60 completed runs, with at least 20 required. Bands are pointwise prediction intervals.")
+    st.caption("Model-specific rolling calibration: up to 60 completed runs, with at least 20 required. Bands are 80% pointwise prediction intervals.")
     for first in range(0, len(selected), columns):
         containers = st.columns(columns)
         for container, model in zip(containers, selected[first:first+columns]):
@@ -264,20 +260,6 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
                 missing = part[f"lower_{min(levels)}"].isna().sum()
                 if missing:
                     st.caption(f"{missing} forecast hours have insufficient prior calibration; the point forecast is shown without a band.")
-    with st.expander("Observed coverage and interval width"):
-        metrics = interval_diagnostics(bands, [level/100 for level in levels])
-        if not metrics.empty:
-            st.dataframe(metrics.drop(columns=["Zone", "Target"]), hide_index=True, width="stretch")
-    with st.expander("How the bands are calibrated"):
-        st.markdown(
-            "Each model, zone and target uses its own absolute forecast errors, grouped into six-hour forecast horizons. "
-            "Only fully observed earlier runs enter the rolling calibration, with a two-hour reporting-lag assumption. "
-            "Historical calibration uses the actuals currently stored, rather than original publication/revision vintages. "
-            "A finite-sample corrected residual quantile sets the band width; lower bounds are clipped at zero. "
-            "Time-series dependence and distribution changes mean nominal coverage is a target, not a guarantee. "
-            "Observed coverage is evaluated only on displayed hours with both bands and actuals. "
-            "See [conformal prediction for dependent time series](https://proceedings.mlr.press/v162/zaffran22a.html)."
-        )
 
 
 
