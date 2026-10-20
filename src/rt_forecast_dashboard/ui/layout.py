@@ -338,8 +338,6 @@ def _render_leaderboard_page(details_page: st.Page) -> None:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
     _render_data_warning(prepared)
-    if prepared["source"].astype(str).str.startswith("historical_mock").any():
-        st.caption("History includes retrospective forecasts from archived inputs. Accuracy comparisons use shared, fully observed runs.")
     _render_rmae_landing(prepared)
     st.page_link(details_page, label="More detailed insights →", icon="📈")
 
@@ -351,8 +349,6 @@ def _render_forecast_details_page() -> None:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
     _render_data_warning(prepared)
-    if prepared["source"].astype(str).str.startswith("historical_mock").any():
-        st.caption("History includes retrospective forecasts from archived inputs. Accuracy comparisons use shared, fully observed runs.")
     st.markdown('<div class="task-section-title">More detailed insights</div>', unsafe_allow_html=True)
     selected_target = st.selectbox("Forecast target", TARGET_ORDER, format_func=_target_label, index=0)
     available_zones = sorted(prepared.loc[prepared["target"].eq(selected_target), "zone"].dropna().unique())
