@@ -1,0 +1,63 @@
+{
+  "cases": [
+    {
+      "model": "t0_gamma",
+      "zone": "BE",
+      "target": "load",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.001953125
+    },
+    {
+      "model": "t0_gamma",
+      "zone": "BE",
+      "target": "solar",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.001953125
+    },
+    {
+      "model": "t0_gamma",
+      "zone": "BE",
+      "target": "wind_onshore",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.00054931640625
+    },
+    {
+      "model": "t0_gamma",
+      "zone": "BE",
+      "target": "wind_offshore",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.000457763671875
+    },
+    {
+      "model": "timestral",
+      "zone": "BE",
+      "target": "load",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.001953125
+    },
+    {
+      "model": "timestral",
+      "zone": "BE",
+      "target": "solar",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.00244140625
+    },
+    {
+      "model": "timestral",
+      "zone": "BE",
+      "target": "wind_onshore",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.0003662109375
+    },
+    {
+      "model": "timestral",
+      "zone": "BE",
+      "target": "wind_offshore",
+      "run_date": "2026-07-24",
+      "max_absolute_difference_mw": 0.000274658203125
+    }
+  ],
+  "passed": true,
+  "absolute_tolerance_mw": 0.25,
+  "relative_tolerance": 1e-05
+}

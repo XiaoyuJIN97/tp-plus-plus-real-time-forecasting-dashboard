@@ -157,3 +157,5 @@ To append a validated mock export and align realized observations across models,
 run `scripts/import_foundation_replay.py --replay PATH --data-dir data`, followed
 by `python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts`. The
 import audits every existing prediction and records revisions to shared actuals.
+
+The rollout [results and coverage report](docs/foundation_online_since_2026-07-24/RESULTS.md) covers 108,048 mock predictions from 24 July through 19 October 2026 across the seven active zones. Both new families appear in the compact forecast artifact and daily leaderboard.

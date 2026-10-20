@@ -1,0 +1,11 @@
+{
+  "new_rows": 108048,
+  "original_forecast_rows": 359688,
+  "predictions_preserved": true,
+  "absolute_tolerance_mw": 1e-08,
+  "relative_tolerance": 1e-12,
+  "original_prediction_hash": "f566685d2bb8bfb0ebbaf52ec03cbdf23560e3d36e4716181613b463a45ffc04",
+  "resulting_prediction_hash": "016f7f2e0153535d9f2e156e4e07dd1da132fe141a98ddbe060f72e273962276",
+  "revised_actual_rows": 7216,
+  "newly_realized_rows": 0
+}
