@@ -59,3 +59,25 @@ def test_missing_month_is_left_missing():
     result = _query_entsoe_hourly(query, 'actual_mw', start=pd.Timestamp('2026-07-01T00:00Z'), end=pd.Timestamp('2026-10-01T00:00Z'))
     assert not result.timestamp.dt.month.eq(8).any()
     assert len(result) == (31+30)*24
+
+
+def test_direct_context_uses_normalized_monthly_queries(monkeypatch):
+    from datetime import date
+    from entsoe.decorators import month_limited
+    from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
+    class Client:
+        def __init__(self, api_key):
+            pass
+        @month_limited
+        def query_generation(self, *, start, end, country_code, psr_type):
+            return monthly_response(start, end)
+        @month_limited
+        def query_wind_and_solar_forecast(self, *, start, end, country_code, psr_type):
+            return pd.Series(50., index=pd.date_range(start, end, freq='h', inclusive='left'))
+    monkeypatch.setattr('entsoe.EntsoePandasClient', Client)
+    result = EntsoeForecastClient(api_key='test', demo_mode=False).fetch_direct_actual_context(
+        run_date=date(2026, 9, 10), zone_code='BE', target='wind_offshore', context_hours=40*24)
+    assert list(result.columns) == ['timestamp', 'actual_mw', 'tso_forecast_mw']
+    assert set(result.actual_mw) == {100., 200.}
+    assert result.tso_forecast_mw.eq(50.).all()
+    assert not result.timestamp.duplicated().any()
