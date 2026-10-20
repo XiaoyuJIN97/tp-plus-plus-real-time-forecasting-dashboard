@@ -1,0 +1,113 @@
+"""Rolling pointwise conformal bands for stored day-ahead point forecasts.
+
+Calibration is per model/zone/target and six-hour horizon bucket. A run only
+enters calibration after all 24 outcomes have finished, plus a reporting lag.
+Historical actual publication/revision vintages are not available in this store;
+this is retrospective calibration under the explicitly stated lag assumption.
+"""
+from __future__ import annotations
+
+import math
+import numpy as np
+import pandas as pd
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+
+LEVELS = (0.80, 0.90, 0.95)
+WINDOW_RUNS = 60
+MIN_RUNS = 20
+REPORTING_LAG_HOURS = 2
+KEYS = ['zone', 'target', 'model', 'run_date', 'timestamp']
+
+
+def conformal_radius(scores, coverage):
+    """Finite-sample order statistic, including the n+1 correction."""
+    scores = np.asarray(scores, dtype=float)
+    scores = scores[np.isfinite(scores)]
+    if not 0 < coverage < 1:
+        raise ValueError('Coverage must be between zero and one')
+    rank = math.ceil((len(scores) + 1) * coverage)
+    if not len(scores) or rank > len(scores):
+        return np.inf
+    return float(np.partition(scores, rank - 1)[rank - 1])
+
+
+def conformal_intervals(frame, *, levels=LEVELS, window_runs=WINDOW_RUNS,
+                        min_runs=MIN_RUNS, reporting_lag_hours=REPORTING_LAG_HOURS):
+    if min_runs < 1 or window_runs < min_runs or reporting_lag_hours < 0:
+        raise ValueError('Invalid calibration window or reporting lag')
+    if not levels or any(not 0 < level < 1 for level in levels):
+        raise ValueError('Invalid coverage levels')
+    columns = KEYS + ['model_label', 'forecast_mw', 'actual_mw']
+    out = frame.reindex(columns=columns).copy().reset_index(drop=True)
+    out['timestamp'] = pd.to_datetime(out.timestamp, utc=True)
+    out['run_date'] = out.run_date.astype(str)
+    if out.duplicated(KEYS).any():
+        raise ValueError('Duplicate forecast keys would duplicate calibration scores')
+    for level in levels:
+        out[f'lower_{round(level*100)}'] = np.nan
+        out[f'upper_{round(level*100)}'] = np.nan
+    out['calibration_runs'] = 0
+    out['calibration_last_delivery'] = pd.Series(pd.NaT, index=out.index, dtype='datetime64[ns, UTC]')
+    if out.empty:
+        return out
+    lows = {level: np.full(len(out), np.nan) for level in levels}
+    highs = {level: np.full(len(out), np.nan) for level in levels}
+    counts = np.zeros(len(out), dtype=np.int32)
+    last_delivery = np.full(len(out), np.datetime64('NaT'), dtype='datetime64[ns]')
+    origins = {day: brussels_cutoff_timestamp(pd.Timestamp(day).date()) for day in out.run_date.unique()}
+    out['horizon'] = (out.timestamp - out.run_date.map(origins)) / pd.Timedelta(hours=1)
+    lag = pd.Timedelta(hours=1 + reporting_lag_hours)
+    for _, series in out.groupby(['zone', 'target', 'model'], observed=True, sort=False):
+        runs = []
+        for day, run in series.groupby('run_date', observed=True, sort=True):
+            run = run.sort_values('horizon')
+            if len(run) != 24 or not np.array_equal(run.horizon.to_numpy(), np.arange(24)):
+                continue
+            prediction = pd.to_numeric(run.forecast_mw, errors='coerce').to_numpy(float)
+            actual = pd.to_numeric(run.actual_mw, errors='coerce').to_numpy(float)
+            if not np.isfinite(prediction).all():
+                continue
+            runs.append(dict(origin=origins[day], index=run.index.to_numpy(),
+                             prediction=prediction, error=np.abs(actual-prediction),
+                             observed=bool(np.isfinite(actual).all()),
+                             last=run.timestamp.max(), ready=run.timestamp.max()+lag))
+        for run in runs:
+            eligible = [past for past in runs if past['observed']
+                        and past['origin'] < run['origin'] and past['ready'] <= run['origin']][-window_runs:]
+            count = len(eligible)
+            counts[run['index']] = count
+            if count < min_runs:
+                continue
+            errors = np.stack([past['error'] for past in eligible])
+            last_delivery[run['index']] = max(past['last'] for past in eligible).tz_localize(None).to_datetime64()
+            for first in range(0, 24, 6):
+                indices = run['index'][first:first+6]
+                point = run['prediction'][first:first+6]
+                for level in levels:
+                    radius = conformal_radius(errors[:, first:first+6].ravel(), level)
+                    if not np.isfinite(radius):
+                        continue
+                    lows[level][indices] = np.maximum(0, point-radius)
+                    highs[level][indices] = point+radius
+    for level in levels:
+        out[f'lower_{round(level*100)}'] = lows[level]
+        out[f'upper_{round(level*100)}'] = highs[level]
+    out['calibration_runs'] = counts
+    out['calibration_last_delivery'] = pd.to_datetime(last_delivery, utc=True)
+    return out
+
+
+def interval_diagnostics(frame, levels=LEVELS):
+    """Realized pointwise coverage on the plotted evaluation window only."""
+    rows = []
+    for (zone, target, model, label), part in frame.groupby(['zone', 'target', 'model', 'model_label'], observed=True, sort=False):
+        actual = pd.to_numeric(part.actual_mw, errors='coerce')
+        for level in levels:
+            low, high = part[f'lower_{round(level*100)}'], part[f'upper_{round(level*100)}']
+            valid = np.isfinite(actual) & np.isfinite(low) & np.isfinite(high)
+            n = int(valid.sum())
+            rows.append({'Zone': str(zone), 'Target': str(target), 'Model': str(label), 'Target coverage (%)': round(level*100),
+                         'Observed coverage (%)': float(100*actual[valid].between(low[valid], high[valid]).mean()) if n else np.nan,
+                         'Mean band width (MW)': float((high[valid]-low[valid]).mean()) if n else np.nan,
+                         'Scored hours': n})
+    return pd.DataFrame(rows)

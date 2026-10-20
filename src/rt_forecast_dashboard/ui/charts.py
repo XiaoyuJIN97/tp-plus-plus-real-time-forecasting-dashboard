@@ -250,3 +250,43 @@ def scatter_diagnostics_chart(frame: pd.DataFrame, title: str) -> go.Figure:
         hovermode="closest",
     )
     return fig
+
+
+def conformal_forecast_chart(frame: pd.DataFrame, levels=(80, 95), title='Conformal prediction') -> go.Figure:
+    """One model per figure, with nested bands and no bridging missing days."""
+    plot = _add_brussels_delivery_time(frame).sort_values('timestamp')
+    fig = go.Figure()
+    styles = {80: 'rgba(37,99,235,0.24)', 90: 'rgba(37,99,235,0.16)', 95: 'rgba(37,99,235,0.10)'}
+    for level in sorted(levels, reverse=True):
+        valid = plot.dropna(subset=[f'lower_{level}', f'upper_{level}']).copy()
+        if valid.empty:
+            continue
+        # Segment separately per band so polygons cannot cross absent intervals.
+        split = valid.timestamp.diff().gt(pd.Timedelta(hours=1.5)).cumsum()
+        for index, (_, part) in enumerate(valid.groupby(split, sort=False)):
+            x = part.delivery_time_brussels
+            fig.add_trace(go.Scatter(x=x, y=part[f'upper_{level}'], mode='lines',
+                                    line=dict(width=0), hoverinfo='skip', showlegend=False,
+                                    legendgroup=f'band{level}', connectgaps=False))
+            fig.add_trace(go.Scatter(x=x, y=part[f'lower_{level}'], mode='lines', fill='tonexty',
+                                    fillcolor=styles.get(level, 'rgba(37,99,235,0.16)'),
+                                    line=dict(width=0), name=f'{level}% band', legendgroup=f'band{level}',
+                                    showlegend=index == 0, customdata=part[[f'lower_{level}', f'upper_{level}']],
+                                    hovertemplate=f'{level}% band: '+ '%{customdata[0]:,.1f}–%{customdata[1]:,.1f} MW<extra></extra>',
+                                    connectgaps=False))
+    segments = plot.timestamp.diff().gt(pd.Timedelta(hours=1.5)).cumsum()
+    for index, (_, part) in enumerate(plot.groupby(segments, sort=False)):
+        fig.add_trace(go.Scatter(x=part.delivery_time_brussels, y=part.forecast_mw, mode='lines',
+                                name='Forecast', legendgroup='forecast', showlegend=index == 0,
+                                line=dict(color='#2563eb', width=2), connectgaps=False,
+                                hovertemplate='%{y:,.1f} MW<extra>Forecast</extra>'))
+        fig.add_trace(go.Scatter(x=part.delivery_time_brussels, y=part.actual_mw, mode='lines',
+                                name='Actual', legendgroup='actual', showlegend=index == 0,
+                                line=dict(color='#111827', width=1.7), connectgaps=False,
+                                hovertemplate='%{y:,.1f} MW<extra>Actual</extra>'))
+    fig.update_layout(title=title, height=380, template='plotly_white', hovermode='x unified',
+                      margin=dict(l=25, r=15, t=55, b=85),
+                      legend=dict(orientation='h', yanchor='top', y=-0.22, x=0))
+    fig.update_xaxes(title='Delivery time (CET/CEST)')
+    fig.update_yaxes(title='MW', rangemode='tozero')
+    return fig

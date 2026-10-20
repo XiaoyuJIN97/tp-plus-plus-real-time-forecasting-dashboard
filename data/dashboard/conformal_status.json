@@ -1,0 +1,17 @@
+{
+  "generated_at_utc": "2026-10-20T12:56:23.113649+00:00",
+  "rows": 452976,
+  "calibrated_rows": 337920,
+  "levels": [
+    0.8,
+    0.9,
+    0.95
+  ],
+  "window_runs": 60,
+  "minimum_runs": 20,
+  "horizon_bucket_hours": 6,
+  "reporting_lag_hours": 2,
+  "method": "Rolling absolute-error conformal; pointwise bands",
+  "historical_actuals": "Current stored revisions; reporting-lag availability assumed",
+  "coverage": "Nominal target; exchangeability is not assumed for time-series guarantees"
+}

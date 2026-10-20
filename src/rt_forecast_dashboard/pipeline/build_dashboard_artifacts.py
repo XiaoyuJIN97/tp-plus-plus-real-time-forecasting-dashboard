@@ -73,6 +73,8 @@ def build_dashboard_forecasts(
     }
     from rt_forecast_dashboard.pipeline.leaderboard_snapshot import build_daily_leaderboard
     build_daily_leaderboard(store, recent)
+    from rt_forecast_dashboard.pipeline.build_conformal_artifacts import build_conformal_artifacts
+    build_conformal_artifacts(store, recent)
 
     metadata_path = path.with_name("forecasts_status.json")
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")

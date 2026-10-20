@@ -1,0 +1,20 @@
+name: Conformal prediction regression
+on:
+  pull_request:
+    paths:
+      - 'src/rt_forecast_dashboard/conformal.py'
+      - 'src/rt_forecast_dashboard/pipeline/build*artifacts.py'
+      - 'src/rt_forecast_dashboard/ui/**'
+      - 'tests/test_conformal.py'
+      - '.github/workflows/conformal-check.yml'
+  workflow_dispatch:
+jobs:
+  calibration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt pytest
+      - run: PYTHONPATH=src pytest tests/test_conformal.py tests/test_dashboard_forecast_artifact.py -q
