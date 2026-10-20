@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from rt_forecast_dashboard.config import features, zones
+from rt_forecast_dashboard.conformal import conformal_intervals, interval_diagnostics
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
@@ -12,9 +13,11 @@ from rt_forecast_dashboard.ui.analytics import (
     online_rmae_leaderboard,
     online_win_rate_by_zone,
     valid_online_forecasts,
+    _normal_model_family,
 )
 from rt_forecast_dashboard.ui.charts import (
     deterministic_forecast_chart,
+    conformal_forecast_chart,
 )
 
 
@@ -194,16 +197,87 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         key=f"{target}_online_last_n",
     )
 
-    current = current[current["zone"].eq(selected_zone)].copy()
-    current = filter_last_n_days(current, last_n_days)
+    series = current[current["zone"].eq(selected_zone)].copy()
+    current = filter_last_n_days(series, last_n_days)
     if current.empty:
         st.warning("No forecast rows match the selected zone and time window.")
         return
 
-    st.plotly_chart(
-        deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
-        width="stretch",
-    )
+    point_tab, conformal_tab = st.tabs(["Point forecasts", "Conformal prediction"])
+    with point_tab:
+        st.plotly_chart(
+            deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
+            width="stretch",
+        )
+    with conformal_tab:
+        _render_conformal_section(target, selected_zone, current)
+
+
+@st.cache_data(max_entries=2, show_spinner=False)
+def _conformal_series(version: tuple, target: str, zone: str) -> pd.DataFrame:
+    path = ForecastStore().dashboard_dir() / "conformal_forecasts.parquet"
+    if path.exists():
+        return pd.read_parquet(path, filters=[("target", "=", target), ("zone", "=", zone)])
+    # Calibration must see the full history, before the plotting window is cut.
+    prepared = _prepared_online_forecasts(version[:2])
+    selected = prepared[prepared.target.eq(target) & prepared.zone.eq(zone)]
+    return conformal_intervals(selected)
+
+
+def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> None:
+    labels = dict(zip(current.model.astype(str), current.model_label.astype(str)))
+    def rank(key):
+        family = _normal_model_family(labels[key])
+        return (MODEL_FAMILY_ORDER.index(family) if family in MODEL_FAMILY_ORDER else len(MODEL_FAMILY_ORDER), labels[key])
+    options = sorted(labels, key=rank)
+    controls = st.columns([2, 1, 1])
+    selected = controls[0].multiselect("Show model plots", options, default=options,
+                                      format_func=lambda key: labels[key], key=f"{target}_{zone}_cp_models")
+    levels = controls[1].multiselect("Coverage levels (%)", [80, 90, 95], default=[80, 95],
+                                     key=f"{target}_{zone}_cp_levels")
+    columns = controls[2].selectbox("Plots per row", [2, 1], key=f"{target}_{zone}_cp_columns")
+    if not selected:
+        st.info("Select one or more models to show their plots.")
+        return
+    if not levels:
+        st.info("Select at least one coverage level to display prediction bands.")
+        return
+    store = ForecastStore()
+    path = store.dashboard_dir() / "conformal_forecasts.parquet"
+    stat = path.stat() if path.exists() else None
+    version = (*_data_version(store), stat.st_mtime_ns if stat else 0, stat.st_size if stat else 0)
+    with st.spinner("Loading conformal bands…"):
+        bands = _conformal_series(version, target, zone)
+    # Match the displayed timestamps without reducing the calibration history.
+    bands = bands[bands.timestamp.between(current.timestamp.min(), current.timestamp.max()) & bands.model.isin(selected)].copy()
+    st.caption("Model-specific rolling calibration: up to 60 completed runs, with at least 20 required. Bands are pointwise prediction intervals.")
+    for first in range(0, len(selected), columns):
+        containers = st.columns(columns)
+        for container, model in zip(containers, selected[first:first+columns]):
+            with container:
+                part = bands[bands.model.eq(model)]
+                if part.empty:
+                    st.info(f"{labels[model]}: no forecast rows in this window.")
+                    continue
+                st.plotly_chart(conformal_forecast_chart(part, levels, labels[model]), width="stretch",
+                                key=f"{target}_{zone}_{model}_conformal")
+                missing = part[f"lower_{min(levels)}"].isna().sum()
+                if missing:
+                    st.caption(f"{missing} forecast hours have insufficient prior calibration; the point forecast is shown without a band.")
+    with st.expander("Observed coverage and interval width"):
+        metrics = interval_diagnostics(bands, [level/100 for level in levels])
+        if not metrics.empty:
+            st.dataframe(metrics.drop(columns=["Zone", "Target"]), hide_index=True, width="stretch")
+    with st.expander("How the bands are calibrated"):
+        st.markdown(
+            "Each model, zone and target uses its own absolute forecast errors, grouped into six-hour forecast horizons. "
+            "Only fully observed earlier runs enter the rolling calibration, with a two-hour reporting-lag assumption. "
+            "Historical calibration uses the actuals currently stored, rather than original publication/revision vintages. "
+            "A finite-sample corrected residual quantile sets the band width; lower bounds are clipped at zero. "
+            "Time-series dependence and distribution changes mean nominal coverage is a target, not a guarantee. "
+            "Observed coverage is evaluated only on displayed hours with both bands and actuals. "
+            "See [conformal prediction for dependent time series](https://proceedings.mlr.press/v162/zaffran22a.html)."
+        )
 
 
 
