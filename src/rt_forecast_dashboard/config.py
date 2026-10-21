@@ -77,3 +77,9 @@ def source_paths() -> dict[str, str]:
 
 def model_registry() -> dict[str, dict[str, Any]]:
     return load_yaml("model_registry.yml")["models"]
+
+
+def model_supports_scope(config: dict, zone: str, target: str) -> bool:
+    if target not in config.get('targets', []):
+        return False
+    return 'scope' not in config or any(s.get('zone')==zone and s.get('target')==target for s in config['scope'])

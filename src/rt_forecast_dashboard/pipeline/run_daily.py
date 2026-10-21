@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 
-from rt_forecast_dashboard.config import features, zones
+from rt_forecast_dashboard.config import features, zones, model_supports_scope
 from rt_forecast_dashboard.context_quality import ContextDataQualityError, repair_context
 from rt_forecast_dashboard.covariates import covariates_for
 from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
@@ -132,6 +132,8 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                     weather_loaded = True
 
                 for model_key, model_config, adapter in iter_model_adapters(target):
+                    if not model_supports_scope(model_config, zone, target):
+                        continue
                     if model_keys is not None and model_key not in model_keys:
                         continue
                     try:

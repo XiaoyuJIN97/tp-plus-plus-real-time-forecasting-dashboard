@@ -14,3 +14,6 @@ tabpfn==7.1.1
 torch>=2.3
 timesfm==3.0.2
 xgboost>=2.0
+
+# Bounded candidate workers (no candidate model dependencies in this environment).
+psutil>=5.9

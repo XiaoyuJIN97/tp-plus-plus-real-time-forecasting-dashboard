@@ -1,0 +1,20 @@
+version: 1
+# Initial operator defaults. Changes require a reviewed PR and regenerated reports.
+context_hours: 2208
+horizon_hours: 24
+offline_years: [2024, 2025]
+minimum_runs_per_year: 60
+minimum_months_per_year: 12
+minimum_runs_per_month: 5
+minimum_matched_fraction: 0.95
+maximum_year_mae_ratio: 1.05
+minimum_mean_mae_improvement: 0.02
+minimum_success_fraction: 0.99
+maximum_warm_p95_seconds: 30
+maximum_cold_seconds: 180
+maximum_daily_seconds: 600
+maximum_peak_rss_mb: 4096
+minimum_warm_samples: 20
+minimum_shadow_days: 7
+threads: 2
+required_system: Linux

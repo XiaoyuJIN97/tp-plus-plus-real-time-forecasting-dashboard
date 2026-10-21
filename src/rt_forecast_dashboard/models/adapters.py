@@ -293,6 +293,9 @@ class ArtifactModelAdapter:
 
 def make_adapter(config: dict) -> ForecastAdapter:
     adapter = config["adapter"]
+    if adapter == "isolated":
+        from rt_forecast_dashboard.models.isolated import IsolatedAdapter
+        return IsolatedAdapter(config)
     if adapter == "tso_reference":
         return TsoReferenceAdapter()
     if adapter == "persistence":

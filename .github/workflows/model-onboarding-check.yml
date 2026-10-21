@@ -1,0 +1,29 @@
+name: Model onboarding contract and admission
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-onboarding.txt scipy scikit-learn joblib
+      - name: Test contracts, gates, process failures and existing model integration
+        run: PYTHONPATH=src pytest tests/test_model_onboarding.py tests/test_selected_ensembles.py tests/test_forecast_completeness.py tests/test_foundation_online.py -q
+      - name: Reject unapproved new or changed production registrations
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "$BASE_SHA" ]; then
+            git show "$BASE_SHA:config/model_registry.yml" > /tmp/base-model-registry.yml
+          else
+            cp config/model_registry.yml /tmp/base-model-registry.yml
+          fi
+          PYTHONPATH=src python -m rt_forecast_dashboard.model_onboarding check-registry --base /tmp/base-model-registry.yml

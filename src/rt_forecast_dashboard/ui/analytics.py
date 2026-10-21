@@ -45,10 +45,11 @@ def _normal_model_family(value: object) -> str:
 def online_enabled_model_families(target: str) -> list[str]:
     families = []
     for model_key, config in model_registry().items():
-        if not config.get("enabled", False) or target not in config.get("targets", []):
+        if model_key == "tabpfn_online" or not config.get("enabled", False) or target not in config.get("targets", []):
             continue
         families.append(_normal_model_family(config.get("label", model_key)))
-    return [family for family in MODEL_FAMILY_ORDER if family in set(families)]
+    known = [family for family in MODEL_FAMILY_ORDER if family in set(families)]
+    return known + sorted(set(families)-set(MODEL_FAMILY_ORDER))
 
 
 def load_historical_accuracy(target: str) -> pd.DataFrame:

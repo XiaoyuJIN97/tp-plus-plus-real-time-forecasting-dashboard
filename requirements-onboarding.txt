@@ -1,0 +1,4 @@
+# Host-side tooling only; install each candidate's own lock in a separate venv.
+-r requirements.txt
+psutil>=5.9
+pytest>=8.0

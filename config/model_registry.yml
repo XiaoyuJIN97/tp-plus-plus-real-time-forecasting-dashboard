@@ -38,6 +38,7 @@ models:
     standardize_covariates: false
     local_files_only: false
   tabpfn_online:
+    required_for_completeness: false
     ensemble_include: false
     label: TabPFN with covariates
     adapter: tabpfn_context

@@ -5,15 +5,9 @@ import csv
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from rt_forecast_dashboard.config import features, zones
+from rt_forecast_dashboard.config import features, zones, model_registry, model_supports_scope
 
 
-TARGET_MODELS = {
-    "load": {"tso_reference", "persistence", "ridge_3mo_context", "chronos2_online", "timesfm3_online", "t0_gamma_online", "timestral_online"},
-    "solar": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online", "t0_gamma_online", "timestral_online"},
-    "wind_onshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online", "t0_gamma_online", "timestral_online"},
-    "wind_offshore": {"tso_reference", "persistence", "chronos2_online", "timesfm3_online", "xgboost_online", "t0_gamma_online", "timestral_online"},
-}
 HORIZON_HOURS = 24
 
 
@@ -32,8 +26,11 @@ def expected_groups(model_keys: set[str] | None = None) -> set[tuple[str, str, s
         for target in target_names:
             if target not in enabled_targets:
                 continue
-            for model in TARGET_MODELS[target]:
-                if model_keys is None or model in model_keys:
+            for model, config in model_registry().items():
+                if (config.get('enabled', False) and not config.get('pipeline_generated', False)
+                        and (model_keys is not None or config.get('required_for_completeness', True))
+                        and model_supports_scope(config, zone, target)
+                        and (model_keys is None or model in model_keys)):
                     groups.add((zone, target, model))
     return groups
 

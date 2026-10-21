@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from rt_forecast_dashboard.config import load_yaml, model_registry
+from rt_forecast_dashboard.config import load_yaml, model_registry, model_supports_scope
 from rt_forecast_dashboard.storage import ForecastStore
 
 
@@ -16,11 +16,11 @@ ENSEMBLE_MODEL_KEY = "ensemble_selected"
 OFFLINE_WEIGHTS_PATH = Path("docs/new_zone_ensemble_weights.csv")
 
 
-def _model_columns() -> dict[str, str]:
+def _model_columns(registry=None) -> dict[str, str]:
     """Registry-driven membership; baselines/experimental models opt out explicitly."""
     return {
         key: config.get("ensemble_label", config.get("label", key)).removesuffix(" with covariates")
-        for key, config in model_registry().items()
+        for key, config in (model_registry() if registry is None else registry).items()
         if config.get("enabled", False)
         and not config.get("pipeline_generated", False)
         and config.get("ensemble_include", True)
@@ -28,10 +28,11 @@ def _model_columns() -> dict[str, str]:
     }
 
 
-def _component_columns(target: str, include_tso: bool) -> list[str]:
-    registry = model_registry()
-    return [key for key in _model_columns()
+def _component_columns(target: str, include_tso: bool, zone: str | None = None, registry=None) -> list[str]:
+    registry = model_registry() if registry is None else registry
+    return [key for key in _model_columns(registry)
             if target in registry[key].get("targets", [])
+            and (zone is None or model_supports_scope(registry[key], zone, target))
             and (key != "tso_reference" or include_tso)]
 
 
@@ -83,8 +84,8 @@ def _load_actuals(path: Path) -> pd.DataFrame:
     )
 
 
-def _forecast_panel(forecasts: pd.DataFrame, actuals: pd.DataFrame) -> pd.DataFrame:
-    components = set(_model_columns())
+def _forecast_panel(forecasts: pd.DataFrame, actuals: pd.DataFrame, model_columns=None) -> pd.DataFrame:
+    components = set(_model_columns() if model_columns is None else model_columns)
     frame = forecasts[forecasts["model"].isin(components)].copy()
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
     frame["run_at"] = pd.to_datetime(frame["run_at"], utc=True, errors="coerce")
@@ -128,6 +129,7 @@ def _offline_fallback_weights(
     band: list[int],
     components: list[str],
     include_tso: bool,
+    model_columns=None,
 ) -> np.ndarray | None:
     if weights.empty:
         return None
@@ -140,7 +142,8 @@ def _offline_fallback_weights(
         & weights["component_set"].eq(component_set)
     ]
     by_model = selected.set_index("model")["mean_weight"] if not selected.empty else pd.Series(dtype=float)
-    labels = [_model_columns()[component] for component in components]
+    model_columns = _model_columns() if model_columns is None else model_columns
+    labels = [model_columns[component] for component in components]
     if not set(labels).issubset(by_model.index):
         return None
     result = by_model.reindex(labels).to_numpy(float)
@@ -158,6 +161,7 @@ def build_selected_ensembles(
     offline_weights_path: Path = OFFLINE_WEIGHTS_PATH,
     only_missing: bool = False,
     refresh_dates: set[str] | None = None,
+    model_registry_override: dict | None = None,
 ) -> pd.DataFrame:
     config = load_yaml("ensemble_registry.yml")
     settings = config["settings"]
@@ -176,8 +180,9 @@ def build_selected_ensembles(
             ["zone", "target", "timestamp"], keep="last"
         )
     offline_weights = pd.read_csv(offline_weights_path) if offline_weights_path.exists() else pd.DataFrame()
-    model_columns = _model_columns()
-    panel = _forecast_panel(forecasts, actuals)
+    registry = model_registry() if model_registry_override is None else model_registry_override
+    model_columns = _model_columns(registry)
+    panel = _forecast_panel(forecasts, actuals, model_columns)
     prepared_cache: dict[tuple, list[pd.DataFrame]] = {}
     forecast_runs = {
         key: frame for key, frame in forecasts.groupby(["run_date", "zone", "target"])
@@ -191,7 +196,7 @@ def build_selected_ensembles(
             for target, selection in target_configs.items():
                 method = selection["method"]
                 include_tso = bool(selection["include_tso"])
-                requested = _component_columns(target, include_tso)
+                requested = _component_columns(target, include_tso, zone, registry)
                 series = panel_series.get((zone, target), panel.iloc[:0])
                 run_panel = series[series["run_date"].eq(run_date)]
                 if run_panel.empty:
@@ -257,6 +262,7 @@ def build_selected_ensembles(
                                 band=band,
                                 components=components,
                                 include_tso=include_tso,
+                                model_columns=model_columns,
                             )
                             for band_index, band in enumerate(bands)
                         }
@@ -326,7 +332,7 @@ def build_selected_ensembles(
                         "context_hours": int(reference["context_hours"].max()),
                         "timestamp": current["timestamp"].to_numpy(),
                         "forecast_mw": np.maximum(ensemble, 0.0),
-                        "tso_forecast_mw": current["tso_reference"].to_numpy(float),
+                        "tso_forecast_mw": current.get("tso_reference", pd.Series(np.nan,index=current.index)).to_numpy(float),
                         "actual_mw": current["actual_mw"].to_numpy(),
                         "context_start": reference["context_start"].min(),
                         "context_end": reference["context_end"].max(),
