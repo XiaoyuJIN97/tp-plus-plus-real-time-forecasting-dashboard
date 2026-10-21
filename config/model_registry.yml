@@ -5,11 +5,13 @@ models:
     pipeline_generated: true
     targets: [load, solar, wind_onshore, wind_offshore]
   tso_reference:
+    ensemble_label: TSO
     label: TSO forecast
     adapter: tso_reference
     enabled: true
     targets: [load, solar, wind_onshore, wind_offshore]
   persistence:
+    ensemble_include: false
     label: Persistence
     adapter: persistence
     enabled: true
@@ -36,6 +38,7 @@ models:
     standardize_covariates: false
     local_files_only: false
   tabpfn_online:
+    ensemble_include: false
     label: TabPFN with covariates
     adapter: tabpfn_context
     enabled: true
