@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-21T22:12:33+00:00,2026-10-12,0,0.124,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-13,0,0.121,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-14,0,0.122,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-15,0,0.121,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-16,0,0.121,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-17,0,0.121,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-18,0,0.121,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-19,0,0.122,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:12:33+00:00,2026-10-20,0,0.122,skipped_complete,complete 27 groups x 24 hours
-2026-10-21T22:15:05+00:00,2026-10-21,576,151.64,incomplete,"incomplete groups (3): PT/solar/timesfm3_online=0, PT/wind_offshore/timesfm3_online=0, PT/wind_onshore/timesfm3_online=0"
+2026-10-21T22:15:34+00:00,2026-10-12,0,0.125,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:34+00:00,2026-10-13,0,0.123,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:34+00:00,2026-10-14,0,0.124,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:34+00:00,2026-10-15,0,0.124,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:34+00:00,2026-10-16,0,0.123,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:34+00:00,2026-10-17,0,0.124,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:35+00:00,2026-10-18,0,0.123,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:35+00:00,2026-10-19,0,0.123,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:15:35+00:00,2026-10-20,0,0.125,skipped_complete,complete 54 groups x 24 hours
+2026-10-21T22:21:44+00:00,2026-10-21,1152,368.777,incomplete,"incomplete groups (6): PT/solar/t0_gamma_online=0, PT/solar/timestral_online=0, PT/wind_offshore/t0_gamma_online=0, PT/wind_offshore/timestral_online=0, PT/wind_onshore/t0_gamma_online=0, PT/wind_onshore/timestral_online=0"
