@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-21T21:56:55+00:00,2026-10-12,0,0.129,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:55+00:00,2026-10-13,0,0.127,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:55+00:00,2026-10-14,0,0.127,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:56+00:00,2026-10-15,0,0.126,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:56+00:00,2026-10-16,0,0.125,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:56+00:00,2026-10-17,0,0.126,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:56+00:00,2026-10-18,0,0.125,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:56+00:00,2026-10-19,0,0.126,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T21:56:56+00:00,2026-10-20,0,0.126,skipped_complete,complete 108 groups x 24 hours
-2026-10-21T22:12:28+00:00,2026-10-21,2304,931.641,incomplete,"incomplete groups (12): PT/solar/chronos2_online=0, PT/solar/persistence=0, PT/solar/tso_reference=0, PT/solar/xgboost_online=0, PT/wind_offshore/chronos2_online=0, PT/wind_offshore/persistence=0, PT/wind_offshore/tso_reference=0, PT/wind_offshore/xgboost_online=0, PT/wind_onshore/chronos2_online=0, PT/wind_onshore/persistence=0, PT/wind_onshore/tso_reference=0, PT/wind_onshore/xgboost_online=0"
+2026-10-21T22:12:33+00:00,2026-10-12,0,0.124,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-13,0,0.121,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-14,0,0.122,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-15,0,0.121,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-16,0,0.121,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-17,0,0.121,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-18,0,0.121,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-19,0,0.122,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:12:33+00:00,2026-10-20,0,0.122,skipped_complete,complete 27 groups x 24 hours
+2026-10-21T22:15:05+00:00,2026-10-21,576,151.64,incomplete,"incomplete groups (3): PT/solar/timesfm3_online=0, PT/wind_offshore/timesfm3_online=0, PT/wind_onshore/timesfm3_online=0"
