@@ -1,0 +1,9 @@
+# Demo only. Replace with the candidate's complete, exact runtime lock, including
+# transitive dependencies and source commit hashes. Never install into core env.
+numpy==2.3.3
+pandas==2.3.3
+pyyaml==6.0.2
+python-dateutil==2.9.0.post0
+pytz==2025.2
+tzdata==2025.2
+six==1.17.0

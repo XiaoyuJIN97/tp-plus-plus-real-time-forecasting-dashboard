@@ -1,0 +1,24 @@
+# Merge under `models:` only AFTER gate passes and a reviewed admission PR.
+# Keep disabled until all model-specific setup and publication wiring is tested.
+example_candidate:
+  label: Example candidate
+  enabled: false
+  adapter: isolated
+  adapter_factory: examples.model_onboarding/demo_adapter:create_adapter
+  adapter_config:
+    model_id: replace-with-vendor/model
+    revision: replace-with-immutable-revision
+    local_files_only: true
+    device: cpu
+  python: .model-envs/example_candidate/bin/python
+  targets: [load]
+  scope:
+    - {zone: BE, target: load, covariates: []}
+  timeout_seconds: 30
+  startup_timeout_seconds: 180
+  memory_mb: 4096
+  threads: 2
+  required_for_completeness: false
+  # No ensemble_include flag needed: admitted enabled models join by default.
+  onboarding_manifest: docs/models/example_candidate/manifest.yml
+  onboarding_report: docs/models/example_candidate/admission.json
