@@ -1,0 +1,29 @@
+model_key: example_candidate
+# Exact, immutable checkpoint revision and fully pinned runtime lock are mandatory.
+checkpoint: replace-with-vendor/model
+revision: replace-with-immutable-revision
+requirements_lock: examples/model_onboarding/requirements.lock
+adapter_source: examples/model_onboarding/demo_adapter.py
+prepare_factory: examples.model_onboarding/demo_adapter:prepare_model
+adapter_factory: examples.model_onboarding.demo_adapter:create_adapter
+adapter_config:
+  model_id: replace-with-vendor/model
+  revision: replace-with-immutable-revision
+  local_files_only: true
+  device: cpu
+scope:
+  - {zone: BE, target: load, covariates: []}
+reference_models: [chronos2_online, ridge_3mo_context, t0_gamma_online, timestral_online, tso_reference]
+licenses:
+  code: {url: '', commercial_use: unknown, conditions_met: false}
+  weights: {url: '', commercial_use: unknown, conditions_met: false}
+  input_data: {url: '', commercial_use: unknown, conditions_met: false}
+review:
+  reviewer: ''
+  evidence_url: ''
+  training_data_overlap_assessment: ''
+operations:
+  ensemble_check_passed: false
+  failure_isolation_check_passed: false
+  rollback_tested: false
+  evidence_url: ''

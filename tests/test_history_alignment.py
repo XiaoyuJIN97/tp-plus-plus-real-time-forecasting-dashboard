@@ -7,7 +7,7 @@ import pytest
 from rt_forecast_dashboard.ui.analytics import valid_online_forecasts
 from rt_forecast_dashboard.pipeline.build_selected_ensembles import _complete_run, build_selected_ensembles
 from rt_forecast_dashboard.storage import ForecastStore
-from test_selected_ensembles import _component_rows
+from tests.test_selected_ensembles import _component_rows
 
 
 def _run(source: str = "online", start: str = "2026-07-24T16:00:00Z") -> pd.DataFrame:

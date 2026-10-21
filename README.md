@@ -159,3 +159,14 @@ by `python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts`. The
 import audits every existing prediction and records revisions to shared actuals.
 
 The rollout [results and coverage report](docs/foundation_online_since_2026-07-24/RESULTS.md) covers 108,048 mock predictions from 24 July through 19 October 2026 across the seven active zones. Both new families appear in the compact forecast artifact and daily leaderboard.
+
+## Adding a model
+
+Use the [standard model-onboarding pipeline](docs/model_onboarding/README.md)
+and [admission PR checklist](docs/model_onboarding/PR_CHECKLIST.md). It covers
+license/data review, matched 2024/2025 tests, configurable performance/resource
+gates, aligned replay, ensemble qualification, live shadow, isolation and rollback.
+The repository includes portable input export, a dependency-isolated runner,
+admission reports, explicit publication and a GitHub PR guard. Start from
+[the candidate template](examples/model_onboarding/manifest.yml); it is deliberately
+not admitted. See [the policy defaults](config/model_onboarding.yml).

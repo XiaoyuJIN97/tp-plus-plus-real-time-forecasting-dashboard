@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from rt_forecast_dashboard.config import load_optimal_engineering_covariates
+from rt_forecast_dashboard.config import load_optimal_engineering_covariates, model_registry
 
 LOAD_GROUPS = {
     "Temp": ["temperature_2m_p1", "temperature_2m_p2", "temperature_2m_p3", "temperature_2m_p4"],
@@ -38,6 +38,10 @@ WIND_COVARIATES = [
 
 
 def covariates_for(target: str, country: str, model_key: str) -> tuple[str, list[str]]:
+    config = model_registry().get(model_key, {})
+    for scope in config.get('scope', []):
+        if scope.get('zone')==country and scope.get('target')==target and 'covariates' in scope:
+            return 'declared_onboarding_covariates', list(scope['covariates'])
     if model_key == "tso_reference":
         return "tso_forecast", ["tso_forecast_mw"]
     if model_key == "persistence":

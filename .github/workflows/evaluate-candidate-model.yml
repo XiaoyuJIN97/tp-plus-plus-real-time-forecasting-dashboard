@@ -1,0 +1,93 @@
+# Candidate-only evaluation: no production writes and no upstream API credentials.
+name: Evaluate a candidate model from frozen inputs
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        description: Reviewed candidate manifest path in this repository
+        required: true
+      candidate_python:
+        description: Python version required by the isolated candidate
+        type: choice
+        options: ['3.11', '3.12', '3.13']
+        default: '3.11'
+      inputs_run_id:
+        description: Same-repository workflow run containing the frozen-windows artifact
+        required: true
+      stage:
+        description: Evaluation stage (shadow must be dispatched once per real day)
+        type: choice
+        options: [offline, replay, shadow]
+        required: true
+      research_use_reviewed:
+        description: Confirm terms allow this evaluation and retention of input/output artifacts
+        type: boolean
+        default: false
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  evaluate:
+    if: inputs.research_use_reviewed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Read candidate dependency lock
+        env:
+          MANIFEST: ${{ inputs.manifest }}
+        run: |
+          pip install -r requirements-onboarding.txt
+          echo "HOST_PYTHON=$(command -v python)" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import yaml
+          spec=yaml.safe_load(Path(os.environ['MANIFEST']).read_text())
+          Path('/tmp/candidate-requirements-path').write_text(spec['requirements_lock'])
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.candidate_python }}
+      - name: Install candidate into its own environment
+        timeout-minutes: 15
+        run: |
+          python -m venv .candidate-env
+          .candidate-env/bin/pip install -r "$(cat /tmp/candidate-requirements-path)"
+          .candidate-env/bin/pip check
+      - name: Download frozen inputs (no model weights in artifact)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUTS_RUN_ID: ${{ inputs.inputs_run_id }}
+        run: gh run download "$INPUTS_RUN_ID" --repo "$GITHUB_REPOSITORY" --name frozen-windows --dir /tmp/candidate-inputs
+      - name: Prepare permitted checkpoint from its original publisher
+        timeout-minutes: 15
+        env:
+          MANIFEST: ${{ inputs.manifest }}
+          HF_HOME: /tmp/candidate-cache/huggingface
+        run: |
+          PYTHONPATH=src "$HOST_PYTHON" -m rt_forecast_dashboard.model_onboarding prepare \
+            --manifest "$MANIFEST" --python .candidate-env/bin/python --output staging/preparation.json
+      - name: Evaluate without network access from model worker
+        env:
+          MANIFEST: ${{ inputs.manifest }}
+          STAGE: ${{ inputs.stage }}
+          HF_HOME: /tmp/candidate-cache/huggingface
+        run: |
+          PYTHONPATH=src "$HOST_PYTHON" -m rt_forecast_dashboard.model_onboarding run \
+            --stage "$STAGE" --manifest "$MANIFEST" \
+            --windows /tmp/candidate-inputs/windows.jsonl \
+            --python .candidate-env/bin/python --output staging/candidate-run
+      - name: Retain candidate evidence (never commit production forecasts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-evaluation-${{ inputs.stage }}-${{ github.run_id }}
+          path: staging/
+          retention-days: 90
