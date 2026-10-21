@@ -1,0 +1,21 @@
+name: Registry-driven ensemble regression
+on:
+  pull_request:
+    paths:
+      - 'src/rt_forecast_dashboard/pipeline/build_selected_ensembles.py'
+      - 'config/model_registry.yml'
+      - 'config/ensemble_registry.yml'
+      - 'tests/test_selected_ensembles.py'
+      - '.github/workflows/refresh-results.yml'
+      - '.github/workflows/ensemble-check.yml'
+  workflow_dispatch:
+jobs:
+  ensemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt scipy pytest
+      - run: PYTHONPATH=src pytest tests/test_selected_ensembles.py -q

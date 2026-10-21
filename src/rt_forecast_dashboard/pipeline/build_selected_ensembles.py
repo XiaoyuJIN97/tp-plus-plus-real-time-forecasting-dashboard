@@ -8,27 +8,31 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from rt_forecast_dashboard.config import load_yaml
+from rt_forecast_dashboard.config import load_yaml, model_registry
 from rt_forecast_dashboard.storage import ForecastStore
 
 
 ENSEMBLE_MODEL_KEY = "ensemble_selected"
-MODEL_COLUMNS = {
-    "chronos2_online": "Chronos2",
-    "ridge_3mo_context": "Ridge",
-    "xgboost_online": "XGBoost",
-    "timesfm3_online": "TimesFM3",
-    "tso_reference": "TSO",
-}
 OFFLINE_WEIGHTS_PATH = Path("docs/new_zone_ensemble_weights.csv")
 
 
+def _model_columns() -> dict[str, str]:
+    """Registry-driven membership; baselines/experimental models opt out explicitly."""
+    return {
+        key: config.get("ensemble_label", config.get("label", key)).removesuffix(" with covariates")
+        for key, config in model_registry().items()
+        if config.get("enabled", False)
+        and not config.get("pipeline_generated", False)
+        and config.get("ensemble_include", True)
+        and key != ENSEMBLE_MODEL_KEY
+    }
+
+
 def _component_columns(target: str, include_tso: bool) -> list[str]:
-    ml_model = "ridge_3mo_context" if target == "load" else "xgboost_online"
-    columns = ["chronos2_online", ml_model, "timesfm3_online"]
-    if include_tso:
-        columns.append("tso_reference")
-    return columns
+    registry = model_registry()
+    return [key for key in _model_columns()
+            if target in registry[key].get("targets", [])
+            and (key != "tso_reference" or include_tso)]
 
 
 def _fit_weights(
@@ -80,7 +84,7 @@ def _load_actuals(path: Path) -> pd.DataFrame:
 
 
 def _forecast_panel(forecasts: pd.DataFrame, actuals: pd.DataFrame) -> pd.DataFrame:
-    components = set(MODEL_COLUMNS)
+    components = set(_model_columns())
     frame = forecasts[forecasts["model"].isin(components)].copy()
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
     frame["run_at"] = pd.to_datetime(frame["run_at"], utc=True, errors="coerce")
@@ -100,6 +104,8 @@ def _complete_run(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     if frame.empty or not set(columns).issubset(frame.columns):
         return pd.DataFrame()
     complete = frame.dropna(subset=columns).sort_values("timestamp").copy()
+    if not np.isfinite(complete[columns].apply(pd.to_numeric, errors="coerce").to_numpy(float)).all():
+        return pd.DataFrame()
     if (len(complete) != 24 or complete["timestamp"].nunique() != 24
             or not complete["timestamp"].diff().dropna().eq(pd.Timedelta(hours=1)).all()):
         return pd.DataFrame()
@@ -134,7 +140,7 @@ def _offline_fallback_weights(
         & weights["component_set"].eq(component_set)
     ]
     by_model = selected.set_index("model")["mean_weight"] if not selected.empty else pd.Series(dtype=float)
-    labels = [MODEL_COLUMNS[component] for component in components]
+    labels = [_model_columns()[component] for component in components]
     if not set(labels).issubset(by_model.index):
         return None
     result = by_model.reindex(labels).to_numpy(float)
@@ -157,10 +163,22 @@ def build_selected_ensembles(
     settings = config["settings"]
     selections = config["selections"]
     forecasts = store.read_forecasts()
+    for column in ("timestamp", "run_at"):
+        forecasts[column] = pd.to_datetime(forecasts[column], utc=True, format="mixed", errors="coerce")
     forecasts["run_date"] = forecasts["run_date"].astype(str)
     actuals = _load_actuals(actuals_path)
+    # Preserve outcomes older than the collector's shorter retained snapshot.
+    if "actual_mw" in forecasts:
+        stored_actuals = forecasts.dropna(subset=["actual_mw"]).sort_values("run_at").drop_duplicates(
+            ["zone", "target", "timestamp"], keep="last"
+        )[["zone", "target", "timestamp", "actual_mw"]]
+        actuals = pd.concat([stored_actuals, actuals], ignore_index=True).drop_duplicates(
+            ["zone", "target", "timestamp"], keep="last"
+        )
     offline_weights = pd.read_csv(offline_weights_path) if offline_weights_path.exists() else pd.DataFrame()
+    model_columns = _model_columns()
     panel = _forecast_panel(forecasts, actuals)
+    prepared_cache: dict[tuple, list[pd.DataFrame]] = {}
     forecast_runs = {
         key: frame for key, frame in forecasts.groupby(["run_date", "zone", "target"])
     }
@@ -173,9 +191,22 @@ def build_selected_ensembles(
             for target, selection in target_configs.items():
                 method = selection["method"]
                 include_tso = bool(selection["include_tso"])
-                components = _component_columns(target, include_tso)
+                requested = _component_columns(target, include_tso)
                 series = panel_series.get((zone, target), panel.iloc[:0])
-                current = _complete_run(series[series["run_date"].eq(run_date)], components)
+                run_panel = series[series["run_date"].eq(run_date)]
+                if run_panel.empty:
+                    continue
+                # Historical additions and temporary outages must not block all forecasts.
+                # Include every eligible model with a complete, finite 24-hour run.
+                components = [key for key in requested if not _complete_run(run_panel, [key]).empty]
+                missing = sorted(set(requested) - set(components))
+                if missing:
+                    print(f"Ensemble {run_date} {zone} {target}: unavailable components {missing}")
+                if len(components) < 2:
+                    print(f"Skip ensemble {run_date} {zone} {target}: fewer than two complete components.")
+                    continue
+                component_signature = ",".join(components)
+                current = _complete_run(run_panel, components)
                 if current.empty:
                     print(f"Skip ensemble {run_date} {zone} {target}: component forecasts are incomplete.")
                     continue
@@ -189,7 +220,9 @@ def build_selected_ensembles(
                     if (not saved.empty
                             and saved["timestamp"].tolist() == current["timestamp"].tolist()
                             and context_end.eq(current["timestamp"].min() - pd.Timedelta(hours=1)).all()
-                            and np.isfinite(saved["forecast_mw"].to_numpy(float)).all()):
+                            and np.isfinite(saved["forecast_mw"].to_numpy(float)).all()
+                            and "ensemble_components" in saved
+                            and saved["ensemble_components"].eq(component_signature).all()):
                         continue
 
                 values = current[components].to_numpy(float)
@@ -200,15 +233,17 @@ def build_selected_ensembles(
                 elif method == "median":
                     ensemble = np.median(values, axis=1)
                 elif method == "constrained_learned":
-                    earlier = series[series["run_date"].lt(run_date)].copy()
-                    complete_dates: list[str] = []
-                    prepared_runs: list[pd.DataFrame] = []
-                    for prior_date, prior in earlier.groupby("run_date"):
-                        prepared = _complete_run(prior, components + ["actual_mw"])
-                        if prepared.empty:
-                            continue
-                        complete_dates.append(str(prior_date))
-                        prepared_runs.append(prepared)
+                    cache_key = (zone, target, tuple(components))
+                    if cache_key not in prepared_cache:
+                        prepared_cache[cache_key] = [
+                            prepared for _, prior in series.groupby("run_date", sort=True)
+                            if not (prepared := _complete_run(prior, components + ["actual_mw"])).empty
+                        ]
+                    # Run-date ordering alone does not prove delivery outcomes have finished.
+                    origin = current["timestamp"].min()
+                    prepared_runs = [prior for prior in prepared_cache[cache_key]
+                                     if str(prior["run_date"].iloc[0]) < run_date
+                                     and prior["timestamp"].max() + pd.Timedelta(hours=1) <= origin]
                     window = int(settings["training_window_runs"])
                     minimum = int(settings["minimum_training_runs"])
                     bands = settings["horizon_bands"]
@@ -260,7 +295,7 @@ def build_selected_ensembles(
                 else:
                     raise ValueError(f"Unknown ensemble method: {method}")
 
-                component_labels = [MODEL_COLUMNS[column] for column in components]
+                component_labels = [model_columns[column] for column in components]
                 weight_note = ""
                 if weights_by_band:
                     weight_note = "|".join(
@@ -287,11 +322,12 @@ def build_selected_ensembles(
                         "model_label": "Ensembled model",
                         "covariate_case": f"{weight_source}:{'+'.join(component_labels)}",
                         "ensemble_weights": weight_note,
+                        "ensemble_components": component_signature,
                         "context_hours": int(reference["context_hours"].max()),
                         "timestamp": current["timestamp"].to_numpy(),
                         "forecast_mw": np.maximum(ensemble, 0.0),
                         "tso_forecast_mw": current["tso_reference"].to_numpy(float),
-                        "actual_mw": pd.NA,
+                        "actual_mw": current["actual_mw"].to_numpy(),
                         "context_start": reference["context_start"].min(),
                         "context_end": reference["context_end"].max(),
                     }
