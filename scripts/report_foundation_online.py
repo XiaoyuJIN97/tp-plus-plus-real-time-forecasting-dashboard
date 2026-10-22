@@ -1,4 +1,5 @@
 """Audit mock replay coverage and compare against saved forecasts on exact keys."""
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
 import argparse
 import json
 from pathlib import Path
@@ -25,7 +26,7 @@ def main():
     if new.duplicated(KEYS + ["model"]).any() or not np.isfinite(new.forecast_mw).all() or (new.forecast_mw < 0).any():
         raise ValueError("Duplicate or invalid replay forecasts")
     counts = new.groupby(["run_date", "zone", "target", "model"]).timestamp.nunique()
-    if not counts.eq(24).all():
+    if not all(count == forecast_horizon_hours(key[0]) for key,count in counts.items()):
         raise ValueError("Incomplete saved replay horizons")
     context_end = pd.to_datetime(new.context_end, utc=True)
     first = new.groupby(["run_date", "zone", "target", "model"]).timestamp.transform("min")

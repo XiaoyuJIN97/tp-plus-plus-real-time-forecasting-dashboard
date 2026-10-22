@@ -43,11 +43,12 @@ jobs:
           import numpy as np
           from rt_forecast_dashboard.models.foundation_online import FoundationOnlineAdapter, close_workers
           x = 100 + np.arange(2208, dtype=float) % 24
-          cov = 102 + np.arange(2232, dtype=float)[None, :] % 24
           for name in ('t0_gamma', 'timestral'):
-              prediction = FoundationOnlineAdapter(name).predict_batch([x], [cov])
-              assert prediction.shape == (1, 24)
-              assert np.isfinite(prediction).all() and (prediction >= 0).all()
-              print(name, prediction.shape, float(prediction.mean()))
+              for horizon in (23, 24, 25):
+                  cov = 102 + np.arange(2208+horizon, dtype=float)[None, :] % 24
+                  prediction = FoundationOnlineAdapter(name).predict_batch([x], [cov], horizon=horizon)
+                  assert prediction.shape == (1, horizon)
+                  assert np.isfinite(prediction).all() and (prediction >= 0).all()
+                  print(name, prediction.shape, float(prediction.mean()))
               close_workers()
           PY

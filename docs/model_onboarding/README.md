@@ -3,6 +3,10 @@
 For step-by-step code and required datasets using the current T0 Gamma and
 Timestral checkpoints, see [the worked examples](FOUNDATION_EXAMPLES.md).
 
+Day-ahead horizons span consecutive Brussels cutoffs: normally 24 hours, **25 on
+the autumn transition and 23 in spring**. Adapters must use the input window's
+actual length; see [daylight-saving handling](../DAYLIGHT_SAVING.md).
+
 This process currently supports time-series foundation models that can run on our local CPU. It provides reusable
 input/export, isolated inference, metrics/admission, ensemble and publication
 commands. The operator still writes the vendor-specific adapter and checks
@@ -39,7 +43,7 @@ Change them only in a reviewed PR; changing policy invalidates admission reports
 
 | Criterion | Default |
 | --- | --- |
-| Forecast contract | 2,208 hourly context values; 24 hourly predictions in MW; UTC grids |
+| Forecast contract | 2,208 hourly context values; 23/24/25 hourly predictions in MW between Brussels cutoffs; UTC grids |
 | Historical coverage | Both 2024 and 2025; >=60 matched runs/year/scope, all 12 months, >=5 runs/month; full daily years preferred |
 | Fair comparison | Identical origins, horizons, outcomes and input settings; >=95% of planned offline runs matched |
 | Annual non-regression | Candidate MAE <=1.05 × best declared reference MAE in **each year** |
@@ -90,7 +94,7 @@ class Adapter:
     def predict(self, features, target, context=None, covariates=None):
         # context: timestamp, actual_mw and selected past covariates.
         # features: timestamp and selected known-future covariates; NO actuals.
-        # Return shape (24,), finite/nonnegative MW, matching input order.
+        # Return shape (len(features),), finite/nonnegative MW, matching input order.
         ...
 ```
 

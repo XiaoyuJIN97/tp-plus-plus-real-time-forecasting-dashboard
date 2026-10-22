@@ -1,7 +1,7 @@
 """Rolling pointwise conformal bands for stored day-ahead point forecasts.
 
 Calibration is per model/zone/target and six-hour horizon bucket. A run only
-enters calibration after all 24 outcomes have finished, plus a reporting lag.
+enters calibration after all delivery outcomes have finished, plus a reporting lag.
 Historical actual publication/revision vintages are not available in this store;
 this is retrospective calibration under the explicitly stated lag assumption.
 """
@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import numpy as np
 import pandas as pd
-from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, forecast_horizon_hours
 
 LEVELS = (0.80, 0.90, 0.95)
 WINDOW_RUNS = 60
@@ -61,7 +61,8 @@ def conformal_intervals(frame, *, levels=LEVELS, window_runs=WINDOW_RUNS,
         runs = []
         for day, run in series.groupby('run_date', observed=True, sort=True):
             run = run.sort_values('horizon')
-            if len(run) != 24 or not np.array_equal(run.horizon.to_numpy(), np.arange(24)):
+            horizon = forecast_horizon_hours(day)
+            if len(run) != horizon or not np.array_equal(run.horizon.to_numpy(), np.arange(horizon)):
                 continue
             prediction = pd.to_numeric(run.forecast_mw, errors='coerce').to_numpy(float)
             actual = pd.to_numeric(run.actual_mw, errors='coerce').to_numpy(float)
@@ -78,13 +79,17 @@ def conformal_intervals(frame, *, levels=LEVELS, window_runs=WINDOW_RUNS,
             counts[run['index']] = count
             if count < min_runs:
                 continue
-            errors = np.stack([past['error'] for past in eligible])
+            # Runs can have 23/24/25 hours; pool errors within the same bucket.
+            # Hour 25 shares the final bucket, rather than needing 20 autumns.
             last_delivery[run['index']] = max(past['last'] for past in eligible).tz_localize(None).to_datetime64()
-            for first in range(0, 24, 6):
-                indices = run['index'][first:first+6]
-                point = run['prediction'][first:first+6]
+            for first in (0, 6, 12, 18):
+                end = len(run['index']) if first == 18 else first+6
+                errors = np.concatenate([past['error'][first:] if first == 18
+                                         else past['error'][first:first+6] for past in eligible])
+                indices = run['index'][first:end]
+                point = run['prediction'][first:end]
                 for level in levels:
-                    radius = conformal_radius(errors[:, first:first+6].ravel(), level)
+                    radius = conformal_radius(errors, level)
                     if not np.isfinite(radius):
                         continue
                     lows[level][indices] = np.maximum(0, point-radius)

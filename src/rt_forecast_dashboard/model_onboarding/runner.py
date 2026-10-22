@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
 import csv
 from datetime import UTC, datetime
 import json
@@ -49,7 +51,7 @@ def run(manifest_path, windows_path, output, python, policy_path, stage):
                     if row['covariates'] != scope[key[:2]]:
                         raise ValueError('Window covariates differ from evaluated manifest scope')
                     past, future = frames(row['context'], row['future'], row['covariates'],
-                                          context_hours=policy['context_hours'], horizon=policy['horizon_hours'])
+                                          context_hours=policy['context_hours'], horizon=forecast_horizon_hours(key[2], policy['horizon_hours']))
                     origin = pd.Timestamp(row['origin_utc'])
                     available = pd.Timestamp(row['inputs_available_at_utc'])
                     if origin.tzinfo is None or available.tzinfo is None or available > origin or origin != future.timestamp.min():

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -9,12 +10,51 @@ from rt_forecast_dashboard.ui.analytics import MODEL_FAMILY_ORDER
 
 def _add_brussels_delivery_time(frame: pd.DataFrame) -> pd.DataFrame:
     plot = frame.copy()
-    plot["delivery_time_brussels"] = (
-        pd.to_datetime(plot["timestamp"], utc=True)
-        .dt.tz_convert("Europe/Brussels")
-        .dt.tz_localize(None)
-    )
+    plot['timestamp'] = pd.to_datetime(plot['timestamp'], utc=True)
+    # Plot against distinct UTC instants; apply explicit Brussels labels below.
+    # Naive local times collapse the two 02:00 hours when clocks go back.
+    plot["delivery_time_brussels"] = plot.timestamp
+    identity = [col for col in ('zone','target') if col in plot]
+    identity += ['model' if 'model' in plot else 'model_label'] if 'model' in plot or 'model_label' in plot else []
+    order = [col for col in ('run_date','run_at') if col in plot]
+    if order:
+        plot = plot.sort_values(order)
+    plot = plot.drop_duplicates(identity+['timestamp'], keep='last')
     return plot
+
+
+def _brussels_axis(fig):
+    """A continuous UTC date axis with unambiguous local ticks and hover text."""
+    all_times = []
+    for trace in fig.data:
+        if trace.x is None or not len(trace.x):
+            continue
+        times = pd.DatetimeIndex(pd.to_datetime(trace.x, utc=True))
+        all_times.extend(times)
+        labels = times.tz_convert('Europe/Brussels').strftime('%Y-%m-%d %H:%M %Z (UTC%z)')
+        existing = np.asarray(trace.customdata, dtype=object) if trace.customdata is not None else np.empty((len(times),0),dtype=object)
+        if existing.ndim == 1:
+            existing = existing[:,None]
+        slot = existing.shape[1]
+        trace.customdata = np.column_stack([existing,labels])
+        if trace.hoverinfo != 'skip':
+            local_time = '%{customdata['+str(slot)+']}'
+            template = trace.hovertemplate or '%{y:,.1f} MW<extra>%{fullData.name}</extra>'
+            trace.hovertemplate = template.replace('%{x}',local_time) if '%{x}' in template else local_time+'<br>'+template
+    if all_times:
+        times = pd.DatetimeIndex(all_times).unique().sort_values()
+        stride = max(1,int(np.ceil(len(times)/10)))
+        ticks = set(times[::stride]) | {times[-1]}
+        # Always label both sides of an offset change, including both 02:00s.
+        local = times.tz_convert('Europe/Brussels')
+        for index in range(1,len(times)):
+            if local[index].utcoffset() != local[index-1].utcoffset():
+                ticks.update((times[index-1],times[index]))
+        ticks = pd.DatetimeIndex(sorted(ticks))
+        fig.update_xaxes(type='date', hoverformat='%Y-%m-%d %H:%M UTC', tickmode='array',tickvals=ticks,
+                         ticktext=ticks.tz_convert('Europe/Brussels').strftime('%b %d<br>%H:%M %Z'),
+                         title='Delivery time (CET/CEST)')
+    return fig
 
 
 def _add_line_segments(frame: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
@@ -60,7 +100,7 @@ def forecast_line_chart(frame: pd.DataFrame) -> go.Figure:
         title_standoff=18,
     )
     fig.update_traces(connectgaps=False)
-    return fig
+    return _brussels_axis(fig)
 
 
 def zone_summary(frame: pd.DataFrame) -> pd.DataFrame:
@@ -125,7 +165,7 @@ def deterministic_forecast_chart(frame: pd.DataFrame, title: str) -> go.Figure:
         title_standoff=18,
     )
     fig.update_traces(connectgaps=False)
-    return fig
+    return _brussels_axis(fig)
 
 
 def accuracy_summary_chart(frame: pd.DataFrame, metric: str = "RMSE", title: str | None = None, show_legend: bool = True) -> go.Figure:
@@ -289,4 +329,4 @@ def conformal_forecast_chart(frame: pd.DataFrame, levels=(80, 95), title='Confor
                       legend=dict(orientation='h', yanchor='top', y=-0.22, x=0))
     fig.update_xaxes(title='Delivery time (CET/CEST)')
     fig.update_yaxes(title='MW', rangemode='tozero')
-    return fig
+    return _brussels_axis(fig)

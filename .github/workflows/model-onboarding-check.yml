@@ -16,7 +16,7 @@ jobs:
           python-version: '3.11'
       - run: pip install -r requirements-onboarding.txt scipy scikit-learn joblib
       - name: Test contracts, gates, process failures and existing model integration
-        run: PYTHONPATH=src:. pytest tests/test_model_onboarding.py tests/test_onboarding_examples.py tests/test_selected_ensembles.py tests/test_forecast_completeness.py tests/test_foundation_online.py -q
+        run: PYTHONPATH=src:. pytest tests/test_model_onboarding.py tests/test_onboarding_examples.py tests/test_dst_windows.py tests/test_selected_ensembles.py tests/test_forecast_completeness.py tests/test_foundation_online.py -q
       - name: Reject unapproved new or changed production registrations
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}

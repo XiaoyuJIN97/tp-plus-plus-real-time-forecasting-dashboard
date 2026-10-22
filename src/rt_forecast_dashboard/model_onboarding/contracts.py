@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+
 import hashlib
 from pathlib import Path
 import numpy as np
@@ -17,12 +19,15 @@ def digest(path):
     return h.hexdigest()
 
 
-def frames(context, future, covariates, *, context_hours=2208, horizon=24):
+def frames(context, future, covariates, *, context_hours=2208, horizon=None):
     """Return independent, strictly selected frames; future truth is never forwarded."""
     if len(set(covariates)) != len(covariates) or any(c in {'timestamp', 'actual_mw'} for c in covariates):
         raise ValueError('Invalid covariate names')
     past = pd.DataFrame(context).loc[:, ['timestamp', 'actual_mw', *covariates]].copy()
     next_ = pd.DataFrame(future).loc[:, ['timestamp', *covariates]].copy()
+    if horizon is None:
+        origin = pd.to_datetime(next_.timestamp, utc=True).iloc[0]
+        horizon = forecast_horizon_hours(origin.tz_convert('Europe/Brussels').date())
     for frame, length in ((past, context_hours), (next_, horizon)):
         frame['timestamp'] = pd.to_datetime(frame.timestamp, utc=True, errors='raise')
         if len(frame) != length or frame.timestamp.isna().any() or frame.timestamp.duplicated().any():

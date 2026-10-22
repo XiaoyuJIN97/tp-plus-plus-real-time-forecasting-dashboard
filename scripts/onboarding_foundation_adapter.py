@@ -45,26 +45,27 @@ class Adapter:
         import torch
         cols = list(covariates or [])
         past, future = frames(context, features, cols)
-        # Shared arrays: B=1, L=2208, H=24, C=len(cols).
+        horizon = len(future)
+        # Shared arrays: B=1, L=2208, H=23/24/25, C=len(cols).
         x = past.actual_mw.to_numpy(np.float32)[None, :]
         cov = np.concatenate([past[cols].to_numpy(np.float32),
                               future[cols].to_numpy(np.float32)]).T[None, :, :]
         with torch.inference_mode():
             if self.family == 't0_gamma':
-                output = self.model.predict(x, horizon=24, future_covariates=cov,
+                output = self.model.predict(x, horizon=horizon, future_covariates=cov,
                     quantile_levels=[0.5], trim_leading_missing=True,
                     symmetric_averaging=True, clip_nonnegative=True,
                     snap_integers=True).median
             else:
-                output = self.model.forecast(x[:, None, :], prediction_length=24,
+                output = self.model.forecast(x[:, None, :], prediction_length=horizon,
                                             known_covariates=cov).median[:, 0, :]
         if hasattr(output, 'detach'):
             output = output.detach().cpu().numpy()
         result = np.asarray(output)
-        if result.shape != (1, 24) or not np.isfinite(result).all():
+        if result.shape != (1, horizon) or not np.isfinite(result).all():
             raise ValueError(f'Unexpected native output: {result.shape}')
         # Match current foundation_runtime.py's explicit nonnegative MW policy.
-        return prediction(np.maximum(result[0], 0), 24)
+        return prediction(np.maximum(result[0], 0), horizon)
 
 
 def create_adapter(config):

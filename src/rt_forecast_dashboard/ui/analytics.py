@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+
 from pathlib import Path
 
 import numpy as np
@@ -178,7 +180,7 @@ def online_forecast_accuracy(forecasts: pd.DataFrame) -> pd.DataFrame:
             .nunique()
             .reset_index(name="realized_horizon_count")
         )
-        complete = complete[complete["realized_horizon_count"].eq(DAY_AHEAD_HOURS)]
+        complete = complete[complete["realized_horizon_count"].eq(complete["run_date"].map(forecast_horizon_hours))]
         frame = frame.merge(complete[["run_date", "zone", "target", "model"]], on=["run_date", "zone", "target", "model"], how="inner")
         if frame.empty:
             return pd.DataFrame()
@@ -241,7 +243,7 @@ def online_rmae_leaderboard(forecasts: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
         .nunique()
         .reset_index(name="realized_hours")
     )
-    complete = complete[complete["realized_hours"].eq(DAY_AHEAD_HOURS)]
+    complete = complete[complete["realized_hours"].eq(complete["run_date"].map(forecast_horizon_hours))]
     frame = frame.merge(complete[group_cols], on=group_cols, how="inner")
     if frame.empty:
         return pd.DataFrame(), pd.DataFrame()
@@ -301,7 +303,7 @@ def online_win_rate_by_zone(forecasts: pd.DataFrame) -> pd.DataFrame:
     frame["display_family"] = frame["model_label"].map(_normal_model_family)
     complete_keys = ["run_date", "zone", "target", "model", "display_family"]
     complete = frame.groupby(complete_keys)["horizon"].nunique().reset_index(name="realized_hours")
-    complete = complete[complete["realized_hours"].eq(DAY_AHEAD_HOURS)]
+    complete = complete[complete["realized_hours"].eq(complete["run_date"].map(forecast_horizon_hours))]
     frame = frame.merge(complete[complete_keys], on=complete_keys, how="inner")
     if frame.empty:
         return pd.DataFrame()
@@ -519,7 +521,8 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     }
     offsets = (frame["timestamp"] - frame["run_date"].map(cutoffs)) / pd.Timedelta(hours=1)
     frame["horizon"] = offsets
-    correct_grid = offsets.between(0, DAY_AHEAD_HOURS - 1) & offsets.mod(1).eq(0)
+    expected_hours = frame["run_date"].map(forecast_horizon_hours)
+    correct_grid = offsets.ge(0) & offsets.lt(expected_hours) & offsets.mod(1).eq(0)
     correct_grid &= np.isfinite(pd.to_numeric(frame["forecast_mw"], errors="coerce"))
     valid_groups = correct_grid.groupby([frame[column] for column in group_cols]).transform("all")
     frame = frame[valid_groups].copy()
@@ -528,7 +531,7 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
         .nunique()
         .reset_index(name="horizon_count")
     )
-    complete = complete[complete["horizon_count"].eq(DAY_AHEAD_HOURS)]
+    complete = complete[complete["horizon_count"].eq(complete["run_date"].map(forecast_horizon_hours))]
     if complete.empty:
         return frame.iloc[0:0].copy()
     return frame.merge(complete[group_cols], on=group_cols, how="inner")

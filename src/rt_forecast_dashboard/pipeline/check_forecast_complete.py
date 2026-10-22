@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 import csv
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rt_forecast_dashboard.config import features, zones, model_registry, model_supports_scope
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
 
 
-HORIZON_HOURS = 24
 
 
 def _requested_models(value: str | None) -> set[str] | None:
@@ -41,7 +41,8 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
         return False, f"missing {path}"
 
     counts = {group: 0 for group in expected}
-    timestamps: dict[tuple[str, str, str], set[str]] = {group: set() for group in expected}
+    timestamps = {group: set() for group in expected}
+    run_dates = {}
     first_delivery: dict[tuple[str, str, str], datetime] = {}
     latest_context_end: dict[tuple[str, str, str], datetime] = {}
     try:
@@ -57,8 +58,15 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
                     continue
                 if not row.get("timestamp") or not row.get("forecast_mw"):
                     continue
-                timestamps[group].add(str(row["timestamp"]))
                 delivery = datetime.fromisoformat(str(row["timestamp"]).replace("Z", "+00:00"))
+                if delivery.tzinfo is None:
+                    raise ValueError('Delivery timestamps must include a timezone')
+                delivery = delivery.astimezone(UTC)
+                timestamps[group].add(delivery)
+                day = row.get('run_date') or path.stem[-10:]
+                if group in run_dates and run_dates[group] != day:
+                    raise ValueError('Mixed run dates within a model group')
+                run_dates[group] = day
                 first_delivery[group] = min(first_delivery.get(group, delivery), delivery)
                 if row.get("context_end"):
                     context_end = datetime.fromisoformat(str(row["context_end"]).replace("Z", "+00:00"))
@@ -69,10 +77,14 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
     for group, values in timestamps.items():
         counts[group] = len(values)
 
-    incomplete = {group: count for group, count in counts.items() if count != HORIZON_HOURS}
+    incomplete = {group: count for group, count in counts.items()
+                  if count != forecast_horizon_hours(run_dates.get(group, path.stem[-10:]))}
     if incomplete:
         listed = ", ".join(f"{zone}/{target}/{model}={count}" for (zone, target, model), count in sorted(incomplete.items()))
         return False, f"incomplete groups ({len(incomplete)}): {listed}"
+    if any(any(b-a != timedelta(hours=1) for a,b in zip(sorted(values),sorted(values)[1:]))
+           for values in timestamps.values()):
+        return False, 'noncontiguous hourly delivery grid'
     stale = {
         group: (latest_context_end[group], delivery - timedelta(hours=1))
         for group, delivery in first_delivery.items()
@@ -84,7 +96,7 @@ def is_forecast_complete(path: Path, model_keys: set[str] | None = None) -> tupl
             for (zone, target, model), (actual, expected_end) in sorted(stale.items())[:8]
         )
         return False, f"stale context: {sample}"
-    return True, f"complete {len(expected)} groups x {HORIZON_HOURS} hours"
+    return True, f"complete {len(expected)} groups; cutoff-to-cutoff hourly windows"
 
 
 def main() -> None:

@@ -17,6 +17,19 @@ def brussels_cutoff_timestamp(run_date: date) -> pd.Timestamp:
     return pd.Timestamp(brussels_cutoff_datetime(run_date)).tz_convert("UTC")
 
 
+def forecast_horizon_hours(run_date: date | str, nominal_hours: int = 24) -> int:
+    """Elapsed hours between consecutive local cutoffs (23/24/25).
+
+    Non-day-ahead experimental horizons retain their explicitly configured size.
+    Subtract UTC instants, not same-zone Python datetimes (wall-time arithmetic).
+    """
+    if nominal_hours != 24:
+        return nominal_hours
+    day = pd.Timestamp(run_date).date()
+    return int((brussels_cutoff_timestamp(day + timedelta(days=1))
+                - brussels_cutoff_timestamp(day)) / pd.Timedelta(hours=1))
+
+
 def latest_complete_run_date(now: datetime | None = None) -> date:
     now = now or datetime.now(UTC)
     if now.tzinfo is None:
