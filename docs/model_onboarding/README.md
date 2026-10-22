@@ -3,7 +3,7 @@
 For step-by-step code and required datasets using the current T0 Gamma and
 Timestral checkpoints, see [the worked examples](FOUNDATION_EXAMPLES.md).
 
-This process currently supports time-series foundation models that can run on CPU in our own forecasting workers. It provides reusable
+This process currently supports time-series foundation models that can run on our local CPU. It provides reusable
 input/export, isolated inference, metrics/admission, ensemble and publication
 commands. The operator still writes the vendor-specific adapter and checks
 licenses/data provenance. API-hosted or GPU models need a reviewed profile/code
