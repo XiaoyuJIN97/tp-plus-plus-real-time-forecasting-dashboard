@@ -20,3 +20,6 @@ models/*.pkl
 models/*.pickle
 
 .foundation-env/
+.onboarding-host/
+.model-envs/
+staging/
