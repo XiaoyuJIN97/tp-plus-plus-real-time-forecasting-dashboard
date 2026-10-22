@@ -7,7 +7,7 @@ Day-ahead horizons span consecutive Brussels cutoffs: normally 24 hours, **25 on
 the autumn transition and 23 in spring**. Adapters must use the input window's
 actual length; see [daylight-saving handling](../DAYLIGHT_SAVING.md).
 
-This is the standard process for a new **local CPU TSFM**. It provides reusable
+This process currently supports time-series foundation models that can run on our local CPU. It provides reusable
 input/export, isolated inference, metrics/admission, ensemble and publication
 commands. The operator still writes the vendor-specific adapter and checks
 licenses/data provenance. API-hosted or GPU models need a reviewed profile/code

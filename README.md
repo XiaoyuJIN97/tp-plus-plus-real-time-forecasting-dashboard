@@ -10,7 +10,7 @@ The first online version runs once per day after the daily 18:00 Europe/Brussels
 - Daily pipeline entrypoint for ENTSO-E and Open-Meteo ingestion.
 - Four weather-point configuration per bidding zone and target type.
 - Separate load, solar, onshore wind, and offshore wind targets.
-- 24-hour daily horizon with 2,208-hour rolling context.
+- Brussels-cutoff-to-cutoff daily horizon (23/24/25 hours) with 2,208-hour rolling context.
 - Pluggable model registry for existing load, solar, wind, ML, and TSFM artifacts.
 - Local CSV storage for forecasts, observations, run metadata, and failures.
 - Backfill command for missed dates.
@@ -99,7 +99,7 @@ For Streamlit Community Cloud or Hugging Face Spaces, add the same value to app 
 
 ## Daily Update Timeline
 
-Scheduled operation follows Europe/Brussels time. ENTSO-E and Open-Meteo API timestamps are stored and queried in UTC after converting the Brussels cutoff timestamp. During CEST, the 18:00 Brussels cutoff is `16:00 UTC`; a 24-hour hourly forecast therefore stores delivery timestamps from `16:00 UTC` through `15:00 UTC`, which display as `18:00` through `17:00` in Europe/Brussels. The last `17:00` timestamp represents the `17:00-18:00` delivery hour.
+Scheduled operation follows Europe/Brussels time. ENTSO-E and Open-Meteo API timestamps are stored and queried in UTC after converting the Brussels cutoff timestamp. During CEST, the 18:00 Brussels cutoff is `16:00 UTC`; a 24-hour hourly forecast therefore stores delivery timestamps from `16:00 UTC` through `15:00 UTC`, which display as `18:00` through `17:00` in Europe/Brussels. The last `17:00` timestamp represents the `17:00-18:00` delivery hour. Clock-change windows instead contain 25 hours in autumn and 23 in spring, ending at the next Brussels cutoff; see [DST handling and plotting checks](docs/DAYLIGHT_SAVING.md).
 
 ```mermaid
 flowchart TD
@@ -107,7 +107,7 @@ flowchart TD
   B --> C["18:02-18:27 Brussels: ENTSO-E collector snapshots forecast and actual series, then pushes data branch"]
   C --> D["18:30+ Brussels: Dashboard daily forecast workflow starts after guarded GitHub cron trigger"]
   D --> E["Read ENTSO-E realtime-data raw/update files and checked-out Open-Meteo data branch"]
-  E --> G["Build 92-day context plus 24-hour day-ahead TSO/weather covariates"]
+  E --> G["Build 92-day context plus 23/24/25-hour day-ahead TSO/weather covariates"]
   G --> H["Run configured online models for BE, FR, DE, DK1, DK2, ES, and PT"]
   H --> I["Commit core model rows first, then append TimesFM3 rows when that run finishes"]
   I --> J["Streamlit Cloud rebuilds from GitHub and displays Europe/Brussels delivery times"]
