@@ -6,10 +6,6 @@ commands. The operator still writes the vendor-specific adapter and checks
 licenses/data provenance. API-hosted or GPU models need a reviewed profile/code
 extension; this process does not silently authorize extra requests or GPU costs.
 
-Existing models have not been retrospectively certified by this process. In
-particular, existing TimesFM3 licensing concerns are not resolved by these tools.
-The GitHub guard grandfathers unchanged legacy registrations technically, not
-legally. This change enables no new production model and runs no paid API.
 
 ## Stages and owners
 
