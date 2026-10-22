@@ -1,11 +1,11 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-22T20:18:19+00:00,2026-10-13,0,0.14,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:19+00:00,2026-10-14,0,0.164,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:20+00:00,2026-10-15,0,0.131,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:20+00:00,2026-10-16,0,0.136,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:20+00:00,2026-10-17,0,0.15,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:20+00:00,2026-10-18,0,0.13,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:20+00:00,2026-10-19,0,0.176,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:18:20+00:00,2026-10-20,0,0.189,skipped_complete,complete 108 groups; cutoff-to-cutoff hourly windows
-2026-10-22T20:35:35+00:00,2026-10-21,2280,1034.628,incomplete,"incomplete groups (12): PT/solar/chronos2_online=0, PT/solar/persistence=0, PT/solar/tso_reference=0, PT/solar/xgboost_online=0, PT/wind_offshore/chronos2_online=0, PT/wind_offshore/persistence=0, PT/wind_offshore/tso_reference=0, PT/wind_offshore/xgboost_online=0, PT/wind_onshore/chronos2_online=0, PT/wind_onshore/persistence=0, PT/wind_onshore/tso_reference=0, PT/wind_onshore/xgboost_online=0"
-2026-10-22T20:47:39+00:00,2026-10-22,2112,723.612,incomplete,"incomplete groups (20): DK1/load/chronos2_online=0, DK1/load/persistence=0, DK1/load/ridge_3mo_context=0, DK1/load/tso_reference=0, DK2/load/chronos2_online=0, DK2/load/persistence=0, DK2/load/ridge_3mo_context=0, DK2/load/tso_reference=0, PT/solar/chronos2_online=0, PT/solar/persistence=0, PT/solar/tso_reference=0, PT/solar/xgboost_online=0, PT/wind_offshore/chronos2_online=0, PT/wind_offshore/persistence=0, PT/wind_offshore/tso_reference=0, PT/wind_offshore/xgboost_online=0, PT/wind_onshore/chronos2_online=0, PT/wind_onshore/persistence=0, PT/wind_onshore/tso_reference=0, PT/wind_onshore/xgboost_online=0"
+2026-10-22T20:47:44+00:00,2026-10-13,0,0.126,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:44+00:00,2026-10-14,0,0.125,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:44+00:00,2026-10-15,0,0.125,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:44+00:00,2026-10-16,0,0.124,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:45+00:00,2026-10-17,0,0.124,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:45+00:00,2026-10-18,0,0.124,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:45+00:00,2026-10-19,0,0.123,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:47:45+00:00,2026-10-20,0,0.124,skipped_complete,complete 27 groups; cutoff-to-cutoff hourly windows
+2026-10-22T20:50:12+00:00,2026-10-21,576,146.833,incomplete,"incomplete groups (3): PT/solar/timesfm3_online=0, PT/wind_offshore/timesfm3_online=0, PT/wind_onshore/timesfm3_online=0"
+2026-10-22T20:52:39+00:00,2026-10-22,528,147.06,incomplete,"incomplete groups (5): DK1/load/timesfm3_online=0, DK2/load/timesfm3_online=0, PT/solar/timesfm3_online=0, PT/wind_offshore/timesfm3_online=0, PT/wind_onshore/timesfm3_online=0"
