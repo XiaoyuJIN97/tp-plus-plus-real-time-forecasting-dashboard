@@ -14,7 +14,7 @@ from rt_forecast_dashboard.data.weather_client import OpenMeteoClient
 from rt_forecast_dashboard.features import build_feature_frame
 from rt_forecast_dashboard.models.registry import iter_model_adapters
 from rt_forecast_dashboard.storage import ForecastStore
-from rt_forecast_dashboard.time_utils import latest_complete_run_date
+from rt_forecast_dashboard.time_utils import latest_complete_run_date, forecast_horizon_hours
 from rt_forecast_dashboard.weather_points import selected_weather_points
 
 
@@ -37,7 +37,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
             if target not in enabled_targets:
                 continue
             try:
-                horizon = int(fcfg["horizon_hours"])
+                horizon = forecast_horizon_hours(run_date, int(fcfg["horizon_hours"]))
                 context_hours = int(fcfg["context_hours"])
                 point_type = fcfg["weather_point_type"]
                 points = selected_weather_points(point_type, zone)

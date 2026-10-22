@@ -3,6 +3,10 @@
 Run commands from the repository root on the Linux CPU benchmark profile. These
 examples reuse the **currently deployed checkpoint revisions and native calls**;
 they do not assert that either legacy model has passed the new admission policy.
+The array sizes below describe ordinary 24-hour windows. At clock changes the
+same code uses 23 or 25 forecast hours (covariate length 2231 or 2233); see
+[daylight-saving handling](../DAYLIGHT_SAVING.md).
+
 Example keys have an `_onboarding_example` suffix to avoid overwriting live rows.
 Do not enable those duplicate keys beside the existing models in production.
 

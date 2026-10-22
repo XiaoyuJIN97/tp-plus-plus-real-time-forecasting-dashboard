@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import pandas as pd
 import yaml
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
 from .contracts import digest, inference_digest
 from .gates import _read_forecasts
 from .registry import check_registry
@@ -58,7 +59,7 @@ def publish(manifest_path, directory, registry_path, policy_path, data_dir):
         raise ValueError('Do not publish incomplete/failed candidate runs')
     for _,part in frame.groupby(['zone','target','run_date']):
         timestamps = part.timestamp.sort_values()
-        if len(part)!=policy['horizon_hours'] or not timestamps.diff().dropna().eq(pd.Timedelta(hours=1)).all():
+        if len(part)!=forecast_horizon_hours(part.run_date.iloc[0], policy['horizon_hours']) or not timestamps.diff().dropna().eq(pd.Timedelta(hours=1)).all():
             raise ValueError('Incomplete/non-hourly delivery window')
     from .contracts import prediction
     prediction(frame.forecast_mw.to_numpy(),len(frame))

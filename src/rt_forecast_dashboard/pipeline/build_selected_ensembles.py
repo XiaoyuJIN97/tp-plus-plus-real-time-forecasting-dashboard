@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+
 import argparse
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -105,12 +107,15 @@ def _complete_run(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     if frame.empty or not set(columns).issubset(frame.columns):
         return pd.DataFrame()
     complete = frame.dropna(subset=columns).sort_values("timestamp").copy()
+    if complete.empty:
+        return pd.DataFrame()
     if not np.isfinite(complete[columns].apply(pd.to_numeric, errors="coerce").to_numpy(float)).all():
         return pd.DataFrame()
-    if (len(complete) != 24 or complete["timestamp"].nunique() != 24
+    horizon = forecast_horizon_hours(complete["run_date"].iloc[0])
+    if (len(complete) != horizon or complete["timestamp"].nunique() != horizon
             or not complete["timestamp"].diff().dropna().eq(pd.Timedelta(hours=1)).all()):
         return pd.DataFrame()
-    complete["horizon"] = np.arange(1, 25)
+    complete["horizon"] = np.arange(1, horizon + 1)
     return complete
 
 
@@ -118,6 +123,8 @@ def _band_for_horizon(horizon: int, bands: list[list[int]]) -> int:
     for index, (start, end) in enumerate(bands):
         if start <= horizon <= end:
             return index
+    if horizon == 25 and bands[-1][1] == 24:
+        return len(bands) - 1  # Extra DST hour shares the final 19–24-hour bucket.
     raise ValueError(f"Horizon {horizon} is not covered by the configured bands.")
 
 
@@ -202,7 +209,7 @@ def build_selected_ensembles(
                 if run_panel.empty:
                     continue
                 # Historical additions and temporary outages must not block all forecasts.
-                # Include every eligible model with a complete, finite 24-hour run.
+                # Include every eligible model with a complete, finite cutoff-to-cutoff run.
                 components = [key for key in requested if not _complete_run(run_panel, [key]).empty]
                 missing = sorted(set(requested) - set(components))
                 if missing:
@@ -276,7 +283,7 @@ def build_selected_ensembles(
                             weight_source = "equal_weight_warmup"
                         else:
                             weight_source = "offline_weight_fallback"
-                        ensemble = np.zeros(24, dtype=float)
+                        ensemble = np.zeros(len(current), dtype=float)
                         for band_index, band_rows in current.groupby("horizon_band"):
                             weights = fallback_by_band[int(band_index)]
                             positions = current.index.get_indexer(band_rows.index)
@@ -286,7 +293,7 @@ def build_selected_ensembles(
                         weight_source = "rolling_prior_actuals"
                         training = pd.concat(prepared_runs[-window:], ignore_index=True)
                         training["horizon_band"] = training["horizon"].map(lambda value: _band_for_horizon(value, bands))
-                        ensemble = np.zeros(24, dtype=float)
+                        ensemble = np.zeros(len(current), dtype=float)
                         for band_index, band_rows in current.groupby("horizon_band"):
                             band_training = training[training["horizon_band"].eq(band_index)]
                             weights = _fit_weights(

@@ -5,7 +5,7 @@ import pandas as pd
 from .contracts import digest, frames, records, staging_path
 
 
-def export_windows(plan_path, output, context_hours=2208, horizon=24):
+def export_windows(plan_path, output, context_hours=2208, horizon=None):
     plan_path = Path(plan_path)
     plan = pd.read_csv(plan_path, keep_default_na=False)
     if plan.duplicated(['zone','target','run_date']).any():
@@ -18,7 +18,7 @@ def export_windows(plan_path, output, context_hours=2208, horizon=24):
             context, future = read('context_path'), read('future_path')
             covs = json.loads(row['covariates'])
             past, next_ = frames(context,future,covs,context_hours=context_hours,horizon=horizon)
-            actuals = future.actual_mw.where(future.actual_mw.notna(), None).tolist() if 'actual_mw' in future else [None]*horizon
+            actuals = future.actual_mw.where(future.actual_mw.notna(), None).tolist() if 'actual_mw' in future else [None]*len(next_)
             actuals = [None if pd.isna(x) else float(x) for x in actuals]
             result = {k:row[k] for k in ('zone','target','run_date','origin_utc','inputs_available_at_utc')}
             result.update(context=records(past), future=records(next_), covariates=covs, actuals=actuals,

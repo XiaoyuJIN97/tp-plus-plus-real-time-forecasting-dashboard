@@ -12,6 +12,7 @@ import time
 
 import numpy as np
 import pandas as pd
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours
 from rt_forecast_dashboard.config import zones
 from rt_forecast_dashboard.context_quality import repair_context
 from rt_forecast_dashboard.covariates import covariates_for
@@ -63,10 +64,12 @@ def load_weather(inputs, zone, target):
 
 def prepare(template, actual, tso, weather, covs):
     template = template.sort_values("timestamp").copy()
-    if len(template) != 24 or template.timestamp.nunique() != 24:
+    horizon = forecast_horizon_hours(template.run_date.iloc[0] if 'run_date' in template
+                                     else pd.Timestamp(template.timestamp.min()).tz_convert('Europe/Brussels').date())
+    if len(template) != horizon or template.timestamp.nunique() != horizon:
         raise ValueError("Incomplete TimesFM3 reference horizon")
     cutoff = template.timestamp.min()
-    expected = pd.date_range(cutoff, periods=24, freq="h")
+    expected = pd.date_range(cutoff, periods=horizon, freq="h")
     if not np.array_equal(expected.to_numpy(), template.timestamp.to_numpy()):
         raise ValueError("Noncontiguous reference horizon")
     index = pd.date_range(cutoff - pd.Timedelta(hours=2208), periods=2208, freq="h")
@@ -142,7 +145,7 @@ def main():
                     saved_rows = pd.read_csv(saved)
                     match = saved_rows[(saved_rows.zone == zone) & (saved_rows.target == target) & (saved_rows.model == name + "_online")]
                     aligned = np.array_equal(pd.to_datetime(match.timestamp, utc=True).sort_values().to_numpy(), template.timestamp.sort_values().to_numpy())
-                    if len(match) == 24 and match.timestamp.nunique() == 24 and np.isfinite(match.forecast_mw).all() and aligned:
+                    if len(match) == len(template) and match.timestamp.nunique() == len(template) and np.isfinite(match.forecast_mw).all() and aligned:
                         continue
                 try:
                     x, cov, output = prepare(template, actual, tso, weather, covs)
@@ -156,18 +159,20 @@ def main():
                 print(name, zone, target, "ready", len(pending), flush=True)
                 continue
             started = time.monotonic()
-            for offset in range(0, len(pending), args.batch_size):
-                chunk = pending[offset:offset + args.batch_size]
-                predictions = adapter.predict_batch([c[0] for c in chunk], [c[1] for c in chunk])
-                for (_, _, output), pred in zip(chunk, predictions, strict=True):
-                    output["model"] = name + "_online"
-                    output["model_label"] = ("T0 Gamma" if name == "t0_gamma" else "Timestral") + " with covariates"
-                    output["forecast_mw"] = pred
-                    output["source"] = "historical_mock_replay"
-                    output["run_at"] = datetime.now(UTC).isoformat()
-                    output["covariate_case"] = case
-                    store.append_forecasts(output, str(output.run_date.iloc[0]))
-                print(name, zone, target, min(offset + len(chunk), len(pending)), "/", len(pending), round(time.monotonic()-started, 1), "s", flush=True)
+            for horizon in sorted({len(item[2]) for item in pending}):
+                same_horizon = [item for item in pending if len(item[2]) == horizon]
+                for offset in range(0, len(same_horizon), args.batch_size):
+                    chunk = same_horizon[offset:offset + args.batch_size]
+                    predictions = adapter.predict_batch([c[0] for c in chunk], [c[1] for c in chunk], horizon=horizon)
+                    for (_, _, output), pred in zip(chunk, predictions, strict=True):
+                        output["model"] = name + "_online"
+                        output["model_label"] = ("T0 Gamma" if name == "t0_gamma" else "Timestral") + " with covariates"
+                        output["forecast_mw"] = pred
+                        output["source"] = "historical_mock_replay"
+                        output["run_at"] = datetime.now(UTC).isoformat()
+                        output["covariate_case"] = case
+                        store.append_forecasts(output, str(output.run_date.iloc[0]))
+                    print(name, zone, target, min(offset + len(chunk), len(same_horizon)), "/", len(same_horizon), round(time.monotonic()-started, 1), "s", flush=True)
         close_workers()
     (args.output / "replay_config.json").write_text(json.dumps(dict(arguments={k: str(v) for k,v in vars(args).items()}, model_revisions=REVISIONS, provenance="reconstructed historical mock, not original issue-time vintages"), indent=2))
     print("Ready windows", len(audit), "blocked windows", len(issues), flush=True)

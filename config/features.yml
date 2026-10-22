@@ -1,6 +1,7 @@
 cutoff:
   timezone: Europe/Brussels
   hour: 18
+  # Nominal: consecutive Brussels cutoffs span 23/24/25 elapsed UTC hours.
   prediction_length_hours: 24
   context_days: 92
 targets:
