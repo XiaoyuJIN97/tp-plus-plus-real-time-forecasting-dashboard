@@ -246,7 +246,6 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
         bands = _conformal_series(version, target, zone)
     # Match the displayed timestamps without reducing the calibration history.
     bands = bands[bands.timestamp.between(current.timestamp.min(), current.timestamp.max()) & bands.model.isin(selected)].copy()
-    st.caption("Model-specific rolling calibration: up to 60 completed runs, with at least 20 required. Bands are 80% pointwise prediction intervals.")
     for first in range(0, len(selected), columns):
         containers = st.columns(columns)
         for container, model in zip(containers, selected[first:first+columns]):
