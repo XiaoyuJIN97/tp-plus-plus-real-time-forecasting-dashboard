@@ -1,8 +1,8 @@
 {
-  "snapshot_date": "2026-10-23",
-  "generated_at_utc": "2026-10-23T21:07:22.326329+00:00",
+  "snapshot_date": "2026-10-24",
+  "generated_at_utc": "2026-10-23T23:06:28.365699+00:00",
   "first_run_date": "2026-07-26",
   "latest_run_date": "2026-10-23",
-  "actuals_through_utc": "2026-10-23T19:00:00+00:00",
-  "actual_rows": 459409
+  "actuals_through_utc": "2026-10-23T21:00:00+00:00",
+  "actual_rows": 459873
 }
