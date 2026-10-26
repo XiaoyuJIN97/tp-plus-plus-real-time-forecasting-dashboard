@@ -337,9 +337,12 @@ def conformal_forecast_chart(frame: pd.DataFrame, levels=(80, 95), title='Confor
                                 name='Actual', legendgroup='actual', showlegend=index == 0,
                                 line=dict(color='#111827', width=1.7), connectgaps=False,
                                 hovertemplate='%{y:,.1f} MW<extra>Actual</extra>'))
-    fig.update_layout(title=title, height=380, template='plotly_white', hovermode='x unified',
-                      margin=dict(l=25, r=15, t=55, b=85),
-                      legend=dict(orientation='h', yanchor='top', y=-0.22, x=0))
-    fig.update_xaxes(title='Delivery time (CET/CEST)')
+    # Reserve a header row for the legend instead of competing with the local
+    # time ticks and axis title in the footer (especially in narrow panels).
+    fig.update_layout(title=dict(text=title, x=0, y=0.98, yanchor='top'),
+                      height=440, template='plotly_white', hovermode='x unified',
+                      margin=dict(l=25, r=15, t=110, b=100),
+                      legend=dict(orientation='h', yanchor='bottom', y=1.04, x=0, xanchor='left'))
+    fig.update_xaxes(title='Delivery time (CET/CEST)', title_standoff=20)
     fig.update_yaxes(title='MW', rangemode='tozero')
     return _brussels_axis(fig)
