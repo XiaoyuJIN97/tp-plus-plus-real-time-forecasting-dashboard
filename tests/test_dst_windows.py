@@ -68,13 +68,28 @@ def test_plot_uses_unique_monotone_instants_and_explicit_local_labels(chart,day)
     labels=list(figure.layout.xaxis.ticktext)
     assert len(labels)==len(set(labels))
     if day=='2026-10-24':
-        assert 'Oct 25<br>02:00 CEST' in labels
-        assert 'Oct 25<br>02:00 CET' in labels
+        assert 'Oct 25<br>02:00 CEST<br>→ 02:00 CET' in labels
         hover=[row[-1] for trace in figure.data for row in trace.customdata]
         assert any('02:00 CEST (UTC+0200)' in value for value in hover)
         assert any('02:00 CET (UTC+0100)' in value for value in hover)
     else:
         assert all('Mar 29<br>02:00' not in value for value in labels)
+
+
+@pytest.mark.parametrize('chart',[deterministic_forecast_chart,conformal_forecast_chart])
+def test_multiday_transition_labels_have_room_on_narrow_panels(chart):
+    frame=pd.concat([run(str(day.date())) for day in pd.date_range('2026-10-12',periods=14)],ignore_index=True)
+    frame['lower_80']=frame.forecast_mw-5
+    frame['upper_80']=frame.forecast_mw+5
+    figure=chart(frame,levels=(80,)) if chart==conformal_forecast_chart else chart(frame,title='DST')
+    axis=figure.layout.xaxis
+    ticks=pd.DatetimeIndex(axis.tickvals)
+    span=frame.timestamp.max()-frame.timestamp.min()
+    # One compact transition label replaces the two adjacent hourly labels.
+    assert len(ticks)<=4
+    assert (ticks.to_series().diff().dropna()>=span/4).all()
+    assert axis.tickangle==0
+    assert 'Oct 25<br>02:00 CEST<br>→ 02:00 CET' in axis.ticktext
 
 
 def test_calibration_accepts_mixed_run_lengths_and_calibrates_extra_hour():

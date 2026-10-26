@@ -43,16 +43,29 @@ def _brussels_axis(fig):
             trace.hovertemplate = template.replace('%{x}',local_time) if '%{x}' in template else local_time+'<br>'+template
     if all_times:
         times = pd.DatetimeIndex(all_times).unique().sort_values()
-        stride = max(1,int(np.ceil(len(times)/10)))
-        ticks = set(times[::stride]) | {times[-1]}
-        # Always label both sides of an offset change, including both 02:00s.
+        # Adjacent transition ticks are only an hour apart and collide on a
+        # multi-day chart. Reserve one compact label for the transition, then
+        # admit ordinary ticks only where there is enough horizontal space.
+        transition_labels = {}
         local = times.tz_convert('Europe/Brussels')
         for index in range(1,len(times)):
             if local[index].utcoffset() != local[index-1].utcoffset():
-                ticks.update((times[index-1],times[index]))
+                before, after = local[index-1], local[index]
+                if before.strftime('%Y-%m-%d %H:%M') == after.strftime('%Y-%m-%d %H:%M'):
+                    label = after.strftime('%b %d')+'<br>'+before.strftime('%H:%M %Z')+'<br>→ '+after.strftime('%H:%M %Z')
+                else:
+                    label = after.strftime('%b %d<br>%H:%M %Z')
+                transition_labels[times[index]] = label
+        spacing = (times[-1]-times[0])/3
+        ticks = []
+        candidates = list(transition_labels)+list(times[np.linspace(0,len(times)-1,min(4,len(times)),dtype=int)])
+        for candidate in candidates:
+            if candidate not in ticks and all(abs(candidate-existing)>=spacing for existing in ticks):
+                ticks.append(candidate)
         ticks = pd.DatetimeIndex(sorted(ticks))
+        labels = [transition_labels.get(t,t.tz_convert('Europe/Brussels').strftime('%b %d<br>%H:%M %Z')) for t in ticks]
         fig.update_xaxes(type='date', hoverformat='%Y-%m-%d %H:%M UTC', tickmode='array',tickvals=ticks,
-                         ticktext=ticks.tz_convert('Europe/Brussels').strftime('%b %d<br>%H:%M %Z'),
+                         ticktext=labels, tickangle=0, tickfont=dict(size=11), automargin=True,
                          title='Delivery time (CET/CEST)')
     return fig
 

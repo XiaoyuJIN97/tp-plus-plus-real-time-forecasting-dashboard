@@ -30,8 +30,9 @@ All joins, deduplication and ordering use UTC. The autumn hours are both retaine
 ```
 
 Plots use continuous UTC coordinates with explicit Brussels tick/hover labels.
-Both labels appear with their timezone suffix, so there are no identical
-ambiguous `02:00` labels or collapsed/reversed points. Duplicate UTC rows are
+A single compact transition tick shows `02:00 CEST → 02:00 CET`; hover text
+identifies each observation separately. Ordinary ticks keep a minimum spacing,
+so there are no crowded ambiguous labels or collapsed/reversed points. Duplicate UTC rows are
 removed per model/zone/target, retaining the latest run. In spring, nonexistent
 local 02:00 is not inserted; the UTC line remains continuous.
 
