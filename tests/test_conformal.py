@@ -82,7 +82,7 @@ def test_plot_band_segments_do_not_bridge_missing_days():
     for trace in figure.data:
         times = pd.Series(pd.to_datetime(trace.x))
         assert not times.diff().gt(pd.Timedelta(hours=1)).any()
-    assert {trace.name for trace in figure.data if trace.showlegend} == {'80% band', '95% band', 'Forecast', 'Actual'}
+    assert {trace.name for trace in figure.data if trace.showlegend} == {'80% interval', '95% interval', 'Forecast', 'Actual'}
 
 
 def test_model_and_coverage_controls(tmp_path, monkeypatch):
@@ -116,7 +116,7 @@ def test_model_and_coverage_controls(tmp_path, monkeypatch):
     import json
     for chart in at.get('plotly_chart'):
         traces = json.loads(chart.proto.spec)['data']
-        assert {trace.get('name') for trace in traces if trace.get('fill') == 'tonexty'} == {'80% band'}
+        assert {trace.get('name') for trace in traces if trace.get('fill') == 'tonexty'} == {'80% interval'}
 
 
 def test_artifact_contains_every_valid_model_and_preserves_warmup(tmp_path):

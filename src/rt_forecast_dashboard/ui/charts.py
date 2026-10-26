@@ -323,9 +323,9 @@ def conformal_forecast_chart(frame: pd.DataFrame, levels=(80, 95), title='Confor
                                     legendgroup=f'band{level}', connectgaps=False))
             fig.add_trace(go.Scatter(x=x, y=part[f'lower_{level}'], mode='lines', fill='tonexty',
                                     fillcolor=styles.get(level, 'rgba(37,99,235,0.16)'),
-                                    line=dict(width=0), name=f'{level}% band', legendgroup=f'band{level}',
+                                    line=dict(width=0), name=f'{level}% interval', legendgroup=f'band{level}',
                                     showlegend=index == 0, customdata=part[[f'lower_{level}', f'upper_{level}']],
-                                    hovertemplate=f'{level}% band: '+ '%{customdata[0]:,.1f}–%{customdata[1]:,.1f} MW<extra></extra>',
+                                    hovertemplate=f'{level}% interval: '+ '%{customdata[0]:,.1f}–%{customdata[1]:,.1f} MW<extra></extra>',
                                     connectgaps=False))
     segments = plot.timestamp.diff().gt(pd.Timedelta(hours=1.5)).cumsum()
     for index, (_, part) in enumerate(plot.groupby(segments, sort=False)):
