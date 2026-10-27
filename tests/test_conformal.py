@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from rt_forecast_dashboard.conformal import conformal_intervals, conformal_radius, interval_diagnostics
 from rt_forecast_dashboard.ui.charts import conformal_forecast_chart
+from rt_forecast_dashboard.conformal import interval_leaderboard
 
 
 def forecasts(days=32, model='persistence', error=2.):
@@ -73,6 +74,58 @@ def test_coverage_scores_only_realized_banded_hours():
     assert metrics['Scored hours'].eq(10*24).all()
 
 
+def test_interval_leaderboard_matches_complete_observed_calibrated_runs():
+    a=forecasts(days=5,model='a',error=lambda day,h:100. if h<6 else 0.)
+    b=forecasts(days=5,model='b',error=lambda day,h:100. if h<6 else 0.)
+    a['lower_80']=90.;a['upper_80']=110.
+    b['lower_80']=80.;b['upper_80']=120.
+    # One missing interval excludes the entire run for both models.
+    a.loc[23,'upper_80']=np.nan
+    # Unobserved future outcomes cannot contribute.
+    a.loc[a.run_date.eq(a.run_date.max()),'actual_mw']=np.nan
+    b.loc[b.run_date.eq(b.run_date.max()),'actual_mw']=np.nan
+    result=interval_leaderboard(pd.concat([a,b],ignore_index=True)).set_index('model')
+    assert result.coverage_pct.eq(75.).all()
+    assert result.scored_runs.eq(3).all() and result.scored_hours.eq(72).all()
+    assert result.loc['a','mean_interval_width_mw']==20.
+    assert result.loc['b','mean_interval_width_mw']==40.
+    # A mismatched realized truth excludes that whole run from both models.
+    b.loc[b.run_date.eq(sorted(b.run_date.unique())[1]),'actual_mw']+=1.
+    result=interval_leaderboard(pd.concat([a,b],ignore_index=True))
+    assert result.scored_runs.eq(2).all()
+
+
+def test_interval_leaderboard_preserves_dst_windows():
+    from tests.test_dst_windows import run
+    parts=[]
+    for model in ('tso_reference','ensemble_selected'):
+        for day in ('2026-03-28','2026-10-24'):
+            part=run(day,model)
+            part['lower_80']=0.;part['upper_80']=200.
+            parts.append(part)
+    result=interval_leaderboard(pd.concat(parts,ignore_index=True))
+    assert result.scored_hours.eq(48).all() and result.scored_runs.eq(2).all()
+    assert result.coverage_pct.eq(100.).all()
+
+
+def test_probabilistic_leaderboard_renders_both_metrics(tmp_path,monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    from rt_forecast_dashboard.ui import layout
+    from rt_forecast_dashboard.storage import ForecastStore
+    scores=pd.DataFrame([dict(zone='BE',target='load',model='ensemble_selected',model_label='Ensembled model',
+        coverage_pct=81.,mean_interval_width_mw=200.,scored_runs=30,scored_hours=720)])
+    monkeypatch.setattr(layout,'_probabilistic_leaderboard',lambda *args:scores.copy())
+    monkeypatch.setattr(layout,'ForecastStore',lambda:ForecastStore(data_dir=tmp_path))
+    def app():
+        from rt_forecast_dashboard.ui.layout import _render_probabilistic_leaderboard
+        _render_probabilistic_leaderboard('load')
+    at=AppTest.from_function(app).run()
+    assert not at.exception
+    assert len(at.dataframe)==2
+    assert at.dataframe[0].value.loc[0,'BE']==81.
+    assert at.dataframe[1].value.loc[0,'BE']==200.
+
+
 def test_plot_band_segments_do_not_bridge_missing_days():
     bands = conformal_intervals(forecasts())
     days = sorted(bands.run_date.unique())
@@ -89,7 +142,7 @@ def test_model_and_coverage_controls(tmp_path, monkeypatch):
     from streamlit.testing.v1 import AppTest
     from rt_forecast_dashboard.ui import layout
     from rt_forecast_dashboard.storage import ForecastStore
-    bands = conformal_intervals(pd.concat([forecasts(model='a'), forecasts(model='b')], ignore_index=True))
+    bands = conformal_intervals(pd.concat([forecasts(model='ensemble_selected'), forecasts(model='tso_reference'), forecasts(model='a')], ignore_index=True))
     monkeypatch.setattr(layout, '_conformal_series', lambda *args: bands)
     monkeypatch.setattr(layout, 'ForecastStore', lambda: ForecastStore(data_dir=tmp_path))
 
@@ -103,12 +156,14 @@ def test_model_and_coverage_controls(tmp_path, monkeypatch):
     at.run()
     assert not at.exception
     assert len(at.get('plotly_chart')) == 2
+    assert set(at.multiselect[0].value) == {'ensemble_selected','tso_reference'}
+    assert 'a' in at.multiselect[0].options
     at.multiselect[0].set_value(['a']).run()
     assert not at.exception
     assert len(at.get('plotly_chart')) == 1
     at.multiselect[0].set_value([]).run()
     assert len(at.get('plotly_chart')) == 0
-    at.multiselect[0].set_value(['a', 'b']).run()
+    at.multiselect[0].set_value(['a', 'tso_reference']).run()
     at.selectbox[0].set_value(1).run()
     assert not at.exception
     assert len(at.get('plotly_chart')) == 2

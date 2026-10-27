@@ -102,6 +102,56 @@ def conformal_intervals(frame, *, levels=LEVELS, window_runs=WINDOW_RUNS,
     return out
 
 
+def interval_leaderboard(frame, level=.80):
+    """Compare models on identical complete, observed and calibrated UTC runs.
+
+    Coverage is an hourly fraction, not a whole-trajectory success rate. Width
+    is averaged over the same hours. Do not rank coverage as 'higher is better'.
+    """
+    columns = ['zone','target','model','model_label','coverage_pct','mean_interval_width_mw','scored_runs','scored_hours']
+    if frame.empty:
+        return pd.DataFrame(columns=columns)
+    low,high = f'lower_{round(level*100)}',f'upper_{round(level*100)}'
+    data = frame.copy()
+    data['timestamp'] = pd.to_datetime(data.timestamp,utc=True)
+    data['run_date'] = data.run_date.astype(str)
+    if data.duplicated(['zone','target','model','run_date','timestamp']).any():
+        raise ValueError('Duplicate interval forecast keys')
+    for col in ('actual_mw',low,high):
+        data[col] = pd.to_numeric(data[col],errors='coerce')
+    rows = []
+    for (zone,target),series in data.groupby(['zone','target'],observed=True):
+        models = set(series.model.dropna().astype(str))
+        complete = []
+        for (_,day),part in series.groupby(['model','run_date'],observed=True):
+            times = part.timestamp.sort_values()
+            expected = forecast_horizon_hours(day)
+            origin = brussels_cutoff_timestamp(pd.Timestamp(day).date())
+            if (len(part)==expected and times.iloc[0]==origin
+                    and times.diff().dropna().eq(pd.Timedelta(hours=1)).all()
+                    and np.isfinite(part[['actual_mw',low,high]].to_numpy(float)).all()
+                    and part[low].ge(0).all() and part[high].ge(part[low]).all()):
+                complete.append(part)
+        if not complete:
+            continue
+        matched = pd.concat(complete,ignore_index=True)
+        shared = matched.groupby('run_date',observed=True).model.nunique()
+        matched = matched[matched.run_date.isin(shared[shared.eq(len(models))].index)]
+        if matched.empty:
+            continue
+        # Reject a whole run if reference truth differs across models.
+        truth = matched.groupby(['run_date','timestamp'],observed=True).actual_mw.agg(['min','max'])
+        bad = truth.loc[~np.isclose(truth['min'],truth['max'],rtol=1e-6,atol=1e-6)].index.get_level_values('run_date')
+        matched = matched[~matched.run_date.isin(bad)]
+        for model,part in matched.groupby('model',observed=True):
+            rows.append(dict(zone=str(zone),target=str(target),model=str(model),
+                model_label=str(part.model_label.iloc[0]),
+                coverage_pct=float(100*part.actual_mw.between(part[low],part[high]).mean()),
+                mean_interval_width_mw=float((part[high]-part[low]).mean()),
+                scored_runs=int(part.run_date.nunique()),scored_hours=len(part)))
+    return pd.DataFrame(rows,columns=columns)
+
+
 def interval_diagnostics(frame, levels=LEVELS):
     """Realized pointwise coverage on the plotted evaluation window only."""
     rows = []
