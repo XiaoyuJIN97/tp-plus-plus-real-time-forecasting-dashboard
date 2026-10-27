@@ -298,13 +298,16 @@ def _render_probabilistic_leaderboard(target: str) -> None:
     scores['Model Family'] = scores.model_label.map(_normal_model_family)
     families = list(dict.fromkeys([f for f in MODEL_FAMILY_ORDER if f in set(scores['Model Family'])]
                                  +sorted(set(scores['Model Family'])-set(MODEL_FAMILY_ORDER))))
-    zone_order = sorted(scores.zone.unique())
     st.caption('80% intervals, evaluated on the same complete observed runs within each zone. Coverage target: 80%. Compare widths alongside coverage.')
-    for metric,title in [('coverage_pct','Coverage (%)'),('mean_interval_width_mw','Mean interval width (MW)')]:
-        table = scores.pivot(index='Model Family',columns='zone',values=metric).reindex(index=families,columns=zone_order).reset_index()
-        st.markdown('##### '+title)
-        st.dataframe(table,width='stretch',hide_index=True,
-                     column_config={zone:st.column_config.NumberColumn(format='%.1f%%' if metric=='coverage_pct' else '%.2f') for zone in zone_order})
+    scores['_model_order'] = scores['Model Family'].map({family:index for index,family in enumerate(families)})
+    table = scores.sort_values(['zone','_model_order'])[
+        ['zone','Model Family','coverage_pct','mean_interval_width_mw']
+    ].rename(columns={'zone':'Zone','coverage_pct':'Coverage (%)',
+                      'mean_interval_width_mw':'Mean interval width (MW)'}).reset_index(drop=True)
+    st.dataframe(table,width='stretch',hide_index=True,column_config={
+        'Coverage (%)':st.column_config.NumberColumn(format='%.1f%%'),
+        'Mean interval width (MW)':st.column_config.NumberColumn(format='%.2f'),
+    })
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
