@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from rt_forecast_dashboard.config import features, zones
-from rt_forecast_dashboard.conformal import conformal_intervals
+from rt_forecast_dashboard.conformal import conformal_intervals, interval_leaderboard
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
@@ -231,8 +231,9 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
         return (MODEL_FAMILY_ORDER.index(family) if family in MODEL_FAMILY_ORDER else len(MODEL_FAMILY_ORDER), labels[key])
     options = sorted(labels, key=rank)
     controls = st.columns([3, 1])
-    selected = controls[0].multiselect("Show model plots", options, default=options,
-                                      format_func=lambda key: labels[key], key=f"{target}_{zone}_cp_models")
+    defaults = [key for key in options if key in {'ensemble_selected','tso_reference'}]
+    selected = controls[0].multiselect("Show model plots", options, default=defaults,
+                                      format_func=lambda key: labels[key], key=f"{target}_{zone}_cp_models_v2")
     levels = [80]
     columns = controls[1].selectbox("Plots per row", [2, 1], key=f"{target}_{zone}_cp_columns")
     if not selected:
@@ -269,6 +270,41 @@ def _fallback_daily_leaderboard(day: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     frame = frame[frame.zone.isin(zones())]
     detail, _ = online_rmae_leaderboard(frame)
     return detail, online_win_rate_by_zone(frame)
+
+
+@st.cache_data(max_entries=4, show_spinner=False)
+def _probabilistic_leaderboard(version: tuple, target: str) -> pd.DataFrame:
+    path = ForecastStore().dashboard_dir()/'conformal_forecasts.parquet'
+    if path.exists():
+        bands = pd.read_parquet(path,filters=[('target','=',target)])
+    else:
+        frame = _prepared_online_forecasts(version[:2])
+        bands = conformal_intervals(frame[frame.target.eq(target)])
+    bands = bands[bands.zone.isin(zones()) & ~bands.model.isin(HIDDEN_MODEL_KEYS)]
+    return interval_leaderboard(bands, .80)
+
+
+def _render_probabilistic_leaderboard(target: str) -> None:
+    st.markdown('#### Probabilistic forecast leaderboard')
+    store = ForecastStore()
+    path = store.dashboard_dir()/'conformal_forecasts.parquet'
+    stat = path.stat() if path.exists() else None
+    version = (*_data_version(store),stat.st_mtime_ns if stat else 0,stat.st_size if stat else 0)
+    with st.spinner('Calculating interval coverage and width…'):
+        scores = _probabilistic_leaderboard(version,target)
+    if scores.empty:
+        st.info('Interval comparisons require shared, fully observed runs with calibrated intervals for every compared model.')
+        return
+    scores['Model Family'] = scores.model_label.map(_normal_model_family)
+    families = list(dict.fromkeys([f for f in MODEL_FAMILY_ORDER if f in set(scores['Model Family'])]
+                                 +sorted(set(scores['Model Family'])-set(MODEL_FAMILY_ORDER))))
+    zone_order = sorted(scores.zone.unique())
+    st.caption('80% intervals, evaluated on the same complete observed runs within each zone. Coverage target: 80%. Compare widths alongside coverage.')
+    for metric,title in [('coverage_pct','Coverage (%)'),('mean_interval_width_mw','Mean interval width (MW)')]:
+        table = scores.pivot(index='Model Family',columns='zone',values=metric).reindex(index=families,columns=zone_order).reset_index()
+        st.markdown('##### '+title)
+        st.dataframe(table,width='stretch',hide_index=True,
+                     column_config={zone:st.column_config.NumberColumn(format='%.1f%%' if metric=='coverage_pct' else '%.2f') for zone in zone_order})
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
@@ -350,6 +386,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
     )
     _render_analysis_window(frame[frame["target"].eq(selected_target)])
+    _render_probabilistic_leaderboard(selected_target)
 
 
 def _render_header() -> None:
