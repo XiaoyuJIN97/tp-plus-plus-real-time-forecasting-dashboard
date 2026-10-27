@@ -123,9 +123,12 @@ def test_probabilistic_leaderboard_renders_both_metrics(tmp_path,monkeypatch):
         _render_probabilistic_leaderboard('load')
     at=AppTest.from_function(app).run()
     assert not at.exception
-    assert len(at.dataframe)==2
-    assert at.dataframe[0].value.loc[0,'BE']==81.
-    assert at.dataframe[1].value.loc[0,'BE']==200.
+    assert len(at.dataframe)==1
+    table=at.dataframe[0].value
+    assert list(table)==['Zone','Model Family','Coverage (%)','Mean interval width (MW)']
+    assert table.loc[0,'Zone']=='BE'
+    assert table.loc[0,'Coverage (%)']==81.
+    assert table.loc[0,'Mean interval width (MW)']==200.
 
 
 def test_plot_band_segments_do_not_bridge_missing_days():
