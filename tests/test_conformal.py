@@ -96,11 +96,13 @@ def test_interval_leaderboard_matches_complete_observed_calibrated_runs():
 
 
 def test_interval_leaderboard_preserves_dst_windows():
-    from tests.test_dst_windows import run
+    from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
     parts=[]
     for model in ('tso_reference','ensemble_selected'):
-        for day in ('2026-03-28','2026-10-24'):
-            part=run(day,model)
+        for day,hours in (('2026-03-28',23),('2026-10-24',25)):
+            part=pd.DataFrame(dict(zone='BE',target='load',model=model,model_label=model,
+                run_date=day,actual_mw=100.,timestamp=pd.date_range(
+                    brussels_cutoff_timestamp(pd.Timestamp(day).date()),periods=hours,freq='h')))
             part['lower_80']=0.;part['upper_80']=200.
             parts.append(part)
     result=interval_leaderboard(pd.concat(parts,ignore_index=True))
