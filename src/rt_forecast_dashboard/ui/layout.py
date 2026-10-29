@@ -6,7 +6,6 @@ import streamlit as st
 from rt_forecast_dashboard.config import features, zones
 from rt_forecast_dashboard.conformal import conformal_intervals, interval_leaderboard
 from rt_forecast_dashboard.storage import ForecastStore
-from rt_forecast_dashboard.ui.actuals import attach_display_actuals
 from rt_forecast_dashboard.ui.analytics import (
     MODEL_FAMILY_ORDER,
     filter_last_n_days,
@@ -110,7 +109,8 @@ def _prepared_online_forecasts(version: tuple[int, int]) -> pd.DataFrame:
     prepared = valid_online_forecasts(forecasts)
     if "model" in prepared.columns:
         prepared = prepared[~prepared["model"].isin(HIDDEN_MODEL_KEYS)].copy()
-    prepared = attach_display_actuals(prepared)
+    # Display only published outcomes. Opening a page must not wait on a
+    # collector HTTP request; the scheduled refresh attaches new actuals.
     keep = ["run_date", "zone", "target", "model", "model_label", "timestamp", "forecast_mw",
             "actual_mw", "source", "horizon", "context_hours", "context_end"]
     prepared = prepared[[c for c in keep if c in prepared]].copy()
@@ -175,19 +175,48 @@ def _render_analysis_window(frame: pd.DataFrame) -> None:
         st.caption(sentence)
 
 
-def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[str]) -> None:
+@st.cache_data(max_entries=16, show_spinner=False)
+def _prepared_forecast_series(version: tuple, target: str, zone: str) -> pd.DataFrame:
+    path = ForecastStore().dashboard_forecast_path()
+    if not path.exists():
+        frame = _prepared_online_forecasts(version)
+        return frame[frame.target.eq(target) & frame.zone.eq(zone)]
+    columns = ['run_date','zone','target','model','model_label','timestamp','forecast_mw',
+               'actual_mw','source','context_hours','context_end']
+    frame = pd.read_parquet(path,columns=columns,filters=[('target','=',target),('zone','=',zone)])
+    return valid_online_forecasts(frame[~frame.model.isin(HIDDEN_MODEL_KEYS)])
+
+
+@st.cache_data(max_entries=1, show_spinner=False)
+def _forecast_catalog(version: tuple) -> pd.DataFrame:
+    store = ForecastStore()
+    path = store.dashboard_dir()/'forecast_catalog.parquet'
+    if path.exists():
+        return pd.read_parquet(path)
+    path = store.dashboard_forecast_path()
+    if path.exists():
+        return pd.read_parquet(path,columns=['zone','target','run_date']).drop_duplicates()
+    return pd.DataFrame(columns=['zone','target','run_date'])
+
+
+def _render_target_section(target: str, prepared: pd.DataFrame | None, countries: list[str]) -> None:
     if not countries:
         st.info("Select at least one bidding zone.")
         return
-    current = prepared[(prepared["target"] == target) & (prepared["zone"].isin(countries))].copy()
-
-    if current.empty:
+    current = None if prepared is None else prepared[(prepared['target']==target) & prepared.zone.isin(countries)].copy()
+    if current is not None and current.empty:
         st.info("No stored online forecast rows for this target yet.")
         return
-    available_zones = sorted(current["zone"].dropna().unique())
+    available_zones = sorted(countries if current is None else current.zone.dropna().unique())
 
     control_cols = st.columns([1.0, 1.0])
     selected_zone = control_cols[0].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
+    if current is None:
+        current = _prepared_forecast_series(_data_version(ForecastStore()),target,selected_zone)
+        if current.empty:
+            st.info('No valid published forecasts are available for this zone and task.')
+            return
+        _render_data_warning(current)
     available_run_days = max(1, current["run_date"].nunique())
     last_n_days = control_cols[1].slider(
         "Plot last N days",
@@ -203,24 +232,32 @@ def _render_target_section(target: str, prepared: pd.DataFrame, countries: list[
         st.warning("No forecast rows match the selected zone and time window.")
         return
 
-    point_tab, conformal_tab = st.tabs(["Point forecasts", "Probabilistic forecasts"])
-    with point_tab:
+    # Streamlit tabs eagerly execute both bodies, including the hidden plots.
+    view = st.radio('Forecast view',['Point forecasts','Probabilistic forecasts'],
+                    horizontal=True,key=f'{target}_{selected_zone}_forecast_view',label_visibility='collapsed')
+    if view == 'Point forecasts':
         st.plotly_chart(
             deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
             width="stretch",
         )
-    with conformal_tab:
+    else:
         _render_conformal_section(target, selected_zone, current)
 
 
-@st.cache_data(max_entries=2, show_spinner=False)
-def _conformal_series(version: tuple, target: str, zone: str) -> pd.DataFrame:
+@st.cache_data(max_entries=16, show_spinner=False)
+def _conformal_series(version: tuple, target: str, zone: str, models: tuple = ()) -> pd.DataFrame:
     path = ForecastStore().dashboard_dir() / "conformal_forecasts.parquet"
     if path.exists():
-        return pd.read_parquet(path, filters=[("target", "=", target), ("zone", "=", zone)])
+        filters = [('target','=',target),('zone','=',zone)]
+        if models:
+            filters.append(('model','in',list(models)))
+        columns = ['zone','target','model','model_label','run_date','timestamp',
+                   'forecast_mw','actual_mw','lower_80','upper_80']
+        return pd.read_parquet(path,columns=columns,filters=filters)
     # Calibration must see the full history, before the plotting window is cut.
-    prepared = _prepared_online_forecasts(version[:2])
-    selected = prepared[prepared.target.eq(target) & prepared.zone.eq(zone)]
+    selected = _prepared_forecast_series(version[:2],target,zone)
+    if models:
+        selected = selected[selected.model.isin(models)]
     return conformal_intervals(selected)
 
 
@@ -244,7 +281,7 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
     stat = path.stat() if path.exists() else None
     version = (*_data_version(store), stat.st_mtime_ns if stat else 0, stat.st_size if stat else 0)
     with st.spinner("Loading conformal bands…"):
-        bands = _conformal_series(version, target, zone)
+        bands = _conformal_series(version, target, zone, tuple(selected))
     # Match the displayed timestamps without reducing the calibration history.
     bands = bands[bands.timestamp.between(current.timestamp.min(), current.timestamp.max()) & bands.model.isin(selected)].copy()
     for first in range(0, len(selected), columns):
@@ -274,6 +311,9 @@ def _fallback_daily_leaderboard(day: str) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 @st.cache_data(max_entries=4, show_spinner=False)
 def _probabilistic_leaderboard(version: tuple, target: str) -> pd.DataFrame:
+    snapshot = ForecastStore().dashboard_dir()/'probabilistic_leaderboard.parquet'
+    if snapshot.exists():
+        return pd.read_parquet(snapshot,filters=[('target','=',target)])
     path = ForecastStore().dashboard_dir()/'conformal_forecasts.parquet'
     if path.exists():
         bands = pd.read_parquet(path,filters=[('target','=',target)])
@@ -290,7 +330,10 @@ def _render_probabilistic_leaderboard(target: str) -> None:
     path = store.dashboard_dir()/'conformal_forecasts.parquet'
     stat = path.stat() if path.exists() else None
     version = (*_data_version(store),stat.st_mtime_ns if stat else 0,stat.st_size if stat else 0)
-    with st.spinner('Calculating interval coverage and width…'):
+    snapshot = store.dashboard_dir()/'probabilistic_leaderboard.parquet'
+    stat = snapshot.stat() if snapshot.exists() else None
+    version += (stat.st_mtime_ns if stat else 0,stat.st_size if stat else 0)
+    with st.spinner('Loading probabilistic leaderboard…'):
         scores = _probabilistic_leaderboard(version,target)
     if scores.empty:
         st.info('Interval comparisons require shared, fully observed runs with calibrated intervals for every compared model.')
@@ -437,16 +480,15 @@ def _render_leaderboard_page(details_page: st.Page) -> None:
 
 def _render_forecast_details_page() -> None:
     _render_header()
-    prepared, _, _ = _load_dashboard()
-    if prepared.empty:
+    catalog = _forecast_catalog(_data_version(ForecastStore()))
+    if catalog.empty:
         st.info("No stored forecasts yet. The scheduled daily forecast has not populated the dashboard data store.")
         return
-    _render_data_warning(prepared)
     st.markdown('<div class="task-section-title">More detailed insights</div>', unsafe_allow_html=True)
     selected_target = st.selectbox("Forecast target", TARGET_ORDER, format_func=_target_label, index=0)
-    available_zones = sorted(prepared.loc[prepared["target"].eq(selected_target), "zone"].dropna().unique())
+    available_zones = sorted(set(catalog.loc[catalog.target.eq(selected_target),'zone']) & set(zones()))
     _render_task_title(selected_target)
-    _render_target_section(selected_target, prepared, available_zones)
+    _render_target_section(selected_target, None, available_zones)
 
 
 def render_app() -> None:

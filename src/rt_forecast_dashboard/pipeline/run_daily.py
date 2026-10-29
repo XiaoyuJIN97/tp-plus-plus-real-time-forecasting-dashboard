@@ -13,12 +13,13 @@ from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
 from rt_forecast_dashboard.data.weather_client import OpenMeteoClient
 from rt_forecast_dashboard.features import build_feature_frame
 from rt_forecast_dashboard.models.registry import iter_model_adapters
+from rt_forecast_dashboard.pipeline.check_forecast_complete import complete_forecast_groups
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.time_utils import latest_complete_run_date, forecast_horizon_hours
 from rt_forecast_dashboard.weather_points import selected_weather_points
 
 
-def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None, *, clear_issues: bool = True) -> pd.DataFrame:
+def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None, *, clear_issues: bool = True, only_missing: bool = False) -> pd.DataFrame:
     run_date = run_date or latest_complete_run_date()
     run_date_str = run_date.isoformat()
     run_at = datetime.now(UTC).isoformat(timespec="seconds")
@@ -28,6 +29,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
     entsoe = EntsoeForecastClient()
     weather_client = OpenMeteoClient()
     outputs: list[pd.DataFrame] = []
+    completed = complete_forecast_groups(store.forecast_path(run_date_str)) if only_missing else set()
     if clear_issues:
         store.clear_issues_for_run(run_date_str)
 
@@ -37,6 +39,12 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
             if target not in enabled_targets:
                 continue
             try:
+                pending = [(key,config,adapter) for key,config,adapter in iter_model_adapters(target)
+                           if model_supports_scope(config,zone,target)
+                           and (model_keys is None or key in model_keys)
+                           and (zone,target,key) not in completed]
+                if not pending:
+                    continue
                 horizon = forecast_horizon_hours(run_date, int(fcfg["horizon_hours"]))
                 context_hours = int(fcfg["context_hours"])
                 point_type = fcfg["weather_point_type"]
@@ -131,7 +139,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                     context_frame = build_feature_frame(actual_context, weather_context).dropna(subset=["actual_mw"]).tail(context_hours)
                     weather_loaded = True
 
-                for model_key, model_config, adapter in iter_model_adapters(target):
+                for model_key, model_config, adapter in pending:
                     if not model_supports_scope(model_config, zone, target):
                         continue
                     if model_keys is not None and model_key not in model_keys:
@@ -189,7 +197,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
 
     result = pd.concat(outputs, ignore_index=True) if outputs else pd.DataFrame()
     if not result.empty:
-        store.append_forecasts(result, run_date_str, replace_run=model_keys is None)
+        store.append_forecasts(result, run_date_str, replace_run=model_keys is None and not only_missing)
     return result
 
 

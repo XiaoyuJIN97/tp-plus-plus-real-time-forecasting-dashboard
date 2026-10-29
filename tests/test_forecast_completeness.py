@@ -64,3 +64,20 @@ def test_forecast_completeness_rejects_stale_context(tmp_path) -> None:
 
     assert not complete
     assert "stale context" in reason
+
+
+def test_recovery_runs_newest_first_and_only_retries_missing_groups(tmp_path,monkeypatch):
+    from rt_forecast_dashboard.pipeline import backfill
+    from rt_forecast_dashboard.storage import ForecastStore
+    calls=[]
+    monkeypatch.setattr(backfill,'ForecastStore',lambda:ForecastStore(data_dir=tmp_path))
+    monkeypatch.setattr(backfill,'_completion_status',lambda *args:(False,'missing test group'))
+    def run(day,model_keys=None,**kwargs):
+        calls.append((day.isoformat(),kwargs['only_missing']))
+        return pd.DataFrame({'forecast_mw':[1.]})
+    monkeypatch.setattr(backfill,'run_daily_forecast',run)
+    backfill.run_backfill('2026-10-26','2026-10-28',{'tso_reference'})
+    assert calls==[('2026-10-28',True),('2026-10-27',True),('2026-10-26',True)]
+    calls.clear()
+    backfill.run_backfill('2026-10-28','2026-10-28',{'tso_reference'},force=True)
+    assert calls==[('2026-10-28',False)]

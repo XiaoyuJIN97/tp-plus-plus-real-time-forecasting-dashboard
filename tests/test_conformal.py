@@ -193,3 +193,47 @@ def test_artifact_contains_every_valid_model_and_preserves_warmup(tmp_path):
     assert result[result.run_date.eq(result.run_date.min())].lower_90.isna().all()
     assert result[result.run_date.eq(result.run_date.max())].lower_90.notna().all()
     assert status['calibrated_rows'] == 11*24*2
+    snapshot=pd.read_parquet(path.parent/'probabilistic_leaderboard.parquet')
+    pd.testing.assert_frame_equal(snapshot,interval_leaderboard(result))
+
+
+def test_scoped_page_load_and_snapshot_do_not_recalculate_or_fetch(tmp_path,monkeypatch):
+    from rt_forecast_dashboard.ui import layout
+    from rt_forecast_dashboard.storage import ForecastStore
+    store=ForecastStore(data_dir=tmp_path)
+    frame=forecasts()
+    frame['source']='online';frame['context_hours']=2208
+    frame['context_end']=frame.groupby('run_date').timestamp.transform('min')-pd.Timedelta(hours=1)
+    extra=frame.copy();extra['zone']='FR';extra['target']='solar'
+    store.write_dashboard_forecasts(pd.concat([frame,extra],ignore_index=True))
+    scores=pd.DataFrame([dict(zone='BE',target='load',model='persistence',model_label='Persistence',coverage_pct=80.,mean_interval_width_mw=4.,scored_runs=3,scored_hours=72)])
+    scores.to_parquet(store.dashboard_dir()/'probabilistic_leaderboard.parquet',index=False)
+    monkeypatch.setattr(layout,'ForecastStore',lambda:store)
+    def forbidden(*args,**kwargs):
+        raise AssertionError('Page must not prepare full history or recalculate published scores')
+    monkeypatch.setattr(layout,'_prepared_online_forecasts',forbidden)
+    monkeypatch.setattr(layout,'interval_leaderboard',forbidden)
+    layout._prepared_forecast_series.clear();layout._probabilistic_leaderboard.clear()
+    selected=layout._prepared_forecast_series((1234,1),'load','BE')
+    assert len(selected)==len(frame) and set(selected.zone)=={'BE'} and set(selected.target)=={'load'}
+    pd.testing.assert_frame_equal(layout._probabilistic_leaderboard((1234,1),'load'),scores)
+    layout._prepared_forecast_series.clear();layout._probabilistic_leaderboard.clear()
+
+
+def test_only_selected_forecast_view_is_built(monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    from rt_forecast_dashboard.ui import layout
+    called=[]
+    monkeypatch.setattr(layout,'_render_conformal_section',lambda *args:called.append('probabilistic'))
+    def app():
+        import streamlit as st
+        from rt_forecast_dashboard.ui.layout import _render_target_section
+        _render_target_section('load',st.session_state['forecasts'],['BE'])
+    at=AppTest.from_function(app)
+    at.session_state['forecasts']=forecasts()
+    at.run()
+    assert not at.exception and called==[]
+    assert len(at.get('plotly_chart'))==1
+    at.radio[0].set_value('Probabilistic forecasts').run()
+    assert not at.exception and called==['probabilistic']
+    assert len(at.get('plotly_chart'))==0

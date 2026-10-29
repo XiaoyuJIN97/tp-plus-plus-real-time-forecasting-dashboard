@@ -61,6 +61,11 @@ def build_dashboard_forecasts(
     sort_columns = [column for column in ["run_date", "zone", "target", "model", "timestamp"] if column in recent]
     recent = recent.sort_values(sort_columns).reset_index(drop=True)
     path = store.write_dashboard_forecasts(recent)
+    catalog = recent[['zone','target','run_date']].drop_duplicates().reset_index(drop=True)
+    catalog_path = store.dashboard_dir()/'forecast_catalog.parquet'
+    temporary_catalog = catalog_path.with_suffix('.parquet.tmp')
+    catalog.to_parquet(temporary_catalog,index=False)
+    temporary_catalog.replace(catalog_path)
     metadata: dict[str, object] = {
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "retention_days": retention_days,

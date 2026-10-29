@@ -160,6 +160,18 @@ def test_daily_models_and_weather_share_the_dst_horizon(day,tmp_path,monkeypatch
     assert len(result)==hours*2
     assert result.groupby('model').timestamp.nunique().eq(hours).all()
     assert calls==[('power',hours),('weather',hours),('t0_gamma',hours),('timestral',hours)]
+    calls.clear()
+    assert daily.run_daily_forecast(date,only_missing=True).empty
+    assert calls==[]  # No model inference or data requests for complete groups.
+    store=ForecastStore(data_dir=tmp_path/'data')
+    saved=pd.read_csv(store.forecast_path(day))
+    saved.loc[saved.model.eq('t0_gamma_online'),'forecast_mw']=123.
+    saved.loc[saved.model.eq('timestral_online'),'forecast_mw']=np.nan
+    saved.to_csv(store.forecast_path(day),index=False)
+    recovered=daily.run_daily_forecast(date,only_missing=True)
+    assert len(recovered)==hours and set(recovered.model)=={'timestral_online'}
+    assert calls==[('power',hours),('weather',hours),('timestral',hours)]
+    assert store.read_forecasts().query("model == 't0_gamma_online'").forecast_mw.eq(123.).all()
 
 
 def test_rolling_learned_weights_handle_mixed_dst_training_lengths(tmp_path,monkeypatch):

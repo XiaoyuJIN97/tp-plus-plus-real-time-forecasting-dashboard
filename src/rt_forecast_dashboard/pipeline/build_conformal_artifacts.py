@@ -2,7 +2,7 @@
 import json
 from datetime import datetime, UTC
 from rt_forecast_dashboard.conformal import (
-    conformal_intervals, interval_diagnostics, LEVELS, WINDOW_RUNS, MIN_RUNS, REPORTING_LAG_HOURS,
+    conformal_intervals, interval_diagnostics, interval_leaderboard, LEVELS, WINDOW_RUNS, MIN_RUNS, REPORTING_LAG_HOURS,
 )
 from rt_forecast_dashboard.ui.analytics import valid_online_forecasts
 
@@ -20,6 +20,13 @@ def build_conformal_artifacts(store, forecasts):
     temporary.replace(path)
     diagnostics = interval_diagnostics(bands)
     diagnostics.to_csv(directory / 'conformal_coverage.csv', index=False)
+    # Web requests read a tiny score snapshot instead of grouping the full
+    # calibration history on each cold start / task selection.
+    scores = interval_leaderboard(bands, .80)
+    snapshot = directory/'probabilistic_leaderboard.parquet'
+    temp_snapshot = snapshot.with_suffix('.parquet.tmp')
+    scores.to_parquet(temp_snapshot,index=False)
+    temp_snapshot.replace(snapshot)
     metadata = dict(generated_at_utc=datetime.now(UTC).isoformat(), rows=len(bands),
                     calibrated_rows=int(bands.lower_90.notna().sum()), levels=list(LEVELS),
                     window_runs=WINDOW_RUNS, minimum_runs=MIN_RUNS, horizon_bucket_hours=6,
