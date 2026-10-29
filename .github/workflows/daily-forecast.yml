@@ -6,6 +6,11 @@ on:
       run_date:
         description: Optional YYYY-MM-DD run date
         required: false
+      repair_recent_days:
+        description: Days to retry (1 keeps today's publication ahead of historical repair)
+        type: choice
+        options: ['1', '3', '10']
+        default: '1'
   schedule:
     # GitHub cron is UTC and can be delayed or occasionally missed. These
     # fallback triggers are guarded below so only the first one after 18:30
@@ -19,6 +24,8 @@ on:
 jobs:
   forecast:
     runs-on: ubuntu-latest
+    env:
+      BACKFILL_DAYS: ${{ github.event.inputs.repair_recent_days || '1' }}
     concurrency:
       group: daily-forecast-${{ github.ref }}
       cancel-in-progress: false
@@ -151,9 +158,9 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models "$MODELS"
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 10 --models "$MODELS"
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days "$BACKFILL_DAYS" --models "$MODELS"
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 10 --models "$MODELS"
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days "$BACKFILL_DAYS" --models "$MODELS"
           fi
 
       - name: Commit core forecast outputs
@@ -179,9 +186,9 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models timesfm3_online --keep-issues
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 10 --models timesfm3_online
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days "$BACKFILL_DAYS" --models timesfm3_online
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 10 --models timesfm3_online
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days "$BACKFILL_DAYS" --models timesfm3_online
           fi
 
       - name: Commit TimesFM3 forecast outputs
@@ -197,7 +204,7 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             DATES="${{ github.event.inputs.run_date }}"
           else
-            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=4); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
+            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=int('${BACKFILL_DAYS}')-1); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
           fi
           failed=0
           for run_date in $DATES; do
@@ -239,7 +246,7 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "$END_DATE" --models "$MODELS" --keep-issues
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --end "$END_DATE" --recent-days 10 --models "$MODELS"
+            python -m rt_forecast_dashboard.pipeline.backfill --end "$END_DATE" --recent-days "$BACKFILL_DAYS" --models "$MODELS"
           fi
 
       - name: Commit foundation model forecasts
@@ -255,7 +262,7 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             DATES="${{ github.event.inputs.run_date }}"
           else
-            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=9); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
+            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=int('${BACKFILL_DAYS}')-1); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
           fi
           failed=0
           for run_date in $DATES; do
@@ -291,9 +298,9 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             python -m rt_forecast_dashboard.pipeline.run_daily --date "${{ github.event.inputs.run_date }}" --models tabpfn_online --keep-issues
           elif [ -n "${{ steps.brussels_window.outputs.run_date }}" ]; then
-            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days 10 --models tabpfn_online
+            python -m rt_forecast_dashboard.pipeline.backfill --end "${{ steps.brussels_window.outputs.run_date }}" --recent-days "$BACKFILL_DAYS" --models tabpfn_online
           else
-            python -m rt_forecast_dashboard.pipeline.backfill --recent-days 10 --models tabpfn_online
+            python -m rt_forecast_dashboard.pipeline.backfill --recent-days "$BACKFILL_DAYS" --models tabpfn_online
           fi
 
       - name: Commit TabPFN forecast outputs
@@ -309,7 +316,7 @@ jobs:
           if [ -n "${{ github.event.inputs.run_date }}" ]; then
             DATES="${{ github.event.inputs.run_date }}"
           else
-            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=4); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
+            DATES="$(python -c "import pandas as pd; end=pd.Timestamp('${END_DATE}').date(); start=end-pd.Timedelta(days=int('${BACKFILL_DAYS}')-1); print(' '.join(day.date().isoformat() for day in pd.date_range(start=start, end=end, freq='D')))")"
           fi
           failed=0
           for run_date in $DATES; do
@@ -335,7 +342,7 @@ jobs:
             python -m rt_forecast_dashboard.pipeline.build_selected_ensembles \
               --actuals external/entsoe-realtime-data/data/dashboard/actuals_recent.parquet \
               --end "${{ steps.brussels_window.outputs.run_date }}" \
-              --recent-days 10 --repair-history
+              --recent-days "$BACKFILL_DAYS" --repair-history
           fi
           python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts \
             --retention-days 90 \

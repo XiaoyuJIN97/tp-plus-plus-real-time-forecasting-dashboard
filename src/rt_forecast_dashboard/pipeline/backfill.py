@@ -32,7 +32,8 @@ def run_backfill(start: str, end: str, model_keys: set[str] | None = None, *, fo
     end_date = datetime.strptime(end, "%Y-%m-%d").date()
     days = _date_range(start_date, end_date)
     rows = []
-    for day in days:
+    # Publish the newest eligible date before older recovery attempts.
+    for day in reversed(days):
         run_date = day
         started = perf_counter()
         before_complete, before_message = _completion_status(store, run_date, model_keys)
@@ -51,7 +52,7 @@ def run_backfill(start: str, end: str, model_keys: set[str] | None = None, *, fo
             continue
 
         try:
-            result = run_daily_forecast(run_date, model_keys=model_keys)
+            result = run_daily_forecast(run_date, model_keys=model_keys, only_missing=not force)
             after_complete, after_message = _completion_status(store, run_date, model_keys)
             status = "complete" if after_complete else "incomplete"
             if not after_complete:

@@ -9,6 +9,36 @@ from rt_forecast_dashboard.config import features, zones, model_registry, model_
 from rt_forecast_dashboard.time_utils import forecast_horizon_hours
 
 
+def complete_forecast_groups(path: Path) -> set[tuple[str,str,str]]:
+    """Individually complete model groups that a partial retry must preserve."""
+    import numpy as np
+    import pandas as pd
+    from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+    if not path.exists():
+        return set()
+    frame = pd.read_csv(path)
+    if not {'zone','target','model','run_date','timestamp','forecast_mw'}.issubset(frame):
+        return set()
+    frame['timestamp'] = pd.to_datetime(frame.timestamp,utc=True,errors='coerce')
+    complete = set()
+    for key,part in frame.groupby(['zone','target','model']):
+        if part.run_date.nunique()!=1:
+            continue
+        day = pd.Timestamp(part.run_date.iloc[0]).date()
+        origin = brussels_cutoff_timestamp(day)
+        grid = pd.date_range(origin,periods=forecast_horizon_hours(day),freq='h')
+        times = pd.DatetimeIndex(part.timestamp.sort_values())
+        values = pd.to_numeric(part.forecast_mw,errors='coerce').to_numpy(float)
+        if len(times)!=len(grid) or not times.equals(grid) or not np.isfinite(values).all():
+            continue
+        if 'context_end' in part:
+            end = pd.to_datetime(part.context_end,utc=True,errors='coerce')
+            if end.isna().any() or not end.eq(origin-pd.Timedelta(hours=1)).all():
+                continue
+        complete.add(key)
+    return complete
+
+
 
 
 def _requested_models(value: str | None) -> set[str] | None:

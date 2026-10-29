@@ -39,6 +39,22 @@ Backfill missed days:
 python -m rt_forecast_dashboard.pipeline.backfill --start 2026-08-01 --end 2026-08-07
 ```
 
+Recovery processes the newest date first and preserves each already-complete
+zone/target/model group. Use `--force` only to deliberately recompute saved runs.
+The daily GitHub workflow now checks the latest eligible date by default;
+operators can select `repair_recent_days: 3` or `10` in a manual dispatch for
+historical recovery. Older holes are no longer retried ahead of today's results
+automatically. GitHub schedule delays can still move execution past 18:30
+Brussels time; that is an earliest allowed time, not a guaranteed start time.
+
+Dashboard visits never launch forecasting jobs. The scheduled pipeline publishes
+`forecast_catalog.parquet` and `probabilistic_leaderboard.parquet` alongside the
+forecast/interval files. Pages read these compact snapshots, load only the
+selected zone and task, and render only the selected point/probabilistic view.
+Observed outcomes come from the committed refresh results; page visits no longer
+wait for a collector HTTP request. A sleeping host can still have cold-start
+overhead, independently of forecast scheduling.
+
 ## Credentials
 
 Set `ENTSOE_API_KEY` in `.env` or Streamlit secrets. Without credentials, the pipeline can still create deterministic demo data so the dashboard remains testable.
