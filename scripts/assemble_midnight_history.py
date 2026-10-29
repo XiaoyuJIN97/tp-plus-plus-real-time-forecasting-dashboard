@@ -22,7 +22,10 @@ def assemble(source,inputs,output,start,end):
     store=ForecastStore(output)
     old=ForecastStore(source).read_forecasts();compact=source/'dashboard/forecasts_recent.parquet'
     if compact.exists():old=pd.concat([old,pd.read_parquet(compact)],ignore_index=True)
-    old.run_date=old.run_date.astype(str);old.timestamp=pd.to_datetime(old.timestamp,utc=True)
+    old.run_date=old.run_date.astype(str)
+    for column in ['timestamp','run_at','context_start','context_end']:
+        if column in old:
+            old[column]=pd.to_datetime(old[column],utc=True,format='mixed',errors='coerce')
     old=old.drop_duplicates(KEYS+['timestamp'],keep='last')
     frames=[]
     for directory in inputs:
@@ -31,8 +34,9 @@ def assemble(source,inputs,output,start,end):
     if not frames:raise ValueError('No staged replay forecasts')
     replay=pd.concat(frames,ignore_index=True);replay.run_date=replay.run_date.astype(str)
     replay=replay[replay.run_date.between(start,end)].copy()
-    replay.timestamp=pd.to_datetime(replay.timestamp,utc=True)
-    replay.run_at=pd.to_datetime(replay.run_at,utc=True)
+    for column in ['timestamp','run_at','context_start','context_end']:
+        if column in replay:
+            replay[column]=pd.to_datetime(replay[column],utc=True,format='mixed',errors='coerce')
     if 'inference_device' not in replay:
         replay['inference_device']='cpu'
     replay['inference_device']=replay.inference_device.fillna('cpu')

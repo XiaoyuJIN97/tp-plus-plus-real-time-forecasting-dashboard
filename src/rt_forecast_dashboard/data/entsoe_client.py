@@ -143,7 +143,7 @@ class EntsoeForecastClient:
         actual_archive = self.archive.fetch_actuals(zone=zone, target=target, start=start, end=end)
         forecast_archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)
         if len(actual_archive) >= context_hours and len(forecast_archive) >= context_hours:
-            frame = actual_archive.merge(forecast_archive, on="timestamp", how="inner").sort_values("timestamp")
+            frame = actual_archive.merge(forecast_archive, on="timestamp", how="outer").sort_values("timestamp")
             frame = frame[["timestamp", "actual_mw", "tso_forecast_mw"]].tail(context_hours)
             expected_last = end - pd.Timedelta(hours=1)
             if len(frame) >= context_hours and pd.to_datetime(frame["timestamp"], utc=True).max() >= expected_last:
@@ -154,13 +154,13 @@ class EntsoeForecastClient:
         if not stored_context.empty:
             context_parts = []
             if not actual_archive.empty and not forecast_archive.empty:
-                context_parts.append(actual_archive.merge(forecast_archive, on="timestamp", how="inner"))
+                context_parts.append(actual_archive.merge(forecast_archive, on="timestamp", how="outer"))
             context_parts.append(stored_context)
             frame = pd.concat(context_parts, ignore_index=True)
             frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
             for column in ["actual_mw", "tso_forecast_mw"]:
                 frame[column] = pd.to_numeric(frame[column], errors="coerce")
-            frame = frame.dropna(subset=["actual_mw", "tso_forecast_mw"])
+            frame = frame.dropna(subset=["actual_mw"])
             frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
             frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
             if len(frame) >= context_hours:
@@ -193,7 +193,7 @@ class EntsoeForecastClient:
                                            start=start, end=end, **kwargs)
         tso_frame = _query_entsoe_hourly(forecast_query, "tso_forecast_mw", country_code=zone_code,
                                         start=start, end=end, **kwargs)
-        frame = actual_frame.merge(tso_frame, on="timestamp", how="inner")
+        frame = actual_frame.merge(tso_frame, on="timestamp", how="outer")
         return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
 
     def _stored_tso_forecast(
@@ -235,7 +235,7 @@ class EntsoeForecastClient:
         frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
         for column in ["actual_mw", "tso_forecast_mw"]:
             frame[column] = pd.to_numeric(frame[column], errors="coerce")
-        frame = frame.dropna(subset=["actual_mw", "tso_forecast_mw"])
+        frame = frame.dropna(subset=["actual_mw"])
         frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
         return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
 

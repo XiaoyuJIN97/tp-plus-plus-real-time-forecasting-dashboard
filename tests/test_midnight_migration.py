@@ -70,7 +70,7 @@ def test_assembler_preserves_legacy_groups_but_reports_them_unmigrated(tmp_path)
             timestamp=pd.date_range(origin,periods=hours,freq='h'),run_at=origin,source=tag,
             forecast_mw=100.,actual_mw=101.,context_hours=2208,context_end=origin-pd.Timedelta(hours=1),
             forecast_window='next_day_midnight_v1' if hours==30 else 'legacy'))
-    source.append_forecasts(pd.concat([rows('t0_gamma_online',24,'online'),rows('timestral_online',24,'online')]),day)
+    source.append_forecasts(pd.concat([rows('t0_gamma_online',24,'online'),rows('timestral_online',24,'online')]).assign(context_end='2026-07-24T15:00:00Z'),day)
     staged.append_forecasts(rows('t0_gamma_online',30,'historical_mock_replay'),day)
     coverage=assemble(source.data_dir,[staged.data_dir],tmp_path/'assembled',day,day)
     assert coverage.migrated.sum()==1 and len(coverage)==2
@@ -160,3 +160,18 @@ def test_replay_comparison_rejects_old_24_hour_or_misaligned_baselines():
     assert len(matched_complete_windows(frame))==30
     assert matched_complete_windows(frame.iloc[:24]).empty
     assert matched_complete_windows(frame.assign(context_end_baseline=origin)).empty
+
+
+def test_missing_past_tso_hour_does_not_discard_observed_actual_context(monkeypatch):
+    from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
+    from datetime import date
+    origin=brussels_cutoff_timestamp(date(2026,7,24))
+    actual=pd.DataFrame(dict(timestamp=pd.date_range(origin-pd.Timedelta(hours=4),periods=4,freq='h'),actual_mw=[100.,101.,102.,103.]))
+    tso=actual.rename(columns={'actual_mw':'tso_forecast_mw'}).drop(index=2)
+    class Archive:
+        def fetch_actuals(self,**kwargs):return actual
+        def fetch_forecast(self,**kwargs):return tso
+    client=EntsoeForecastClient(api_key=None,demo_mode=False);client.archive=Archive()
+    result=client.fetch_actual_context(run_date=date(2026,7,24),zone='BE',zone_code='BE',target='load',context_hours=3)
+    assert result.actual_mw.tolist()==[101.,102.,103.]
+    assert result.loc[result.timestamp.eq(origin-pd.Timedelta(hours=2)),'tso_forecast_mw'].isna().all()
