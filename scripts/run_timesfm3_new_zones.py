@@ -67,7 +67,10 @@ def main():
     parser.add_argument('--max-cutoffs',type=int,default=None)
     parser.add_argument('--batch-size',type=int,default=128)
     parser.add_argument('--force',action='store_true')
+    parser.add_argument('--legacy-24-hour-study',action='store_true',help='Reproduce the archived study; not valid for current leaderboard comparisons')
     args=parser.parse_args()
+    if not args.legacy_24_hour_study:
+        parser.error('Use plan_midnight_offline.py and replay_midnight_history.py for the current 29/30/31-hour protocol; pass --legacy-24-hour-study only to reproduce historical evidence.')
     ns=load_notebook_runtime()
     zones=[x.strip() for x in args.zones.split(',') if x.strip()]
     targets=[x.strip() for x in args.targets.split(',') if x.strip()]

@@ -75,6 +75,16 @@ resume complete groups and record explicit failure evidence. Neither path
 publishes to production. Never append forecasts copied from another origin,
 repeat the last six predictions, or use future actuals as covariates.
 
+Assemble validated groups into a separate copy of retained history. This
+rejects shifted grids, invalid values or incorrect replay provenance, and writes
+an explicit list of unrecovered legacy groups:
+
+```sh
+PYTHONPATH=src python scripts/assemble_midnight_history.py \
+  --source data --inputs /path/to/staging/results \
+  --output /path/to/staging/assembled --start 2026-07-24 --end YYYY-MM-DD
+```
+
 After all required groups pass, import full groups, recompute selected ensembles
 from earlier completed runs, attach observed actuals, and rebuild dashboard
 artifacts and both leaderboard tables. Retain failed/missing scopes in the

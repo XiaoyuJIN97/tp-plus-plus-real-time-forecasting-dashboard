@@ -28,6 +28,10 @@ def test_tso_response_is_trimmed_to_exact_midnight_grid(day):
     assert _forecast_on_grid(frame[frame.timestamp.ne(selected.timestamp.max())],start,h).empty
     # A full row count with the wrong delivery hours must not pass validation.
     assert _forecast_on_grid(frame.iloc[:h],start,h).empty
+    nullable = selected.copy()
+    nullable['tso_forecast_mw'] = nullable.tso_forecast_mw.astype('Float64')
+    nullable.loc[nullable.index[-1], 'tso_forecast_mw'] = pd.NA
+    assert _forecast_on_grid(nullable,start,h).empty
 
 
 def test_daily_persistence_repeats_profile_for_added_evening_hours():
@@ -53,3 +57,28 @@ def test_batched_preparation_keeps_delivery_truth_out_of_features(tmp_path):
     assert past.actual_mw.eq(100).all()
     assert 'actual_mw' not in future
     assert np.all(truth==1e12)
+
+
+def test_assembler_preserves_legacy_groups_but_reports_them_unmigrated(tmp_path):
+    from scripts.assemble_midnight_history import assemble
+    from rt_forecast_dashboard.storage import ForecastStore
+    from rt_forecast_dashboard.ui.analytics import valid_online_forecasts
+    day='2026-07-24';origin=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+    source=ForecastStore(tmp_path/'source');staged=ForecastStore(tmp_path/'staged')
+    def rows(model,hours,tag):
+        return pd.DataFrame(dict(run_date=day,zone='BE',target='load',model=model,model_label=model,
+            timestamp=pd.date_range(origin,periods=hours,freq='h'),run_at=origin,source=tag,
+            forecast_mw=100.,actual_mw=101.,context_hours=2208,context_end=origin-pd.Timedelta(hours=1),
+            forecast_window='next_day_midnight_v1' if hours==30 else 'legacy'))
+    source.append_forecasts(pd.concat([rows('t0_gamma_online',24,'online'),rows('timestral_online',24,'online')]),day)
+    staged.append_forecasts(rows('t0_gamma_online',30,'historical_mock_replay'),day)
+    coverage=assemble(source.data_dir,[staged.data_dir],tmp_path/'assembled',day,day)
+    assert coverage.migrated.sum()==1 and len(coverage)==2
+    saved=ForecastStore(tmp_path/'assembled').read_forecasts()
+    assert len(saved[saved.model.eq('timestral_online')])==24
+    valid=valid_online_forecasts(saved)
+    assert len(valid)==30 and set(valid.model)=={'t0_gamma_online'}
+    bad=rows('t0_gamma_online',30,'historical_mock_replay');bad.timestamp+=pd.Timedelta(hours=1)
+    staged.append_forecasts(bad,day)
+    with pytest.raises(ValueError,match='Invalid replay group'):
+        assemble(source.data_dir,[staged.data_dir],tmp_path/'rejected',day,day)

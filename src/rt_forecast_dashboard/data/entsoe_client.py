@@ -291,6 +291,7 @@ def _forecast_on_grid(frame: pd.DataFrame, start: pd.Timestamp, hours: int) -> p
     frame['timestamp'] = pd.to_datetime(frame.timestamp, utc=True)
     frame = frame.drop_duplicates('timestamp', keep='last').set_index('timestamp')
     frame = frame.reindex(pd.date_range(start, periods=hours, freq='h', name='timestamp'))
-    if not np.isfinite(pd.to_numeric(frame.tso_forecast_mw, errors='coerce')).all():
+    values = pd.to_numeric(frame.tso_forecast_mw, errors='coerce').to_numpy(dtype=float, na_value=np.nan)
+    if not np.isfinite(values).all():
         return frame.iloc[:0].reset_index()
     return frame.reset_index()

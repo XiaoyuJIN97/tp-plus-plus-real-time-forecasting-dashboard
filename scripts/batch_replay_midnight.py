@@ -93,8 +93,14 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
     adapters={};started=time.monotonic()
     for (zone,target),scope in plan.groupby(['zone','target'],sort=True):
         if zone not in enabled or target not in enabled[zone]['targets'] or (selected_scopes and (zone,target) not in selected_scopes):continue
-        prepared,errors=prepare_scope(inputs,zone,target,sorted(scope.run_date.unique()));issues.extend(errors)
         completed={day:complete_forecast_groups(store.forecast_path(day)) for day in scope.run_date.unique()}
+        pending_days=sorted({r.run_date for r in scope.itertuples() if r.model in registry
+            and registry[r.model].get('enabled') and not registry[r.model].get('pipeline_generated')
+            and r.model!='tabpfn_online' and (not models or r.model in models)
+            and (zone,target,r.model) not in completed[r.run_date]})
+        if not pending_days:
+            continue
+        prepared,errors=prepare_scope(inputs,zone,target,pending_days);issues.extend(errors)
         for key,model_plan in scope.groupby('model',sort=True):
             cfg=registry.get(key,{})
             if key=='tabpfn_online' or not cfg.get('enabled') or cfg.get('pipeline_generated') or not model_supports_scope(cfg,zone,target) or (models and key not in models):continue
@@ -113,7 +119,7 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
                             frame=pd.DataFrame(dict(run_date=day,run_at=datetime.now(UTC).isoformat(),source='historical_mock_replay',
                                 forecast_window='next_day_midnight_v1',input_vintage='retrospective_archived_revisions',zone=zone,target=target,
                                 model=key,model_label=cfg.get('label',key),covariate_case=case,context_hours=2208,
-                                timestamp=future.timestamp,forecast_mw=np.maximum(pred,0.),tso_forecast_mw=future.tso_forecast_mw,
+                                timestamp=future.timestamp,forecast_mw=pred,tso_forecast_mw=future.tso_forecast_mw,
                                 actual_mw=truth,context_start=context.timestamp.min(),context_end=context.timestamp.max(),
                                 context_missing_hours=quality.missing_hours,context_imputed_hours=quality.imputed_hours,
                                 context_imputation_method=quality.methods,data_quality=quality.quality))
@@ -122,7 +128,7 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
                     except Exception as exc:
                         issues.extend(dict(zone=zone,target=target,model=key,run_date=d,stage='predict',error=str(exc)) for d in dates)
                     pd.DataFrame(audit).to_csv(output/'batch_runtime.csv',index=False)
-                    pd.DataFrame(issues).to_csv(output/'batch_issues.csv',index=False)
+                    pd.DataFrame(issues,columns=['zone','target','model','run_date','stage','error']).to_csv(output/'batch_issues.csv',index=False)
                     print(zone,target,key,h,min(offset+len(dates),len(days)),'/',len(days),'total_seconds',round(time.monotonic()-started,1),flush=True)
     close_workers()
     return issues
@@ -135,4 +141,5 @@ if __name__=='__main__':
     a=p.parse_args();kwargs=vars(a).copy();scopes=kwargs.pop('scopes');models=kwargs.pop('models')
     kwargs['selected_scopes']={tuple(s.split(':')) for s in scopes.split(',')} if scopes else None
     kwargs['models']=set(models.split(',')) if models else None
-    replay(**kwargs)
+    issues=replay(**kwargs)
+    raise SystemExit(1 if issues else 0)
