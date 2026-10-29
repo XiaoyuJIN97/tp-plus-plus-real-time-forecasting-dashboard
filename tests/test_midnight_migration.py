@@ -175,3 +175,36 @@ def test_missing_past_tso_hour_does_not_discard_observed_actual_context(monkeypa
     result=client.fetch_actual_context(run_date=date(2026,7,24),zone='BE',zone_code='BE',target='load',context_hours=3)
     assert result.actual_mw.tolist()==[101.,102.,103.]
     assert result.loc[result.timestamp.eq(origin-pd.Timedelta(hours=2)),'tso_forecast_mw'].isna().all()
+
+
+def test_offline_batch_plan_uses_both_years_and_cannot_be_published_online(tmp_path):
+    from scripts.batch_replay_midnight import replay
+    from scripts.assemble_midnight_history import assemble
+    from rt_forecast_dashboard.storage import ForecastStore
+    timestamps=pd.DatetimeIndex([],tz='UTC')
+    for day in ['2024-01-02','2025-01-02']:
+        origin=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+        timestamps=timestamps.append(pd.date_range(origin-pd.Timedelta(hours=2208),periods=2238,freq='h'))
+    inputs=tmp_path/'inputs'
+    for variable,value in [('actual_load',100.),('forecast_load',110.)]:
+        for year in timestamps.year.unique():
+            part=timestamps[timestamps.year==year]
+            p=inputs/'entsoe/data/hourly/BE'/variable/f'{year}.parquet';p.parent.mkdir(parents=True,exist_ok=True)
+            pd.DataFrame(dict(timestamp_utc=part,value=value)).to_parquet(p,index=False)
+    for year in timestamps.year.unique():
+        p=inputs/'weather/data/raw/BE/load'/f'{year}.csv';p.parent.mkdir(parents=True,exist_ok=True)
+        pd.DataFrame(dict(timestamp_utc=timestamps[timestamps.year==year],temperature_2m_p1=10.)).to_csv(p,index=False)
+    plan_path=tmp_path/'plan.csv'
+    pd.DataFrame(dict(run_date=['2024-01-02','2025-01-02'],zone='BE',target='load',model='tso_reference')).to_csv(plan_path,index=False)
+    output=tmp_path/'offline';source=tmp_path/'source'
+    issues=replay(source,inputs,output,'2024-01-01','2025-12-31',plan_path=plan_path,stage='offline')
+    assert not issues
+    f=ForecastStore(output).read_forecasts()
+    assert len(f)==60 and f.source.eq('offline_midnight_backtest').all()
+    assert set(f.run_date.str[:4])=={'2024','2025'}
+    assert f.forecast_mw.eq(110.).all()
+    # Provide a retained-history origin only to exercise the publication gate.
+    store=ForecastStore(source)
+    for day,part in f.groupby('run_date'):store.append_forecasts(part,day)
+    with pytest.raises(ValueError,match='Invalid replay group'):
+        assemble(source,[output],tmp_path/'rejected','2024-01-01','2025-12-31')

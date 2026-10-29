@@ -117,6 +117,21 @@ PYTHONPATH=src python scripts/replay_midnight_history.py \
   --plan /path/to/staging/offline-plan.csv --start 2024-01-01 --end 2025-12-31
 ```
 
+For faster bulk reference generation, use the same plan with equal-horizon
+native batching (keep CPU settings when comparing CPU throughput):
+
+```sh
+export FOUNDATION_DEVICE=cpu
+PYTHONPATH=src python scripts/batch_replay_midnight.py \
+  --source data --inputs /path/to/offline-inputs \
+  --output /path/to/staging/offline-batch --stage offline \
+  --plan /path/to/staging/offline-plan.csv --start 2024-01-01 --end 2025-12-31
+```
+
+Offline outputs carry `offline_midnight_backtest`; the history assembler rejects
+that source, preventing accidental online publication. Batch throughput does
+not substitute for the isolated cold/warm latency and resource admission tests.
+
 For admission, use the standard frozen-window exporter, isolated benchmark
 runner, annual matched-reference metrics and runtime/resource gates described
 in `model_onboarding/README.md`. Their policy now requires 29/30/31-hour windows.

@@ -90,11 +90,14 @@ def predict_batch(adapter,key,target,covs,chunk):
     return np.stack([adapter.predict(f,target,context=p,covariates=covs) for p,f in chunk])
 
 
-def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,models=None):
+def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,models=None,plan_path=None,stage="replay"):
     source,output=Path(source).resolve(),staging_path(output)
     if output==source or output.is_relative_to(source):raise ValueError('Use isolated staging')
-    original=ForecastStore(source).read_forecasts();compact=source/'dashboard/forecasts_recent.parquet'
-    if compact.exists():original=pd.concat([original,pd.read_parquet(compact)],ignore_index=True)
+    if plan_path:
+        original=pd.read_csv(plan_path,dtype={'run_date':str})
+    else:
+        original=ForecastStore(source).read_forecasts();compact=source/'dashboard/forecasts_recent.parquet'
+        if compact.exists():original=pd.concat([original,pd.read_parquet(compact)],ignore_index=True)
     original.run_date=original.run_date.astype(str)
     plan=original[original.run_date.between(start,end)][['run_date','zone','target','model']].drop_duplicates()
     registry=model_registry();enabled=zones();store=ForecastStore(output);audit=[];issues=[]
@@ -124,7 +127,7 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
                         if predictions.shape!=(len(dates),h) or not np.isfinite(predictions).all():raise ValueError('Invalid native forecast shape/values')
                         for day,pred in zip(dates,predictions,strict=True):
                             context,future,quality,truth=prepared[day]
-                            frame=pd.DataFrame(dict(run_date=day,run_at=datetime.now(UTC).isoformat(),source='historical_mock_replay',
+                            frame=pd.DataFrame(dict(run_date=day,run_at=datetime.now(UTC).isoformat(),source='offline_midnight_backtest' if stage=='offline' else 'historical_mock_replay',
                                 forecast_window='next_day_midnight_v1',input_vintage='retrospective_archived_revisions',
                                 inference_device=getattr(adapter,'device',getattr(adapter,'device_map','cpu')),zone=zone,target=target,
                                 model=key,model_label=cfg.get('label',key),covariate_case=case,context_hours=2208,
@@ -147,8 +150,10 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for name in ['source','inputs','output','start','end']:p.add_argument('--'+name,required=True)
     p.add_argument('--batch-size',type=int,default=8);p.add_argument('--scopes');p.add_argument('--models')
+    p.add_argument('--plan');p.add_argument('--stage',choices=['replay','offline'],default='replay')
     a=p.parse_args();kwargs=vars(a).copy();scopes=kwargs.pop('scopes');models=kwargs.pop('models')
     kwargs['selected_scopes']={tuple(s.split(':')) for s in scopes.split(',')} if scopes else None
     kwargs['models']=set(models.split(',')) if models else None
+    kwargs['plan_path']=kwargs.pop('plan')
     issues=replay(**kwargs)
     raise SystemExit(1 if issues else 0)
