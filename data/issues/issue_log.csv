@@ -622,8 +622,8 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-10-29T01:57:50+00:00,2026-10-28,PT,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT solar: 6/24 hourly rows.,{},open
 2026-10-29T01:57:51+00:00,2026-10-28,PT,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_onshore: 6/24 hourly rows.,{},open
 2026-10-29T01:57:52+00:00,2026-10-28,PT,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_offshore: 6/24 hourly rows.,{},open
-2026-10-29T22:59:54+00:00,2026-10-29,DK1,load,data_or_features,context has 56 missing actual hours; maximum automatic imputation is 48,{},open
-2026-10-29T23:03:30+00:00,2026-10-29,DK2,load,data_or_features,context has 56 missing actual hours; maximum automatic imputation is 48,{},open
-2026-10-29T23:04:05+00:00,2026-10-29,PT,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT solar: 0/30 hourly rows.,{},open
-2026-10-29T23:04:33+00:00,2026-10-29,PT,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_onshore: 0/30 hourly rows.,{},open
-2026-10-29T23:04:47+00:00,2026-10-29,PT,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_offshore: 0/30 hourly rows.,{},open
+2026-10-29T23:06:48+00:00,2026-10-29,DK1,load,data_or_features,context has 56 missing actual hours; maximum automatic imputation is 48,{},open
+2026-10-29T23:08:43+00:00,2026-10-29,DK2,load,data_or_features,context has 56 missing actual hours; maximum automatic imputation is 48,{},open
+2026-10-29T23:09:17+00:00,2026-10-29,PT,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT solar: 0/30 hourly rows.,{},open
+2026-10-29T23:09:45+00:00,2026-10-29,PT,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_onshore: 0/30 hourly rows.,{},open
+2026-10-29T23:10:07+00:00,2026-10-29,PT,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_offshore: 0/30 hourly rows.,{},open
