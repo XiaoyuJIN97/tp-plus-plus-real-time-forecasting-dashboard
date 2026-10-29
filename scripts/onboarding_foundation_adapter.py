@@ -46,7 +46,7 @@ class Adapter:
         cols = list(covariates or [])
         past, future = frames(context, features, cols)
         horizon = len(future)
-        # Shared arrays: B=1, L=2208, H=23/24/25, C=len(cols).
+        # Shared arrays: B=1, L=2208, H=29/30/31, C=len(cols).
         x = past.actual_mw.to_numpy(np.float32)[None, :]
         cov = np.concatenate([past[cols].to_numpy(np.float32),
                               future[cols].to_numpy(np.float32)]).T[None, :, :]

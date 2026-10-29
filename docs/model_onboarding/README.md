@@ -3,8 +3,8 @@
 For step-by-step code and required datasets using the current T0 Gamma and
 Timestral checkpoints, see [the worked examples](FOUNDATION_EXAMPLES.md).
 
-Day-ahead horizons span consecutive Brussels cutoffs: normally 24 hours, **25 on
-the autumn transition and 23 in spring**. Adapters must use the input window's
+Day-ahead horizons start at 18:00 Brussels and end at midnight after the following
+day: normally 30 hours, **31 on the autumn transition and 29 in spring**. Adapters must use the input window's
 actual length; see [daylight-saving handling](../DAYLIGHT_SAVING.md).
 
 This process currently supports time-series foundation models that can run on our local CPU. It provides reusable
@@ -43,7 +43,7 @@ Change them only in a reviewed PR; changing policy invalidates admission reports
 
 | Criterion | Default |
 | --- | --- |
-| Forecast contract | 2,208 hourly context values; 23/24/25 hourly predictions in MW between Brussels cutoffs; UTC grids |
+| Forecast contract | 2,208 hourly context values; 29/30/31 hourly predictions in MW through next-day midnight; UTC grids |
 | Historical coverage | Both 2024 and 2025; >=60 matched runs/year/scope, all 12 months, >=5 runs/month; full daily years preferred |
 | Fair comparison | Identical origins, horizons, outcomes and input settings; >=95% of planned offline runs matched |
 | Annual non-regression | Candidate MAE <=1.05 × best declared reference MAE in **each year** |

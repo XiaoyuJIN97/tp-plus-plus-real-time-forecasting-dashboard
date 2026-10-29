@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+import os
 
 import numpy as np
 import pandas as pd
@@ -34,6 +35,8 @@ class OpenMeteoClient:
         archive = self.archive.fetch_weather(zone=zone, target=target, start=start, hours=horizon_hours)
         if len(archive) >= horizon_hours:
             return archive.head(horizon_hours)
+        if os.getenv('FORECAST_ARCHIVE_ONLY') == 'true':
+            raise RuntimeError(f'Archived weather is incomplete: {zone} {target} future {len(archive)}/{horizon_hours}')
         return self._fetch_openmeteo(points=points, start=start, hours=horizon_hours, historical=False)
 
     def fetch_context_weather(self, *, run_date: date, zone: str, points: list[dict], target: str, context_hours: int) -> pd.DataFrame:
@@ -44,6 +47,8 @@ class OpenMeteoClient:
         archive = self.archive.fetch_weather(zone=zone, target=target, start=start, hours=context_hours)
         if len(archive) >= context_hours:
             return archive.head(context_hours)
+        if os.getenv('FORECAST_ARCHIVE_ONLY') == 'true':
+            raise RuntimeError(f'Archived weather is incomplete: {zone} {target} context {len(archive)}/{context_hours}')
         return self._fetch_openmeteo(points=points, start=start, hours=context_hours, historical=True)
 
     def _fetch_openmeteo(self, *, points: list[dict], start: pd.Timestamp, hours: int, historical: bool) -> pd.DataFrame:

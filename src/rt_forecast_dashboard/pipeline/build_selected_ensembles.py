@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours, brussels_cutoff_timestamp
 
 import argparse
 from datetime import UTC, datetime, timedelta
@@ -115,6 +115,9 @@ def _complete_run(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     if (len(complete) != horizon or complete["timestamp"].nunique() != horizon
             or not complete["timestamp"].diff().dropna().eq(pd.Timedelta(hours=1)).all()):
         return pd.DataFrame()
+    expected = pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(complete['run_date'].iloc[0]).date()), periods=horizon, freq='h')
+    if not pd.DatetimeIndex(complete['timestamp']).equals(expected):
+        return pd.DataFrame()
     complete["horizon"] = np.arange(1, horizon + 1)
     return complete
 
@@ -123,8 +126,8 @@ def _band_for_horizon(horizon: int, bands: list[list[int]]) -> int:
     for index, (start, end) in enumerate(bands):
         if start <= horizon <= end:
             return index
-    if horizon == 25 and bands[-1][1] == 24:
-        return len(bands) - 1  # Extra DST hour shares the final 19–24-hour bucket.
+    if horizon == 31 and bands[-1][1] == 30:
+        return len(bands) - 1  # Extra DST hour shares the final 25–30-hour bucket.
     raise ValueError(f"Horizon {horizon} is not covered by the configured bands.")
 
 

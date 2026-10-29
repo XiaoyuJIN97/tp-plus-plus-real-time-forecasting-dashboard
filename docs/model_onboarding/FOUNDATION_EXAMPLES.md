@@ -3,8 +3,8 @@
 Run commands from the repository root on the Linux CPU benchmark profile. These
 examples reuse the **currently deployed checkpoint revisions and native calls**;
 they do not assert that either legacy model has passed the new admission policy.
-The array sizes below describe ordinary 24-hour windows. At clock changes the
-same code uses 23 or 25 forecast hours (covariate length 2231 or 2233); see
+The array sizes below describe ordinary 30-hour windows. At clock changes the
+same code uses 29 or 31 forecast hours (covariate length 2237 or 2239); see
 [daylight-saving handling](../DAYLIGHT_SAVING.md).
 
 Example keys have an `_onboarding_example` suffix to avoid overwriting live rows.
@@ -28,8 +28,8 @@ process described in the main guide.
 
 | Family | Checkpoint | Immutable weights revision | Native input/output |
 | --- | --- | --- | --- |
-| T0 Gamma | `theforecastingcompany/t0-gamma` | `e08aee083778f1f32da4974c0a34276776a35c52` | Context `(1,2208)`, covariates `(1,C,2232)`; median `(1,24)` |
-| Timestral | `mistralai/Timestral-209M` | `9874d252ab0aae16f7f7c999f98f98d6ad7d8365` | Context `(1,1,2208)`, covariates `(1,C,2232)`; median `(1,1,24)` |
+| T0 Gamma | `theforecastingcompany/t0-gamma` | `e08aee083778f1f32da4974c0a34276776a35c52` | Context `(1,2208)`, covariates `(1,C,2238)`; median `(1,30)` |
+| Timestral | `mistralai/Timestral-209M` | `9874d252ab0aae16f7f7c999f98f98d6ad7d8365` | Context `(1,1,2208)`, covariates `(1,C,2238)`; median `(1,1,30)` |
 
 Both examples return nonnegative MW point forecasts. They use the same covariate
 selection as the current online models, obtained from `covariates_for`; the
@@ -41,7 +41,7 @@ expand scope and repeat qualification for each additional zone/target.
 | Step | Required local data | Produced evidence |
 | --- | --- | --- |
 | Package/review | Exact checkpoint, vendor code, complete environment lock, license/data-rights records | `manifest.yml`, disabled `registry-entry.yml`, `requirements.lock`, preparation log, local checkpoint |
-| Offline | 2024/2025 origin inventory; 2,208 past hours per origin (including 2023 context); 24 future covariate hours; separately held truth; matched reference predictions | Frozen `windows.jsonl`, `references.csv`; `forecasts.csv`, `runtime.csv`, `run.json`, worker log |
+| Offline | 2024/2025 origin inventory; 2,208 past hours per origin (including 2023 context); 30 future covariate hours; separately held truth; matched reference predictions | Frozen `windows.jsonl`, `references.csv`; `forecasts.csv`, `runtime.csv`, `run.json`, worker log |
 | Replay | Inventory covering the exact retained online origins, original input vintages and availability evidence; matching incumbent history | Same frozen/run files, tagged as replay |
 | Ensemble | Offline candidate run plus component-level offline reference predictions and observed outcomes | With/without-candidate `ensemble.json` |
 | Shadow | Fresh daily snapshots, once each real day for seven consecutive dates; no future truth required at inference | Seven daily run folders, combined `shadow` evidence |
@@ -109,11 +109,11 @@ Reuse those files for both models and all reference runs. The inventory is:
 
 ```csv
 zone,target,run_date,origin_utc,inputs_available_at_utc,context_path,future_path
-BE,load,2024-01-02,2024-01-02T00:00:00Z,2024-01-01T23:45:00Z,2024-01-02/context.parquet,2024-01-02/future.parquet
+BE,load,2024-01-02,2024-01-02T17:00:00Z,2024-01-02T16:45:00Z,2024-01-02/context.parquet,2024-01-02/future.parquet
 ```
 
 This is a schema example, not evidence that inputs were actually available at
-23:45. Paths are relative to the inventory. `run_date` is the Brussels date of
+16:45. Paths are relative to the inventory. `run_date` is the Brussels date of
 the first delivery hour, not the download date. Use each real forecast's exact
 origin; do not round or shift online runs to midnight.
 
@@ -129,10 +129,10 @@ covs = spec['scope'][0]['covariates']  # same list for Timestral in this scope
 context = pd.read_parquet('archives/offline/2024-01-02/context.parquet')
 future = pd.read_parquet('archives/offline/2024-01-02/future.parquet')
 # context columns: timestamp, actual_mw, *covs; 2208 consecutive hourly UTC rows
-# future columns: timestamp, *covs; 24 consecutive hourly UTC rows
+# future columns: timestamp, *covs; 30 consecutive hourly UTC rows
 # Optional future.actual_mw supplies scoring truth, never model input.
 past, known_future = frames(context, future, covs)
-assert len(past) == 2208 and len(known_future) == 24
+assert len(past) == 2208 and len(known_future) == 30
 assert 'actual_mw' not in known_future
 ```
 
@@ -150,10 +150,10 @@ local CSV with one row per model/delivery hour:
 
 ```csv
 zone,target,run_date,timestamp,model,forecast_mw,actual_mw
-BE,load,2024-01-02,2024-01-02T00:00:00Z,chronos2_online,10000,10100
+BE,load,2024-01-02,2024-01-02T17:00:00Z,chronos2_online,10000,10100
 ```
 
-Provide **all 24 hours for every declared reference and origin**, not just this
+Provide **all 30 hours for every declared reference and origin**, not just this
 illustrative row. The generated load manifest declares Chronos2, Ridge,
 TimesFM3, existing T0 Gamma, existing Timestral and TSO. Using existing identical
 T0/Timestral as references can prevent their duplicate examples passing the 2%

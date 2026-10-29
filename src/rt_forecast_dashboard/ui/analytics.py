@@ -12,7 +12,7 @@ from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, latest_c
 
 
 TP_ROOT = Path("/Users/xiaoyujin/Desktop/TP++")
-DAY_AHEAD_HOURS = 24
+DAY_AHEAD_HOURS = 30
 ONLINE_CONTEXT_HOURS = 2208
 MODEL_FAMILY_ORDER = ["Ensembled model", "Chronos2", "TimesFM3", "T0 Gamma", "Timestral", "Ridge", "XGBoost", "TSO forecast", "Persistence"]
 MODEL_FAMILY_RANK = {family: rank for rank, family in enumerate(MODEL_FAMILY_ORDER)}
@@ -515,7 +515,7 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
         frame = frame.merge(coverage[group_cols], on=group_cols, how="inner")
         if frame.empty:
             return frame
-    # A run must contain the exact hourly delivery grid, not merely 24 rows.
+    # A run must contain the exact hourly delivery grid, not merely a fixed number of rows.
     cutoffs = {
         value: brussels_cutoff_timestamp(pd.Timestamp(value).date())
         for value in frame["run_date"].unique()

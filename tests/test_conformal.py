@@ -8,7 +8,7 @@ from rt_forecast_dashboard.conformal import interval_leaderboard
 def forecasts(days=32, model='persistence', error=2.):
     rows = []
     for index, day in enumerate(pd.date_range('2026-07-24', periods=days)):
-        for hour, timestamp in enumerate(pd.date_range(day.tz_localize('UTC')+pd.Timedelta(hours=16), periods=24, freq='h')):
+        for hour, timestamp in enumerate(pd.date_range(day.tz_localize('UTC')+pd.Timedelta(hours=16), periods=30, freq='h')):
             rows.append(dict(run_date=str(day.date()), zone='BE', target='load', model=model,
                              model_label=model, timestamp=timestamp, forecast_mw=100.,
                              actual_mw=100.+(error(index, hour) if callable(error) else error)))
@@ -45,7 +45,7 @@ def test_models_and_horizon_buckets_calibrate_separately():
     b = forecasts(model='b', error=50.)
     result = conformal_intervals(pd.concat([a,b], ignore_index=True))
     latest = result[result.run_date.eq(result.run_date.max())]
-    np.testing.assert_array_equal(latest[latest.model.eq('a')].upper_90.to_numpy(), np.repeat([101.,102.,103.,104.],6))
+    np.testing.assert_array_equal(latest[latest.model.eq('a')].upper_90.to_numpy(), np.repeat([101.,102.,103.,104.,105.],6))
     assert latest[latest.model.eq('b')].upper_90.eq(150.).all()
 
 
@@ -71,7 +71,7 @@ def test_coverage_scores_only_realized_banded_hours():
     result.loc[result.run_date.eq(last), 'actual_mw'] = np.nan
     metrics = interval_diagnostics(result)
     assert metrics['Observed coverage (%)'].eq(100.).all()
-    assert metrics['Scored hours'].eq(10*24).all()
+    assert metrics['Scored hours'].eq(10*30).all()
 
 
 def test_interval_leaderboard_matches_complete_observed_calibrated_runs():
@@ -85,8 +85,8 @@ def test_interval_leaderboard_matches_complete_observed_calibrated_runs():
     a.loc[a.run_date.eq(a.run_date.max()),'actual_mw']=np.nan
     b.loc[b.run_date.eq(b.run_date.max()),'actual_mw']=np.nan
     result=interval_leaderboard(pd.concat([a,b],ignore_index=True)).set_index('model')
-    assert result.coverage_pct.eq(75.).all()
-    assert result.scored_runs.eq(3).all() and result.scored_hours.eq(72).all()
+    assert result.coverage_pct.eq(80.).all()
+    assert result.scored_runs.eq(3).all() and result.scored_hours.eq(90).all()
     assert result.loc['a','mean_interval_width_mw']==20.
     assert result.loc['b','mean_interval_width_mw']==40.
     # A mismatched realized truth excludes that whole run from both models.
@@ -99,14 +99,14 @@ def test_interval_leaderboard_preserves_dst_windows():
     from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
     parts=[]
     for model in ('tso_reference','ensemble_selected'):
-        for day,hours in (('2026-03-28',23),('2026-10-24',25)):
+        for day,hours in (('2026-03-28',29),('2026-10-24',31)):
             part=pd.DataFrame(dict(zone='BE',target='load',model=model,model_label=model,
                 run_date=day,actual_mw=100.,timestamp=pd.date_range(
                     brussels_cutoff_timestamp(pd.Timestamp(day).date()),periods=hours,freq='h')))
             part['lower_80']=0.;part['upper_80']=200.
             parts.append(part)
     result=interval_leaderboard(pd.concat(parts,ignore_index=True))
-    assert result.scored_hours.eq(48).all() and result.scored_runs.eq(2).all()
+    assert result.scored_hours.eq(60).all() and result.scored_runs.eq(2).all()
     assert result.coverage_pct.eq(100.).all()
 
 
@@ -192,7 +192,7 @@ def test_artifact_contains_every_valid_model_and_preserves_warmup(tmp_path):
     assert len(result) == len(frame)
     assert result[result.run_date.eq(result.run_date.min())].lower_90.isna().all()
     assert result[result.run_date.eq(result.run_date.max())].lower_90.notna().all()
-    assert status['calibrated_rows'] == 11*24*2
+    assert status['calibrated_rows'] == 11*30*2
     snapshot=pd.read_parquet(path.parent/'probabilistic_leaderboard.parquet')
     pd.testing.assert_frame_equal(snapshot,interval_leaderboard(result))
 

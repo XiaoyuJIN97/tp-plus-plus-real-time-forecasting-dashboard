@@ -10,21 +10,21 @@ spec.loader.exec_module(replay)
 
 
 def inputs():
-    times = pd.date_range("2026-04-23T16:00Z", periods=2232, freq="h")
-    actual = pd.Series(np.arange(2232, dtype=float), index=times)
+    times = pd.date_range("2026-04-23T16:00Z", periods=2238, freq="h")
+    actual = pd.Series(np.arange(2238, dtype=float), index=times)
     tso = actual + 5
-    weather = pd.DataFrame({"temperature_2m_p1": np.arange(2232, dtype=float)}, index=times)
-    template = pd.DataFrame({"timestamp": times[-24:], "tso_forecast_mw": tso.iloc[-24:].to_numpy()})
+    weather = pd.DataFrame({"temperature_2m_p1": np.arange(2238, dtype=float)}, index=times)
+    template = pd.DataFrame({"timestamp": times[-30:], "tso_forecast_mw": tso.iloc[-30:].to_numpy()})
     return template, actual, tso, weather
 
 
 def test_replay_context_excludes_delivery_actuals():
     template, actual, tso, weather = inputs()
-    actual.iloc[-24:] = 1e9
+    actual.iloc[-30:] = 1e9
     x, cov, saved = replay.prepare(template, actual, tso, weather, ["temperature_2m_p1", "tso_forecast_mw"])
     np.testing.assert_array_equal(x, np.arange(2208))
-    assert cov.shape == (2, 2232)
-    assert len(saved) == 24
+    assert cov.shape == (2, 2238)
+    assert len(saved) == 30
     assert (saved.actual_mw == 1e9).all()
     assert saved.context_end.iloc[0] < saved.timestamp.min()
 

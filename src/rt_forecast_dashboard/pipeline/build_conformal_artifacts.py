@@ -27,7 +27,7 @@ def build_conformal_artifacts(store, forecasts):
     temp_snapshot = snapshot.with_suffix('.parquet.tmp')
     scores.to_parquet(temp_snapshot,index=False)
     temp_snapshot.replace(snapshot)
-    metadata = dict(generated_at_utc=datetime.now(UTC).isoformat(), rows=len(bands),
+    metadata = dict(forecast_window='next_day_midnight_v1', generated_at_utc=datetime.now(UTC).isoformat(), rows=len(bands),
                     calibrated_rows=int(bands.lower_90.notna().sum()), levels=list(LEVELS),
                     window_runs=WINDOW_RUNS, minimum_runs=MIN_RUNS, horizon_bucket_hours=6,
                     reporting_lag_hours=REPORTING_LAG_HOURS,

@@ -7,7 +7,7 @@ from rt_forecast_dashboard.storage import ForecastStore
 
 
 def forecasts() -> pd.DataFrame:
-    times = pd.date_range('2026-07-24T16:00:00Z', periods=24, freq='h')
+    times = pd.date_range('2026-07-24T16:00:00Z', periods=30, freq='h')
     parts = []
     for model, label, error in [('tso_reference','TSO forecast',10), ('chronos2_online','Chronos2',5)]:
         parts.append(pd.DataFrame({'run_date':'2026-07-24','zone':'BE','target':'load',

@@ -67,6 +67,7 @@ def build_dashboard_forecasts(
     catalog.to_parquet(temporary_catalog,index=False)
     temporary_catalog.replace(catalog_path)
     metadata: dict[str, object] = {
+        "forecast_window": "next_day_midnight_v1",
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "retention_days": retention_days,
         "first_run_date": str(recent["run_date"].min()),
