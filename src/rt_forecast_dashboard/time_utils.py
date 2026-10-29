@@ -17,17 +17,22 @@ def brussels_cutoff_timestamp(run_date: date) -> pd.Timestamp:
     return pd.Timestamp(brussels_cutoff_datetime(run_date)).tz_convert("UTC")
 
 
-def forecast_horizon_hours(run_date: date | str, nominal_hours: int = 24) -> int:
-    """Elapsed hours between consecutive local cutoffs (23/24/25).
+def forecast_end_timestamp(run_date: date | str) -> pd.Timestamp:
+    """Exclusive delivery end: midnight after the following Brussels day."""
+    day = pd.Timestamp(run_date).date()
+    return pd.Timestamp(datetime.combine(day + timedelta(days=2), time(), tzinfo=BRUSSELS_TZ)).tz_convert("UTC")
 
-    Non-day-ahead experimental horizons retain their explicitly configured size.
-    Subtract UTC instants, not same-zone Python datetimes (wall-time arithmetic).
+
+def forecast_horizon_hours(run_date: date | str, nominal_hours: int = 30) -> int:
+    """18:00 origin through the following day, normally 30 hours (29/31 at DST).
+
+    Explicit experimental lengths retain their configured size. Production
+    configurations use 30; compute elapsed time between timezone-aware endpoints.
     """
-    if nominal_hours != 24:
+    if nominal_hours != 30:
         return nominal_hours
     day = pd.Timestamp(run_date).date()
-    return int((brussels_cutoff_timestamp(day + timedelta(days=1))
-                - brussels_cutoff_timestamp(day)) / pd.Timedelta(hours=1))
+    return int((forecast_end_timestamp(day) - brussels_cutoff_timestamp(day)) / pd.Timedelta(hours=1))
 
 
 def latest_complete_run_date(now: datetime | None = None) -> date:

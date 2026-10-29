@@ -38,7 +38,7 @@ def test_online_accuracy_uses_dates_shared_by_every_model() -> None:
         ("2026-10-01", "timesfm3_online", "TimesFM3", 2.0),
         ("2026-10-02", "timesfm3_online", "TimesFM3", 100.0),
     ]:
-        for horizon in range(24):
+        for horizon in range(30):
             rows.append(
                 {
                     "run_date": run_date,
@@ -55,8 +55,8 @@ def test_online_accuracy_uses_dates_shared_by_every_model() -> None:
 
     result = online_forecast_accuracy(pd.DataFrame(rows)).set_index("display_family")
 
-    assert result.loc["Ensembled model", "n"] == 24
-    assert result.loc["TimesFM3", "n"] == 24
+    assert result.loc["Ensembled model", "n"] == 30
+    assert result.loc["TimesFM3", "n"] == 30
     assert result.loc["TimesFM3", "MAE"] == 2.0
 
 
@@ -66,7 +66,7 @@ def test_rmae_leaderboard_uses_paired_complete_runs() -> None:
         ("timesfm3_online", "TimesFM3 with covariates", 5.0),
         ("tso_reference", "TSO forecast", 10.0),
     ]:
-        for horizon in range(24):
+        for horizon in range(30):
             rows.append(
                 {
                     "run_date": "2026-10-01",
@@ -148,7 +148,7 @@ def test_win_rate_is_reported_per_zone_with_half_credit_for_ties() -> None:
                 ("timesfm3_online", "TimesFM3 with covariates", model_error),
                 ("tso_reference", "TSO forecast", tso_error),
             ]:
-                for horizon in range(24):
+                for horizon in range(30):
                     rows.append(
                         {
                             "run_date": f"2026-10-0{day}",

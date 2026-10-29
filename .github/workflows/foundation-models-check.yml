@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'src/rt_forecast_dashboard/models/foundation_*.py'
+      - 'src/rt_forecast_dashboard/time_utils.py'
+      - 'config/features.yml'
       - 'scripts/requirements-foundation-online.txt'
       - 'tests/test_foundation_online.py'
       - 'tests/test_foundation_replay.py'
@@ -44,7 +46,7 @@ jobs:
           from rt_forecast_dashboard.models.foundation_online import FoundationOnlineAdapter, close_workers
           x = 100 + np.arange(2208, dtype=float) % 24
           for name in ('t0_gamma', 'timestral'):
-              for horizon in (23, 24, 25):
+              for horizon in (29, 30, 31):
                   cov = 102 + np.arange(2208+horizon, dtype=float)[None, :] % 24
                   prediction = FoundationOnlineAdapter(name).predict_batch([x], [cov], horizon=horizon)
                   assert prediction.shape == (1, horizon)

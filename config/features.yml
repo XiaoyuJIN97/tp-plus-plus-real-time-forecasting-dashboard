@@ -1,36 +1,36 @@
 cutoff:
   timezone: Europe/Brussels
   hour: 18
-  # Nominal: consecutive Brussels cutoffs span 23/24/25 elapsed UTC hours.
-  prediction_length_hours: 24
+  # Nominal: 18:00 Brussels through midnight after the following day: 29/30/31 UTC hours.
+  prediction_length_hours: 30
   context_days: 92
 targets:
   load:
     label: Load
     entsoe_signal: load_forecast
     weather_point_type: load
-    horizon_hours: 24
+    horizon_hours: 30
     context_hours: 2208
     covariate_policy: load_optimal_engineering_plus_tso
   solar:
     label: Solar
     entsoe_signal: generation_forecast_solar
     weather_point_type: solar
-    horizon_hours: 24
+    horizon_hours: 30
     context_hours: 2208
     covariate_policy: solar_weather_plus_tso
   wind_onshore:
     label: Onshore wind
     entsoe_signal: generation_forecast_wind_onshore
     weather_point_type: onshore
-    horizon_hours: 24
+    horizon_hours: 30
     context_hours: 2208
     covariate_policy: wind_4p_weather_plus_tso
   wind_offshore:
     label: Offshore wind
     entsoe_signal: generation_forecast_wind_offshore
     weather_point_type: offshore
-    horizon_hours: 24
+    horizon_hours: 30
     context_hours: 2208
     covariate_policy: wind_4p_weather_plus_tso
 load_optimal_engineering_covariates:

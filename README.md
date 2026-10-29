@@ -2,7 +2,7 @@
 
 Daily online forecasting dashboard for load, solar, and wind in the BE, FR, DE, DK1, DK2, ES, and PT bidding zones.
 
-The first online version runs once per day after the daily 18:00 Europe/Brussels ENTSO-E Transparency Platform publication point. The dashboard workflow is triggered around 18:30 Europe/Brussels, after the realtime data collector has had time to snapshot and push the latest TSO forecasts; under normal conditions the new dashboard results should be visible before about 19:00. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
+The first online version runs once per day after the daily 18:00 Europe/Brussels ENTSO-E Transparency Platform publication point. The dashboard workflow is triggered around 18:30 Europe/Brussels, after the realtime data collector has had time to snapshot and push the latest TSO forecasts; publication time depends on GitHub scheduling, upstream availability and model runtime. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
 
 ## What Is Included
 
@@ -10,7 +10,7 @@ The first online version runs once per day after the daily 18:00 Europe/Brussels
 - Daily pipeline entrypoint for ENTSO-E and Open-Meteo ingestion.
 - Four weather-point configuration per bidding zone and target type.
 - Separate load, solar, onshore wind, and offshore wind targets.
-- Brussels-cutoff-to-cutoff daily horizon (23/24/25 hours) with 2,208-hour rolling context.
+- 18:00 Brussels through next-day midnight (29/30/31 hours) with 2,208-hour rolling context.
 - Pluggable model registry for existing load, solar, wind, ML, and TSFM artifacts.
 - Local CSV storage for forecasts, observations, run metadata, and failures.
 - Backfill command for missed dates.
@@ -120,7 +120,14 @@ For Streamlit Community Cloud or Hugging Face Spaces, add the same value to app 
 
 ## Daily Update Timeline
 
-Scheduled operation follows Europe/Brussels time. ENTSO-E and Open-Meteo API timestamps are stored and queried in UTC after converting the Brussels cutoff timestamp. During CEST, the 18:00 Brussels cutoff is `16:00 UTC`; a 24-hour hourly forecast therefore stores delivery timestamps from `16:00 UTC` through `15:00 UTC`, which display as `18:00` through `17:00` in Europe/Brussels. The last `17:00` timestamp represents the `17:00-18:00` delivery hour. Clock-change windows instead contain 25 hours in autumn and 23 in spring, ending at the next Brussels cutoff; see [DST handling and plotting checks](docs/DAYLIGHT_SAVING.md).
+Scheduled operation follows Europe/Brussels time. Every run covers 18:00 on its
+Brussels run date through midnight at the end of the following day, exclusive:
+normally 30 hours, 29 in spring and 31 in autumn. The final 23:00 timestamp
+represents 23:00–24:00. Requests, storage and joins use UTC; plots label Brussels
+time and deduplicate the six delivery hours shared by consecutive runs. See
+[DST handling](docs/DAYLIGHT_SAVING.md) and the
+[history migration/offline runbook](docs/FORECAST_WINDOW_MIGRATION.md).
+
 
 ```mermaid
 flowchart TD
@@ -128,7 +135,7 @@ flowchart TD
   B --> C["18:02-18:27 Brussels: ENTSO-E collector snapshots forecast and actual series, then pushes data branch"]
   C --> D["18:30+ Brussels: Dashboard daily forecast workflow starts after guarded GitHub cron trigger"]
   D --> E["Read ENTSO-E realtime-data raw/update files and checked-out Open-Meteo data branch"]
-  E --> G["Build 92-day context plus 23/24/25-hour day-ahead TSO/weather covariates"]
+  E --> G["Build 92-day context plus 29/30/31-hour day-ahead TSO/weather covariates"]
   G --> H["Run configured online models for BE, FR, DE, DK1, DK2, ES, and PT"]
   H --> I["Commit core model rows first, then append TimesFM3 rows when that run finishes"]
   I --> J["Streamlit Cloud rebuilds from GitHub and displays Europe/Brussels delivery times"]
@@ -141,7 +148,7 @@ flowchart TD
 |---|---|---|---|
 | ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | Forecast and actual series under `data/hourly`; compact BE/FR/DE/DK1/DK2/ES/PT comparison actuals under `data/dashboard/actuals_recent.parquet` | TSO covariate, TSO benchmark, 3-month context values, and one-request realized actuals for dashboard diagnostics |
 | Open-Meteo weather collection | `XiaoyuJIN97/open-meteo-realtime-data`, `data` branch | Four-point target-specific files under `data/raw/{BE,FR,DE,DK1,DK2,ES,PT}/{load,solar,onshore,offshore}`. Load uses `temperature_2m`, `relative_humidity_2m`, `shortwave_radiation`, plus a derived degree proxy. The degree proxy is computed in the dashboard as the absolute distance between the mean four-point temperature and an 18 C comfort/reference temperature, so it summarizes heating/cooling stress with one covariate. Solar uses `shortwave_radiation` and `temperature_2m`. Wind uses `wind_speed_100m_ms`, `wind_dir_sin`, and `wind_dir_cos`. Spain does not include offshore wind because that ENTSO-E series is unavailable. | Weather covariates for load, solar, onshore wind, offshore wind |
-| Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` with 24 hourly delivery timestamps, forecasts, TSO benchmark, run metadata, context start/end | Reads public ENTSO-E hourly archive first, falls back to raw/update files when needed, reads checked-out Open-Meteo files, and displays deterministic forecast analysis, scatter diagnostics, accuracy, and run history |
+| Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` with 29/30/31 hourly delivery timestamps, forecasts, TSO benchmark, run metadata, context start/end | Reads public ENTSO-E hourly archive first, falls back to raw/update files when needed, reads checked-out Open-Meteo files, and displays deterministic forecast analysis, scatter diagnostics, accuracy, and run history |
 | Streamlit display | Streamlit Cloud | Live dashboard from committed forecast CSVs plus fetched realized actuals | Displays timestamps in Europe/Brussels; uses ENTSO-E actuals only for visualization/diagnostics, not as forecast inputs |
 
 The dashboard forecast workflow is scheduled to run after about `18:30 Europe/Brussels` each day. GitHub Actions cron is UTC-only and can be delayed, so the workflow uses several UTC fallback triggers with a Brussels-time guard. Only a trigger after the Brussels forecast window proceeds when the daily forecast file is missing. This deliberately leaves a buffer after the 18:00 Brussels publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.
@@ -149,7 +156,7 @@ The dashboard forecast workflow is scheduled to run after about `18:30 Europe/Br
 
 ### T0 Gamma and Timestral online forecasts
 
-Both use TimesFM3's covariate policy and the same 2,208-hour context / 24-hour
+Both use TimesFM3's covariate policy and the same 2,208-hour context / normally 30-hour
 horizon. Checkpoints are pinned in `models/foundation_runtime.py`. The scheduled
 workflow appends their predictions after TimesFM3 and before building the compact
 leaderboard artifacts.

@@ -1,9 +1,9 @@
-version: 1
+version: 2
 # Initial operator defaults. Changes require a reviewed PR and regenerated reports.
 context_hours: 2208
-horizon_hours: 24
-# Nominal day-ahead horizon; runtime uses 23/24/25 elapsed UTC hours.
-horizon_policy: brussels_cutoff_to_cutoff
+horizon_hours: 30
+# Nominal day-ahead horizon; runtime uses 29/30/31 elapsed UTC hours.
+horizon_policy: brussels_18_to_next_day_midnight
 offline_years: [2024, 2025]
 minimum_runs_per_year: 60
 minimum_months_per_year: 12

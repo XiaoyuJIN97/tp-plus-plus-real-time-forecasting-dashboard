@@ -79,12 +79,12 @@ def conformal_intervals(frame, *, levels=LEVELS, window_runs=WINDOW_RUNS,
             counts[run['index']] = count
             if count < min_runs:
                 continue
-            # Runs can have 23/24/25 hours; pool errors within the same bucket.
-            # Hour 25 shares the final bucket, rather than needing 20 autumns.
+            # Runs can have 29/30/31 hours; pool errors within the same bucket.
+            # Hour 31 shares the final bucket, rather than needing 20 autumns.
             last_delivery[run['index']] = max(past['last'] for past in eligible).tz_localize(None).to_datetime64()
-            for first in (0, 6, 12, 18):
-                end = len(run['index']) if first == 18 else first+6
-                errors = np.concatenate([past['error'][first:] if first == 18
+            for first in (0, 6, 12, 18, 24):
+                end = len(run['index']) if first == 24 else first+6
+                errors = np.concatenate([past['error'][first:] if first == 24
                                          else past['error'][first:first+6] for past in eligible])
                 indices = run['index'][first:end]
                 point = run['prediction'][first:end]

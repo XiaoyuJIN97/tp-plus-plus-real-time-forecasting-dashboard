@@ -12,7 +12,7 @@ Coverage diagnostics remain available in the generated CSV artifact.
 
 Calibration uses absolute errors separately for each model, zone, target and
 six-hour horizon bucket. For every forecast origin, use at most 60 earlier,
-fully observed 24-hour runs and require at least 20. A run becomes eligible
+fully observed complete 29/30/31-hour runs and require at least 20. A run becomes eligible
 only after its final hourly delivery has ended, plus a two-hour reporting lag.
 Neither its own outcomes nor future outcomes enter a forecast's calibration.
 Original actual publication and revision vintages are unavailable: historical
@@ -22,7 +22,7 @@ mock forecasts retain their existing provenance and are included.
 For n eligible residuals, the radius is sorted residual number
 ceil((n+1)*coverage). If that rank exceeds n, no finite band is displayed.
 Bounds are forecast +/- radius, with lower bounds clipped at zero. These are
-pointwise prediction intervals, not simultaneous 24-hour trajectory bands.
+pointwise prediction intervals, not simultaneous full-window trajectory bands.
 Time-series dependence and distribution changes can cause coverage to depart
 from its nominal target; inspect observed coverage and width together.
 See [Zaffran et al., 2022](https://proceedings.mlr.press/v162/zaffran22a.html)

@@ -17,18 +17,19 @@ from rt_forecast_dashboard.model_onboarding.datasets import combine_runs
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def window(day='2024-01-01', hours=24):
-    origin = pd.Timestamp(day+'T16:00:00Z')
+def window(day='2024-01-01', hours=30):
+    from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+    origin = brussels_cutoff_timestamp(pd.Timestamp(day).date())
     context = pd.DataFrame({'timestamp':pd.date_range(end=origin-pd.Timedelta(hours=1),periods=hours,freq='h'), 'actual_mw':100.})
-    future = pd.DataFrame({'timestamp':pd.date_range(origin,periods=24,freq='h'), 'actual_mw':1e12})
+    future = pd.DataFrame({'timestamp':pd.date_range(origin,periods=30,freq='h'), 'actual_mw':1e12})
     return dict(zone='BE',target='load',run_date=day,origin_utc=origin.isoformat(),
                 inputs_available_at_utc=origin.isoformat(),covariates=[],
-                context=records(context),future=records(future),actuals=[101.]*24)
+                context=records(context),future=records(future),actuals=[101.]*30)
 
 
 def request():
     w=window()
-    return dict(context=w['context'],future=w['future'],covariates=[],target='load',context_hours=24,horizon=24)
+    return dict(context=w['context'],future=w['future'],covariates=[],target='load',context_hours=30,horizon=30)
 
 
 def worker(behavior=None, **kwargs):
@@ -38,11 +39,11 @@ def worker(behavior=None, **kwargs):
 
 def test_contract_strips_future_actuals_and_checks_grid():
     w=window()
-    past,future=frames(w['context'],w['future'],[],context_hours=24)
+    past,future=frames(w['context'],w['future'],[],context_hours=30)
     assert 'actual_mw' not in future
     assert past.actual_mw.eq(100).all()
     w['context'][-1]['timestamp']=w['future'][0]['timestamp']
-    with pytest.raises(ValueError): frames(w['context'],w['future'],[],context_hours=24)
+    with pytest.raises(ValueError): frames(w['context'],w['future'],[],context_hours=30)
 
 
 def test_worker_cannot_mutate_inputs_or_read_upstream_secrets(monkeypatch):
@@ -53,7 +54,7 @@ def test_worker_cannot_mutate_inputs_or_read_upstream_secrets(monkeypatch):
         first,cold=w.predict(r)
         second,warm=w.predict(r)
         assert cold and not warm
-        assert first==second==[100.]*24
+        assert first==second==[100.]*30
         assert r['context'][0]['actual_mw']==100
         assert 'mutated' not in r['future'][0]
     finally: w.close()
@@ -65,7 +66,7 @@ def test_failed_worker_does_not_break_next_model(behavior,match):
     with pytest.raises(Exception,match=match): bad.predict(request())
     assert bad.process is None
     good=worker()
-    try: assert good.predict(request())[0]==[100.]*24
+    try: assert good.predict(request())[0]==[100.]*30
     finally: good.close()
 
 
@@ -84,7 +85,7 @@ def test_timeout_kills_worker_and_memory_budget_is_enforced():
 @pytest.fixture
 def evidence(tmp_path):
     policy=yaml.safe_load((ROOT/'config/model_onboarding.yml').read_text())
-    policy.update(required_system="any",context_hours=24,minimum_runs_per_year=2,minimum_months_per_year=1,minimum_runs_per_month=1,
+    policy.update(required_system="any",context_hours=30,minimum_runs_per_year=2,minimum_months_per_year=1,minimum_runs_per_month=1,
                   minimum_warm_samples=1,minimum_shadow_days=2,maximum_warm_p95_seconds=2,
                   maximum_cold_seconds=10,maximum_daily_seconds=20)
     pp=tmp_path/'policy.yml';pp.write_text(yaml.safe_dump(policy))
@@ -159,7 +160,7 @@ def test_gate_accepts_strong_matched_candidate_and_rejects_year_regression(evide
 
 def test_gate_rejects_missing_mock_windows_and_unapproved_license(evidence):
     root,mp,pp,manifest,b=evidence
-    f=pd.read_csv(root/'replay/forecasts.csv').iloc[:24]
+    f=pd.read_csv(root/'replay/forecasts.csv').iloc[:30]
     f.to_csv(root/'replay/forecasts.csv',index=False)
     report=admission(evidence)
     assert not report['passed']
@@ -202,7 +203,7 @@ def test_publication_is_explicit_preserves_incumbents_and_rejects_offline(eviden
     store=ForecastStore(data_dir=root/'production')
     f=pd.read_csv(root/'replay/forecasts.csv');f['run_at']='2026-07-24T18:30:00Z';f['model']='incumbent';f['forecast_mw']=999.
     for day,part in f.groupby('run_date'): store.append_forecasts(part,day)
-    assert publish(mp,root/'replay',registry,pp,root/'production')==48
+    assert publish(mp,root/'replay',registry,pp,root/'production')==60
     saved=store.read_forecasts()
     assert saved[saved.model.eq('incumbent')].forecast_mw.eq(999).all()
     assert saved[saved.model.eq(manifest['model_key'])].source.eq('historical_mock_replay').all()
@@ -235,8 +236,8 @@ def test_isolated_production_adapter_preserves_frames_and_reuses_worker():
                 adapter_config={},startup_timeout_seconds=10)
     a,b=IsolatedAdapter(config),IsolatedAdapter(config)
     try:
-        assert len(a.predict(future,'load',past,[]))==24
-        assert len(b.predict(future,'load',past,[]))==24
+        assert len(a.predict(future,'load',past,[]))==30
+        assert len(b.predict(future,'load',past,[]))==30
         assert a.worker is b.worker
         pd.testing.assert_frame_equal(past,past_before)
         pd.testing.assert_frame_equal(future,future_before)
@@ -253,7 +254,7 @@ def test_exported_snapshot_keeps_truth_outside_worker(tmp_path):
                    'context_path':'context.parquet','future_path':'future.parquet','covariates':'[]'}]).to_csv(tmp_path/'plan.csv',index=False)
     export_windows(tmp_path/'plan.csv',tmp_path/'windows.jsonl')
     row=json.loads((tmp_path/'windows.jsonl').read_text())
-    assert row['actuals']==[1e12]*24
+    assert row['actuals']==[1e12]*30
     assert 'actual_mw' not in row['future'][0]
     assert len(row['sources']['context_path'])==64
 

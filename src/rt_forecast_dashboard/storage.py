@@ -46,7 +46,9 @@ class ForecastStore:
                 existing = existing[existing["_replace"].isna()].drop(columns="_replace")
             frame = pd.concat([existing, frame], ignore_index=True)
             frame = frame.drop_duplicates(["run_date", "zone", "target", "model", "timestamp"], keep="last")
-        frame.to_csv(path, index=False)
+        temporary = path.with_suffix(".csv.tmp")
+        frame.to_csv(temporary, index=False)
+        temporary.replace(path)
 
     def read_forecasts(self) -> pd.DataFrame:
         files = sorted((self.data_dir / "forecasts").glob("forecasts_*.csv"))

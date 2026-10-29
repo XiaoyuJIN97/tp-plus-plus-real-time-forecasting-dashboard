@@ -1,5 +1,5 @@
 """Audit mock replay coverage and compare against saved forecasts on exact keys."""
-from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours, brussels_cutoff_timestamp
 import argparse
 import json
 from pathlib import Path
@@ -7,6 +7,18 @@ import numpy as np
 import pandas as pd
 
 KEYS = ["run_date", "zone", "target", "timestamp"]
+
+
+def matched_complete_windows(frame):
+    valid=[]
+    for (day,zone,target),part in frame.groupby(['run_date','zone','target']):
+        origin=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+        grid=pd.date_range(origin,periods=forecast_horizon_hours(day),freq='h')
+        if (pd.DatetimeIndex(part.timestamp.sort_values()).equals(grid)
+                and pd.to_datetime(part.context_end,utc=True).eq(origin-pd.Timedelta(hours=1)).all()
+                and pd.to_datetime(part.context_end_baseline,utc=True).eq(origin-pd.Timedelta(hours=1)).all()):
+            valid.append(part)
+    return pd.concat(valid,ignore_index=True) if valid else frame.iloc[:0].copy()
 
 
 def main():
@@ -28,6 +40,10 @@ def main():
     counts = new.groupby(["run_date", "zone", "target", "model"]).timestamp.nunique()
     if not all(count == forecast_horizon_hours(key[0]) for key,count in counts.items()):
         raise ValueError("Incomplete saved replay horizons")
+    for key, part in new.groupby(['run_date','zone','target','model']):
+        grid = pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(key[0]).date()), periods=forecast_horizon_hours(key[0]), freq='h')
+        if not pd.DatetimeIndex(part.timestamp.sort_values()).equals(grid):
+            raise ValueError('Replay is outside the exact midnight-ending delivery grid')
     context_end = pd.to_datetime(new.context_end, utc=True)
     first = new.groupby(["run_date", "zone", "target", "model"]).timestamp.transform("min")
     if not context_end.eq(first - pd.Timedelta(hours=1)).all():
@@ -45,6 +61,7 @@ def main():
             matched = group[KEYS + ["forecast_mw", "actual_mw", "context_end"]].merge(
                 reference[KEYS + ["forecast_mw", "context_end"]], on=KEYS, suffixes=("", "_baseline"), validate="one_to_one")
             matched = matched.dropna(subset=["actual_mw", "forecast_mw", "forecast_mw_baseline"])
+            matched = matched_complete_windows(matched)
             if matched.empty:
                 continue
             error = matched.forecast_mw - matched.actual_mw
@@ -56,13 +73,14 @@ def main():
                                 mae=mae, baseline_mae=base_mae,
                                 mae_change_pct=100 * (mae / base_mae - 1) if base_mae else np.nan,
                                 rmse=np.sqrt((error**2).mean()), baseline_rmse=np.sqrt((baseline_error**2).mean())))
-    scores = pd.DataFrame(metrics)
+    scores = pd.DataFrame(metrics,columns=['same_origin_rows','origin_aligned','zone','target','model','baseline',
+        'n','windows','mae','baseline_mae','mae_change_pct','rmse','baseline_rmse'])
     scores.to_csv(args.replay / "matched_comparison.csv", index=False)
     tfm = scores[scores.baseline.eq("timesfm3_online")]
     lines = ["# T0 Gamma and Timestral online mock replay", "",
-             "Mock forecasts follow each saved TimesFM3 delivery window from 24 July through 19 October 2026, with 2,208 context hours and 24 forecast hours. Actual context ends one hour before delivery. The model checkpoints and inference settings match the validated offline evaluation.", "",
+             f"Mock forecasts cover {new.run_date.min()} through {new.run_date.max()}, with 2,208 context hours and 29/30/31 forecast hours through next-day midnight. Actual context ends one hour before delivery.", "",
              "All rows are labeled `historical_mock_replay`. Collector archives and retained outcomes reconstruct past inputs. October weather gaps use the Open-Meteo historical forecast API; these are not certified original issue-time vintages. This is a reconstructed mock comparison, not a claim of contemporaneous live performance.", "",
-             "Coverage gaps remain excluded under production context-quality limits. Some older baseline horizons differ by two hours; all comparisons below match the exact run date and delivery timestamp, using the same realized actuals for both models. Pairs with different forecast origins are marked in the comparison CSV and are descriptive rather than controlled comparisons.", "",
+             "Coverage gaps remain excluded under production context-quality limits. Comparisons require identical complete midnight-ending delivery grids, the same forecast origin and the same observed actuals. Old 24-hour or misaligned baseline windows are excluded.", "",
              f"Saved predictions: **{len(new):,} rows / {len(counts):,} complete daily windows** across {new.zone.nunique()} zones.", "",
              "## Matched comparison with TimesFM3", "",
              "| Zone | Target | Model | Scored hours | MAE (MW) | TimesFM3 MAE | Change |",

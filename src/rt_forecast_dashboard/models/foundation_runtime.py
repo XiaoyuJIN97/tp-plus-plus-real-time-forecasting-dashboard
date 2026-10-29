@@ -35,7 +35,7 @@ class FoundationRuntime:
             os.environ.setdefault('TORCHINDUCTOR_CACHE_DIR', str(ROOT/'.codex-build/torchinductor'))
             self.model.model._run_two_stream = torch.compile(self.model.model._run_two_stream, dynamic=False)
 
-    def predict(self, contexts, covariates, horizon=24):
+    def predict(self, contexts, covariates, horizon=30):
         import torch
         x = np.stack(contexts).astype(np.float32)
         cov = np.stack(covariates).astype(np.float32)

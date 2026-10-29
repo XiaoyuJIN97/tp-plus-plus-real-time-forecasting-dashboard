@@ -1,23 +1,23 @@
 # Brussels daylight-saving transitions
 
 Daily forecasts cover 18:00 Europe/Brussels on `run_date` up to, but excluding,
-18:00 the next day. Subtract those cutoffs as **UTC instants**: a local day is
-not always 24 elapsed hours. Inference normally starts at 18:30 local time.
+00:00 two calendar days later (midnight at the end of the next day). Subtract those cutoffs as **UTC instants**: the extended delivery window is
+not always 30 elapsed hours. Inference normally starts at 18:30 local time.
 
 | Run date | UTC start | UTC end (exclusive) | Hours |
 | --- | --- | --- | --- |
-| 2026-10-24 | 2026-10-24 16:00Z | 2026-10-25 17:00Z | 25 |
-| 2026-10-25 | 2026-10-25 17:00Z | 2026-10-26 17:00Z | 24 |
-| 2026-03-28 | 2026-03-28 17:00Z | 2026-03-29 16:00Z | 23 |
+| 2026-10-24 | 2026-10-24 16:00Z | 2026-10-25 23:00Z | 31 |
+| 2026-10-25 | 2026-10-25 17:00Z | 2026-10-26 23:00Z | 30 |
+| 2026-03-28 | 2026-03-28 17:00Z | 2026-03-29 22:00Z | 29 |
 
 `forecast_horizon_hours` is shared by inference, completeness, replay, ensembles,
-online accuracy, conformal calibration and onboarding. Configuration's 24 hours
-denotes the nominal day-ahead window; actual requests have 23, 24 or 25 hours.
+online accuracy, conformal calibration and onboarding. Configuration's 30 hours
+denotes the nominal day-ahead window; actual requests have 29, 30 or 31 hours.
 Context remains 2,208 elapsed hours. Adapters return `len(features)` predictions;
 replay batches group equal-length windows. Never copy/interpolate a prediction
 to manufacture the extra hour.
 
-Hour 25 shares the final learned-ensemble bucket (hours 19–24). Conformal bands
+Hour 31 shares the final learned-ensemble bucket (hours 25–30). Conformal bands
 pool the final bucket's available errors from fully observed earlier runs,
 accommodating mixed-length histories without stacking unequal arrays or needing
 decades of autumn-only calibration samples.
@@ -42,9 +42,9 @@ necessary. Collector requests and timestamps must remain UTC.
 
 ## Operator checks
 
-1. On 24 October, verify 25 distinct consecutive UTC timestamps per model group,
-   ending at 25 October 16:00Z. The next run starts at 17:00Z with 24 rows.
-   There must be no gap or overlap.
+1. On 24 October, verify 31 distinct consecutive UTC timestamps per model group,
+   ending with the 25 October 22:00Z hourly interval. The next run starts at 17:00Z with 30 rows.
+   Runs deliberately overlap by six hours. Plotting deduplicates delivery instants, while scoring retains each distinct forecast origin.
 2. Run `check_forecast_complete --date YYYY-MM-DD` for each inference pass;
    check optional candidate models explicitly in their own jobs.
 3. Verify ensemble rows, observed-run scores and probabilistic panels retain
@@ -60,5 +60,5 @@ provenance if repair is needed. The changed onboarding policy/source invalidates
 admission fingerprints; regenerate evidence before admitting a new model.
 
 Regression tests: `tests/test_dst_windows.py`. The foundation integration workflow
-also exercises native CPU forecasts at 23, 24 and 25 hours for T0 Gamma and
+also exercises native CPU forecasts at 29, 30 and 31 hours for T0 Gamma and
 Timestral. Local stub/demo checks alone do not prove native inference.

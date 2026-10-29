@@ -10,6 +10,7 @@ import pandas as pd
 import yaml
 from scripts.onboarding_foundation_adapter import CHECKPOINTS
 from rt_forecast_dashboard.covariates import covariates_for
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
 from rt_forecast_dashboard.model_onboarding.contracts import frames, staging_path
 from rt_forecast_dashboard.model_onboarding.datasets import export_windows
 
@@ -79,7 +80,7 @@ def freeze(manifest, inventory, references, output):
         available = pd.Timestamp(row['inputs_available_at_utc'])
         if origin.tzinfo is None or available.tzinfo is None or available>origin:
             raise ValueError('Explicit timezone and input availability <= origin are required')
-        if origin != future.timestamp.iloc[0] or str(origin.tz_convert('Europe/Brussels').date())!=str(row['run_date']):
+        if origin != future.timestamp.iloc[0] or origin != brussels_cutoff_timestamp(pd.Timestamp(row['run_date']).date()):
             raise ValueError('Origin/delivery/run_date mismatch')
         expected.extend((row['zone'],row['target'],str(row['run_date']),t) for t in future.timestamp)
     refs = pd.read_csv(references, dtype={'run_date':str})

@@ -1,0 +1,217 @@
+zone,target,model,model_label,coverage_pct,mean_interval_width_mw,scored_runs,scored_hours
+BE,load,chronos2_online,Chronos2 with covariates,81.57765801077903,727.5155638703455,68,2041
+BE,load,ensemble_selected,Ensembled model,81.62665360117589,698.3151104875741,68,2041
+BE,load,persistence,Persistence,84.76237138657521,1146.9748048342317,68,2041
+BE,load,ridge_3mo_context,Ridge with covariates,80.05879470847623,881.1578891762557,68,2041
+BE,load,t0_gamma_online,T0 Gamma with covariates,80.69573738363547,733.2632808289441,68,2041
+BE,load,timesfm3_online,TimesFM3 with covariates,81.08770210681038,708.3549643250858,68,2041
+BE,load,timestral_online,Timestral with covariates,81.38167564919158,729.3105369227703,68,2041
+BE,load,tso_reference,TSO forecast,81.47966682998529,917.4098775110242,68,2041
+BE,solar,chronos2_online,Chronos2 with covariates,86.9671729544341,551.8891267201088,68,2041
+BE,solar,ensemble_selected,Ensembled model,84.46839784419402,424.73023998133505,68,2041
+BE,solar,persistence,Persistence,86.72219500244978,1371.1594511268986,68,2041
+BE,solar,t0_gamma_online,T0 Gamma with covariates,83.68446839784419,476.29117340013124,68,2041
+BE,solar,timesfm3_online,TimesFM3 with covariates,84.02743753062224,470.9718977862989,68,2041
+BE,solar,timestral_online,Timestral with covariates,83.5374816266536,431.5712043671147,68,2041
+BE,solar,tso_reference,TSO forecast,87.26114649681529,467.61404170896617,68,2041
+BE,solar,xgboost_online,XGBoost with covariates,87.75110240078394,517.4952092830017,68,2041
+BE,wind_offshore,chronos2_online,Chronos2 with covariates,77.80499755022048,430.80283775258573,68,2041
+BE,wind_offshore,ensemble_selected,Ensembled model,77.85399314061733,407.59777539499714,68,2041
+BE,wind_offshore,persistence,Persistence,76.82508574228319,1827.7032569818716,68,2041
+BE,wind_offshore,t0_gamma_online,T0 Gamma with covariates,78.1969622733954,423.5486577064704,68,2041
+BE,wind_offshore,timesfm3_online,TimesFM3 with covariates,78.39294463498285,414.18797602744814,68,2041
+BE,wind_offshore,timestral_online,Timestral with covariates,79.37285644292014,415.3802992525899,68,2041
+BE,wind_offshore,tso_reference,TSO forecast,76.62910338069574,473.32077768250855,68,2041
+BE,wind_offshore,xgboost_online,XGBoost with covariates,75.9921607055365,454.9927213617425,68,2041
+BE,wind_onshore,chronos2_online,Chronos2 with covariates,79.02988731014209,325.23628416114866,68,2041
+BE,wind_onshore,ensemble_selected,Ensembled model,81.08770210681038,316.1231047082603,68,2041
+BE,wind_onshore,persistence,Persistence,73.15041646251838,1245.991233844684,68,2041
+BE,wind_onshore,t0_gamma_online,T0 Gamma with covariates,80.54875061244488,331.00489515478534,68,2041
+BE,wind_onshore,timesfm3_online,TimesFM3 with covariates,79.96080352768251,311.60170965770646,68,2041
+BE,wind_onshore,timestral_online,Timestral with covariates,80.54875061244488,320.86887123202854,68,2041
+BE,wind_onshore,tso_reference,TSO forecast,82.55756981871632,358.7349454487996,68,2041
+BE,wind_onshore,xgboost_online,XGBoost with covariates,81.03870651641353,355.55290488922105,68,2041
+DE,load,chronos2_online,Chronos2 with covariates,81.28368446839784,3831.378973934836,68,2041
+DE,load,ensemble_selected,Ensembled model,82.36158745712886,3632.934519649658,68,2041
+DE,load,persistence,Persistence,84.27241548260656,6231.773612178344,68,2041
+DE,load,ridge_3mo_context,Ridge with covariates,85.00734933855954,5095.087734306575,68,2041
+DE,load,t0_gamma_online,T0 Gamma with covariates,81.52866242038218,3872.8169097907894,68,2041
+DE,load,timesfm3_online,TimesFM3 with covariates,81.57765801077903,3636.2077328263113,68,2041
+DE,load,timestral_online,Timestral with covariates,82.11660950514454,3727.6064023493395,68,2041
+DE,load,tso_reference,TSO forecast,81.03870651641353,4817.17633192177,68,2041
+DE,solar,chronos2_online,Chronos2 with covariates,85.25252525252526,2756.416451453335,66,1980
+DE,solar,ensemble_selected,Ensembled model,85.60606060606061,2024.8966142958498,66,1980
+DE,solar,persistence,Persistence,83.53535353535354,7001.876169654882,66,1980
+DE,solar,t0_gamma_online,T0 Gamma with covariates,85.85858585858585,2555.4885909676186,66,1980
+DE,solar,timesfm3_online,TimesFM3 with covariates,84.34343434343434,2039.6989379748004,66,1980
+DE,solar,timestral_online,Timestral with covariates,83.63636363636363,2012.5536821989426,66,1980
+DE,solar,tso_reference,TSO forecast,88.43434343434343,1839.1933361498313,66,1980
+DE,solar,xgboost_online,XGBoost with covariates,87.62626262626263,2403.920700423938,66,1980
+DE,wind_offshore,chronos2_online,Chronos2 with covariates,70.5046545810877,1726.4672228372722,68,2041
+DE,wind_offshore,ensemble_selected,Ensembled model,71.09260166585007,1567.8254853626672,68,2041
+DE,wind_offshore,persistence,Persistence,80.00979911807937,5475.9091931651155,68,2041
+DE,wind_offshore,t0_gamma_online,T0 Gamma with covariates,69.57373836354728,1664.1739886253515,68,2041
+DE,wind_offshore,timesfm3_online,TimesFM3 with covariates,70.79862812346889,1605.633598309365,68,2041
+DE,wind_offshore,timestral_online,Timestral with covariates,70.35766780989711,1619.614734147885,68,2041
+DE,wind_offshore,tso_reference,TSO forecast,69.76972072513475,1794.5691658092437,68,2041
+DE,wind_offshore,xgboost_online,XGBoost with covariates,71.19059284664381,1725.3823976814933,68,2041
+DE,wind_onshore,chronos2_online,Chronos2 with covariates,78.43434343434343,3804.0059245008674,66,1980
+DE,wind_onshore,ensemble_selected,Ensembled model,79.6969696969697,3708.6121540866634,66,1980
+DE,wind_onshore,persistence,Persistence,69.7979797979798,18885.257717688553,66,1980
+DE,wind_onshore,t0_gamma_online,T0 Gamma with covariates,78.03030303030303,3771.264189415088,66,1980
+DE,wind_onshore,timesfm3_online,TimesFM3 with covariates,80.4040404040404,3835.7664523833128,66,1980
+DE,wind_onshore,timestral_online,Timestral with covariates,79.0909090909091,3625.3471764791666,66,1980
+DE,wind_onshore,tso_reference,TSO forecast,80.65656565656566,3901.9315508169193,66,1980
+DE,wind_onshore,xgboost_online,XGBoost with covariates,78.58585858585857,4428.874328024384,66,1980
+DK1,load,chronos2_online,Chronos2 with covariates,79.03225806451613,142.35572218371985,62,1860
+DK1,load,ensemble_selected,Ensembled model,79.83870967741935,128.45278679978057,62,1860
+DK1,load,persistence,Persistence,77.79569892473118,488.8718548387097,62,1860
+DK1,load,ridge_3mo_context,Ridge with covariates,79.24731182795699,148.66509420102608,62,1860
+DK1,load,t0_gamma_online,T0 Gamma with covariates,78.2258064516129,144.70005733366938,62,1860
+DK1,load,timesfm3_online,TimesFM3 with covariates,80.16129032258064,143.62583127520162,62,1860
+DK1,load,timestral_online,Timestral with covariates,79.6774193548387,130.158904265373,62,1860
+DK1,load,tso_reference,TSO forecast,79.03225806451613,147.4132258064516,62,1860
+DK1,solar,chronos2_online,Chronos2 with covariates,73.38877338877339,208.1411697544517,16,481
+DK1,solar,ensemble_selected,Ensembled model,72.97297297297297,189.4426409554891,16,481
+DK1,solar,persistence,Persistence,77.96257796257797,534.5683605523216,16,481
+DK1,solar,t0_gamma_online,T0 Gamma with covariates,77.54677754677755,200.87808245841995,16,481
+DK1,solar,timesfm3_online,TimesFM3 with covariates,74.01247401247402,161.9297247794579,16,481
+DK1,solar,timestral_online,Timestral with covariates,75.05197505197505,190.60048188549993,16,481
+DK1,solar,tso_reference,TSO forecast,68.3991683991684,270.1839266463964,16,481
+DK1,solar,xgboost_online,XGBoost with covariates,65.07276507276507,242.60506256512082,16,481
+DK1,wind_offshore,chronos2_online,Chronos2 with covariates,74.81626653601175,343.7508220743636,68,2041
+DK1,wind_offshore,ensemble_selected,Ensembled model,78.44194022537971,315.5065813852971,68,2041
+DK1,wind_offshore,persistence,Persistence,78.83390494855463,1422.9717631544179,68,2041
+DK1,wind_offshore,t0_gamma_online,T0 Gamma with covariates,79.61783439490446,338.44247504320606,68,2041
+DK1,wind_offshore,timesfm3_online,TimesFM3 with covariates,78.93189612934836,326.48590391888166,68,2041
+DK1,wind_offshore,timestral_online,Timestral with covariates,77.60901518863302,318.2392388010387,68,2041
+DK1,wind_offshore,tso_reference,TSO forecast,74.22831945124939,785.1568818421526,68,2041
+DK1,wind_offshore,xgboost_online,XGBoost with covariates,77.70700636942675,348.04342070092304,68,2041
+DK1,wind_onshore,chronos2_online,Chronos2 with covariates,78.93189612934836,432.5927610455391,68,2041
+DK1,wind_onshore,ensemble_selected,Ensembled model,78.343949044586,391.78887122036576,68,2041
+DK1,wind_onshore,persistence,Persistence,74.66927976482116,2109.5506272987095,68,2041
+DK1,wind_onshore,t0_gamma_online,T0 Gamma with covariates,77.60901518863302,405.6664519088902,68,2041
+DK1,wind_onshore,timesfm3_online,TimesFM3 with covariates,79.47084762371387,404.17321548148215,68,2041
+DK1,wind_onshore,timestral_online,Timestral with covariates,78.0499755022048,407.9388862954055,68,2041
+DK1,wind_onshore,tso_reference,TSO forecast,74.22831945124939,726.008703864323,68,2041
+DK1,wind_onshore,xgboost_online,XGBoost with covariates,79.17687408133268,478.4699356376652,68,2041
+DK2,load,chronos2_online,Chronos2 with covariates,76.98924731182795,80.58190552545364,62,1860
+DK2,load,ensemble_selected,Ensembled model,77.15053763440861,65.17585719021513,62,1860
+DK2,load,persistence,Persistence,70.86021505376344,190.74570967741937,62,1860
+DK2,load,ridge_3mo_context,Ridge with covariates,79.83870967741935,85.28600414712888,62,1860
+DK2,load,t0_gamma_online,T0 Gamma with covariates,75.48387096774194,77.85080100176413,62,1860
+DK2,load,timesfm3_online,TimesFM3 with covariates,77.79569892473118,73.9271579511089,62,1860
+DK2,load,timestral_online,Timestral with covariates,77.09677419354838,66.69607195060482,62,1860
+DK2,load,tso_reference,TSO forecast,79.46236559139786,91.36827419354842,62,1860
+DK2,solar,chronos2_online,Chronos2 with covariates,93.9334637964775,93.5549321053219,17,511
+DK2,solar,ensemble_selected,Ensembled model,96.28180039138942,84.58348789830282,17,511
+DK2,solar,persistence,Persistence,89.23679060665361,185.58934493052837,17,511
+DK2,solar,t0_gamma_online,T0 Gamma with covariates,93.73776908023484,80.56934088151488,17,511
+DK2,solar,timesfm3_online,TimesFM3 with covariates,93.15068493150685,84.62757145394897,17,511
+DK2,solar,timestral_online,Timestral with covariates,95.69471624266144,90.01658587986816,17,511
+DK2,solar,tso_reference,TSO forecast,77.69080234833659,125.835966681833,17,511
+DK2,solar,xgboost_online,XGBoost with covariates,96.4774951076321,100.00384954542075,17,511
+DK2,wind_offshore,chronos2_online,Chronos2 with covariates,78.7359137677609,237.51830938880872,68,2041
+DK2,wind_offshore,ensemble_selected,Ensembled model,80.59774620284175,223.03286408659528,68,2041
+DK2,wind_offshore,persistence,Persistence,73.10142087212151,839.495418477707,68,2041
+DK2,wind_offshore,t0_gamma_online,T0 Gamma with covariates,80.59774620284175,222.92325894818094,68,2041
+DK2,wind_offshore,timesfm3_online,TimesFM3 with covariates,81.43067123958843,231.62104679807996,68,2041
+DK2,wind_offshore,timestral_online,Timestral with covariates,79.91180793728564,240.80642662767394,68,2041
+DK2,wind_offshore,tso_reference,TSO forecast,83.09652131308182,342.8222833566879,68,2041
+DK2,wind_offshore,xgboost_online,XGBoost with covariates,79.07888290053894,265.1659321832024,68,2041
+DK2,wind_onshore,chronos2_online,Chronos2 with covariates,77.41303282704557,69.6453533428928,68,2041
+DK2,wind_onshore,ensemble_selected,Ensembled model,78.1969622733954,66.81464844400853,68,2041
+DK2,wind_onshore,persistence,Persistence,74.66927976482116,335.51420025926836,68,2041
+DK2,wind_onshore,t0_gamma_online,T0 Gamma with covariates,78.14796668299853,69.28661703944464,68,2041
+DK2,wind_onshore,timesfm3_online,TimesFM3 with covariates,78.14796668299853,65.42528569640366,68,2041
+DK2,wind_onshore,timestral_online,Timestral with covariates,77.60901518863302,68.56461866162014,68,2041
+DK2,wind_onshore,tso_reference,TSO forecast,76.28613424791769,82.33459915552017,68,2041
+DK2,wind_onshore,xgboost_online,XGBoost with covariates,78.00097991180793,75.87182343069672,68,2041
+ES,load,chronos2_online,Chronos2 with covariates,81.38167564919158,1340.1890170770046,68,2041
+ES,load,ensemble_selected,Ensembled model,84.2234198922097,1117.705032916727,68,2041
+ES,load,persistence,Persistence,78.29495345418913,5657.763841254287,68,2041
+ES,load,ridge_3mo_context,Ridge with covariates,84.27241548260656,1180.011575876542,68,2041
+ES,load,t0_gamma_online,T0 Gamma with covariates,81.82263596276334,1360.4859405622244,68,2041
+ES,load,timesfm3_online,TimesFM3 with covariates,83.390494855463,1199.2725743354972,68,2041
+ES,load,timestral_online,Timestral with covariates,83.34149926506615,1161.7781877756001,68,2041
+ES,load,tso_reference,TSO forecast,83.5374816266536,1163.1366976972072,68,2041
+ES,solar,chronos2_online,Chronos2 with covariates,83.83145516903478,2327.595473139188,68,2041
+ES,solar,ensemble_selected,Ensembled model,86.23223909848113,1871.91731578182,68,2041
+ES,solar,persistence,Persistence,83.63547280744733,3751.4447166421687,68,2041
+ES,solar,t0_gamma_online,T0 Gamma with covariates,84.3704066634003,1925.380134887795,68,2041
+ES,solar,timesfm3_online,TimesFM3 with covariates,85.69328760411562,1989.9286913998706,68,2041
+ES,solar,timestral_online,Timestral with covariates,84.95835374816266,1936.290368929459,68,2041
+ES,solar,tso_reference,TSO forecast,90.05389514943654,2950.9697452229298,68,2041
+ES,solar,xgboost_online,XGBoost with covariates,87.80009799118079,2509.2544017681475,68,2041
+ES,wind_onshore,chronos2_online,Chronos2 with covariates,79.22586967172954,1708.4500509334043,68,2041
+ES,wind_onshore,ensemble_selected,Ensembled model,80.05879470847623,1571.5963963420295,68,2041
+ES,wind_onshore,persistence,Persistence,70.74963253307203,6637.72921770374,68,2041
+ES,wind_onshore,t0_gamma_online,T0 Gamma with covariates,81.28368446839784,1689.3819032825131,68,2041
+ES,wind_onshore,timesfm3_online,TimesFM3 with covariates,80.45075943165115,1565.8577474755787,68,2041
+ES,wind_onshore,timestral_online,Timestral with covariates,80.05879470847623,1556.3163779005006,68,2041
+ES,wind_onshore,tso_reference,TSO forecast,81.77364037236649,2056.3993957210514,68,2041
+ES,wind_onshore,xgboost_online,XGBoost with covariates,79.56883880450759,1879.6797994625797,68,2041
+FR,load,chronos2_online,Chronos2 with covariates,77.95198432141108,1808.41811121999,68,2041
+FR,load,ensemble_selected,Ensembled model,78.7359137677609,1743.6979812082782,68,2041
+FR,load,persistence,Persistence,78.44194022537971,5097.464991017474,68,2041
+FR,load,ridge_3mo_context,Ridge with covariates,80.54875061244488,2102.4931362304637,68,2041
+FR,load,t0_gamma_online,T0 Gamma with covariates,77.56001959823617,1921.62679323861,68,2041
+FR,load,timesfm3_online,TimesFM3 with covariates,79.22586967172954,1839.9855844255273,68,2041
+FR,load,timestral_online,Timestral with covariates,80.54875061244488,1827.1364603748168,68,2041
+FR,load,tso_reference,TSO forecast,80.9407153356198,2106.5390543851067,68,2041
+FR,solar,chronos2_online,Chronos2 with covariates,84.24242424242424,1162.643503575797,66,1980
+FR,solar,ensemble_selected,Ensembled model,87.72727272727273,808.8157655144959,66,1980
+FR,solar,persistence,Persistence,86.46464646464646,2080.4956435185186,66,1980
+FR,solar,t0_gamma_online,T0 Gamma with covariates,83.48484848484848,981.1625542699127,66,1980
+FR,solar,timesfm3_online,TimesFM3 with covariates,86.41414141414141,920.90429053392,66,1980
+FR,solar,timestral_online,Timestral with covariates,85.70707070707071,846.315622754235,66,1980
+FR,solar,tso_reference,TSO forecast,88.73737373737373,1054.1567004861113,66,1980
+FR,solar,xgboost_online,XGBoost with covariates,85.3030303030303,1168.2038790043791,66,1980
+FR,wind_offshore,chronos2_online,Chronos2 with covariates,77.62626262626262,374.2694370148013,66,1980
+FR,wind_offshore,ensemble_selected,Ensembled model,77.27272727272727,356.0105269772675,66,1980
+FR,wind_offshore,persistence,Persistence,71.26262626262626,1190.6692028619527,66,1980
+FR,wind_offshore,t0_gamma_online,T0 Gamma with covariates,78.33333333333333,382.45110037087596,66,1980
+FR,wind_offshore,timesfm3_online,TimesFM3 with covariates,78.53535353535354,359.42993503681015,66,1980
+FR,wind_offshore,timestral_online,Timestral with covariates,78.03030303030303,351.44401061785663,66,1980
+FR,wind_offshore,tso_reference,TSO forecast,71.21212121212122,438.4927218253367,66,1980
+FR,wind_offshore,xgboost_online,XGBoost with covariates,78.08080808080808,408.35899054792515,66,1980
+FR,wind_onshore,chronos2_online,Chronos2 with covariates,77.57575757575758,1474.2131718848643,66,1980
+FR,wind_onshore,ensemble_selected,Ensembled model,78.48484848484848,1375.5742129658406,66,1980
+FR,wind_onshore,persistence,Persistence,70.95959595959596,6155.478107744108,66,1980
+FR,wind_onshore,t0_gamma_online,T0 Gamma with covariates,78.58585858585857,1453.5546138237846,66,1980
+FR,wind_onshore,timesfm3_online,TimesFM3 with covariates,78.18181818181819,1370.3208646721116,66,1980
+FR,wind_onshore,timestral_online,Timestral with covariates,78.88888888888889,1396.5933146701389,66,1980
+FR,wind_onshore,tso_reference,TSO forecast,76.76767676767676,1588.0615971069024,66,1980
+FR,wind_onshore,xgboost_online,XGBoost with covariates,76.91919191919192,1551.379016280974,66,1980
+PT,load,chronos2_online,Chronos2 with covariates,76.1391474767271,276.3443525883451,68,2041
+PT,load,ensemble_selected,Ensembled model,73.10142087212151,237.0128353813501,68,2041
+PT,load,persistence,Persistence,74.13032827045566,880.4847623713865,68,2041
+PT,load,ridge_3mo_context,Ridge with covariates,73.83635472807447,271.8103121554563,68,2041
+PT,load,t0_gamma_online,T0 Gamma with covariates,73.54238118569329,295.7540069206272,68,2041
+PT,load,timesfm3_online,TimesFM3 with covariates,72.61146496815286,249.97420535276825,68,2041
+PT,load,timestral_online,Timestral with covariates,73.49338559529642,245.5686516260412,68,2041
+PT,load,tso_reference,TSO forecast,74.42430181283684,271.51621754042134,68,2041
+PT,solar,chronos2_online,Chronos2 with covariates,82.68551236749117,295.3742198098735,66,1981
+PT,solar,ensemble_selected,Ensembled model,84.40181726400807,252.355758776853,66,1981
+PT,solar,persistence,Persistence,83.59414437152954,482.913074204947,66,1981
+PT,solar,t0_gamma_online,T0 Gamma with covariates,79.70721857647652,277.9712062876132,66,1981
+PT,solar,timesfm3_online,TimesFM3 with covariates,82.68551236749117,241.00378009424492,66,1981
+PT,solar,timestral_online,Timestral with covariates,80.76728924785462,249.49493345350163,66,1981
+PT,solar,tso_reference,TSO forecast,85.25996971226654,359.28510853104495,66,1981
+PT,solar,xgboost_online,XGBoost with covariates,83.54366481574962,320.71017831988195,66,1981
+PT,wind_offshore,chronos2_online,Chronos2 with covariates,77.99091367995962,6.345446790799174,66,1981
+PT,wind_offshore,ensemble_selected,Ensembled model,77.58707723372035,5.578882711770738,66,1981
+PT,wind_offshore,persistence,Persistence,76.32508833922262,23.768399798081777,66,1981
+PT,wind_offshore,t0_gamma_online,T0 Gamma with covariates,76.67844522968198,5.697592477230398,66,1981
+PT,wind_offshore,timesfm3_online,TimesFM3 with covariates,77.58707723372035,5.60202196596368,66,1981
+PT,wind_offshore,timestral_online,Timestral with covariates,76.42604745078243,5.9419597533903366,66,1981
+PT,wind_offshore,tso_reference,TSO forecast,79.65673902069662,7.170368500757193,66,1981
+PT,wind_offshore,xgboost_online,XGBoost with covariates,81.92831903079252,7.301679884896983,66,1981
+PT,wind_onshore,chronos2_online,Chronos2 with covariates,78.34427057041898,551.874628483533,66,1981
+PT,wind_onshore,ensemble_selected,Ensembled model,79.65673902069662,523.4226165810996,66,1981
+PT,wind_onshore,persistence,Persistence,69.35890964159516,1549.650933871782,66,1981
+PT,wind_onshore,t0_gamma_online,T0 Gamma with covariates,78.74810701665825,527.709711873393,66,1981
+PT,wind_onshore,timesfm3_online,TimesFM3 with covariates,79.35386168601715,538.069758408001,66,1981
+PT,wind_onshore,timestral_online,Timestral with covariates,79.45482079757699,523.2081703705958,66,1981
+PT,wind_onshore,tso_reference,TSO forecast,78.89954568399799,536.4993942453306,66,1981
+PT,wind_onshore,xgboost_online,XGBoost with covariates,78.34427057041898,564.6469663971425,66,1981

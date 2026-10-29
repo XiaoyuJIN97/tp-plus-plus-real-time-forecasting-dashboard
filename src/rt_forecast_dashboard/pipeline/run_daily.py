@@ -4,6 +4,7 @@ import argparse
 from datetime import UTC, date, datetime
 import sys
 
+import numpy as np
 import pandas as pd
 
 from rt_forecast_dashboard.config import features, zones, model_supports_scope
@@ -19,7 +20,7 @@ from rt_forecast_dashboard.time_utils import latest_complete_run_date, forecast_
 from rt_forecast_dashboard.weather_points import selected_weather_points
 
 
-def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None, *, clear_issues: bool = True, only_missing: bool = False) -> pd.DataFrame:
+def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None, *, clear_issues: bool = True, only_missing: bool = False, scopes: set[tuple[str, str]] | None = None) -> pd.DataFrame:
     run_date = run_date or latest_complete_run_date()
     run_date_str = run_date.isoformat()
     run_at = datetime.now(UTC).isoformat(timespec="seconds")
@@ -36,7 +37,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
     for zone, zcfg in zone_config.items():
         enabled_targets = set(zcfg.get("targets", target_config))
         for target, fcfg in target_config.items():
-            if target not in enabled_targets:
+            if target not in enabled_targets or (scopes is not None and (zone, target) not in scopes):
                 continue
             try:
                 pending = [(key,config,adapter) for key,config,adapter in iter_model_adapters(target)
@@ -114,6 +115,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                 feature_frame = build_feature_frame(tso, tso[["timestamp"]]).head(horizon)
                 context_frame = build_feature_frame(actual_context, actual_context[["timestamp"]]).dropna(subset=["actual_mw"]).tail(context_hours)
                 weather_loaded = False
+                weather_error = None
 
                 def ensure_weather_features() -> None:
                     nonlocal feature_frame, context_frame, weather_loaded
@@ -133,7 +135,13 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                         target=target,
                         context_hours=context_hours + 72,
                     )
-                    feature_frame = build_feature_frame(tso, weather).head(horizon)
+                    weather = weather.copy()
+                    weather['timestamp'] = pd.to_datetime(weather.timestamp, utc=True)
+                    weather = weather.drop_duplicates('timestamp', keep='last').set_index('timestamp')
+                    weather = weather.reindex(pd.DatetimeIndex(tso.timestamp))
+                    if weather.isna().any().any():
+                        raise ValueError('Weather does not cover every delivery hour through next-day midnight')
+                    feature_frame = build_feature_frame(tso, weather.reset_index()).head(horizon)
                     context_timestamps = actual_context[["timestamp"]].drop_duplicates()
                     weather_context = context_timestamps.merge(weather_context, on="timestamp", how="left")
                     context_frame = build_feature_frame(actual_context, weather_context).dropna(subset=["actual_mw"]).tail(context_hours)
@@ -148,14 +156,23 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                         covariate_case, covariates = covariates_for(target, zone, model_key)
                         missing_covariates = [column for column in covariates if column not in feature_frame.columns or column not in context_frame.columns]
                         if missing_covariates:
-                            ensure_weather_features()
-                        forecast = adapter.predict(feature_frame, target, context=context_frame, covariates=covariates)
+                            if weather_error is not None:
+                                raise weather_error
+                            try:
+                                ensure_weather_features()
+                            except Exception as exc:
+                                weather_error = exc
+                                raise
+                        forecast = np.asarray(adapter.predict(feature_frame, target, context=context_frame, covariates=covariates), dtype=float)
+                        if forecast.shape != (horizon,) or not np.isfinite(forecast).all():
+                            raise ValueError(f'Expected {horizon} finite predictions through next-day midnight')
                         outputs.append(
                             pd.DataFrame(
                                 {
                                     "run_date": run_date_str,
                                     "run_at": run_at,
                                     "source": "online",
+                                    "forecast_window": "next_day_midnight_v1",
                                     "zone": zone,
                                     "target": target,
                                     "model": model_key,

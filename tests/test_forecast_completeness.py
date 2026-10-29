@@ -5,7 +5,7 @@ import pandas as pd
 from rt_forecast_dashboard.pipeline.check_forecast_complete import expected_groups, is_forecast_complete
 
 
-def _forecast_rows(groups: set[tuple[str, str, str]], hours: int = 24) -> pd.DataFrame:
+def _forecast_rows(groups: set[tuple[str, str, str]], hours: int = 30) -> pd.DataFrame:
     rows = []
     timestamps = pd.date_range("2026-08-30T16:00:00Z", periods=hours, freq="h")
     for zone, target, model in groups:

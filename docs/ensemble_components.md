@@ -2,7 +2,7 @@
 
 The ensemble now discovers components from config/model_registry.yml. Every
 model that is enabled, supports the target and is not pipeline_generated is
-included by default when its current run has 24 contiguous hourly predictions
+included by default when its current run has a complete 29/30/31-hour UTC window ending at next-day midnight
 with finite values. Set ensemble_include: false to opt out. Persistence and
 experimental/hidden TabPFN explicitly opt out. The ensemble itself is excluded.
 TSO remains controlled by each zone/target's include_tso selection.
@@ -16,7 +16,7 @@ its individual forecasting integration must also be in place.
 The existing mean/median/constrained-learned choice per zone/target is retained.
 Those choices were selected with the older component set; this change does not
 claim they are still optimal for the expanded set. Learned weights are refitted
-per six-hour horizon block using up to 60 earlier complete runs (minimum 21),
+per six-hour horizon block (1–6, 7–12, 13–18, 19–24, 25–30; hour 31 shares the last) using up to 60 earlier complete runs (minimum 21),
 non-negative weights summing to one, a 70% cap and regularization 0.1. Prior
 runs must finish delivery before the new run's origin. Actual publication/revision
 vintages are not reconstructed; historical fits use the stored actuals.

@@ -14,9 +14,9 @@ from rt_forecast_dashboard.models.foundation_runtime import REVISIONS
 
 
 def inputs(covs):
-    past = pd.DataFrame({'timestamp':pd.date_range('2023-10-02',periods=2208,freq='h',tz='UTC'),
+    past = pd.DataFrame({'timestamp':pd.date_range(end='2024-01-02T16:00:00Z',periods=2208,freq='h'),
                          'actual_mw':100.})
-    future = pd.DataFrame({'timestamp':pd.date_range(past.timestamp.iloc[-1]+pd.Timedelta(hours=1),periods=24,freq='h'),
+    future = pd.DataFrame({'timestamp':pd.date_range(past.timestamp.iloc[-1]+pd.Timedelta(hours=1),periods=30,freq='h'),
                            'actual_mw':120.})
     for name in covs:
         past[name]=1.
@@ -33,15 +33,15 @@ def test_native_tensor_contract(family,monkeypatch):
     class Native:
         def predict(self,x,**kwargs):
             assert x.shape==(1,2208)
-            assert kwargs['future_covariates'].shape==(1,1,2232)
-            return types.SimpleNamespace(median=np.ones((1,24)))
+            assert kwargs['future_covariates'].shape==(1,1,2238)
+            return types.SimpleNamespace(median=np.ones((1,30)))
         def forecast(self,x,**kwargs):
             assert x.shape==(1,1,2208)
-            assert kwargs['known_covariates'].shape==(1,1,2232)
-            return types.SimpleNamespace(median=np.ones((1,1,24)))
+            assert kwargs['known_covariates'].shape==(1,1,2238)
+            return types.SimpleNamespace(median=np.ones((1,1,30)))
     adapter.model=Native()
     past,future=inputs(['weather'])
-    assert adapter.predict(future,'load',past,['weather']).shape==(24,)
+    assert adapter.predict(future,'load',past,['weather']).shape==(30,)
     assert CHECKPOINTS[family][1]==REVISIONS[family]
 
 
@@ -62,9 +62,9 @@ def test_generated_manifest_and_frozen_data(tmp_path):
     freeze(tmp_path/'model/manifest.yml',tmp_path/'inventory.csv',tmp_path/'refs.csv',tmp_path/'frozen')
     import json
     window=json.loads((tmp_path/'frozen/windows.jsonl').read_text())
-    assert len(window['context'])==2208 and len(window['future'])==24
+    assert len(window['context'])==2208 and len(window['future'])==30
     assert 'actual_mw' not in window['future'][0]
-    assert window['actuals']==[120.]*24
+    assert window['actuals']==[120.]*30
     refs.iloc[:-1].to_csv(tmp_path/'missing.csv',index=False)
     with pytest.raises(ValueError,match='does not cover'):
         freeze(tmp_path/'model/manifest.yml',tmp_path/'inventory.csv',tmp_path/'missing.csv',tmp_path/'bad')

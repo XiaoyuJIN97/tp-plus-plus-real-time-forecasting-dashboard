@@ -21,8 +21,8 @@ def run(day, model='t0_gamma_online'):
         forecast_mw=np.arange(h)+100., actual_mw=np.arange(h)+101.))
 
 
-@pytest.mark.parametrize('day,hours,next_day',[('2026-10-24',25,'2026-10-25'),
-    ('2026-03-28',23,'2026-03-29'),('2026-10-25',24,'2026-10-26')])
+@pytest.mark.parametrize('day,hours,next_day',[('2026-10-24',31,'2026-10-25'),
+    ('2026-03-28',29,'2026-03-29'),('2026-10-25',30,'2026-10-26')])
 def test_cutoff_windows_and_completeness(day,hours,next_day,tmp_path,monkeypatch):
     from rt_forecast_dashboard.pipeline import check_forecast_complete as checker
     from rt_forecast_dashboard.ui import analytics
@@ -30,7 +30,7 @@ def test_cutoff_windows_and_completeness(day,hours,next_day,tmp_path,monkeypatch
     monkeypatch.setattr(analytics,'latest_complete_run_date',lambda:date(2026,11,1))
     frame=run(day)
     assert len(frame)==hours
-    assert frame.timestamp.iloc[-1]+pd.Timedelta(hours=1)==run(next_day).timestamp.iloc[0]
+    assert frame.timestamp.iloc[-1]+pd.Timedelta(hours=1)==pd.Timestamp(next_day,tz='Europe/Brussels')+pd.DateOffset(days=1)
     assert len(_complete_run(frame,['forecast_mw']))==hours
     assert len(valid_online_forecasts(frame))==hours
     context=pd.DataFrame(dict(timestamp=pd.date_range(frame.timestamp.min()-pd.Timedelta(hours=2208),periods=2208,freq='h'),actual_mw=100.))
@@ -41,8 +41,8 @@ def test_cutoff_windows_and_completeness(day,hours,next_day,tmp_path,monkeypatch
     assert is_forecast_complete(path)[0]
     frame.iloc[:-1].to_csv(path,index=False)
     assert not is_forecast_complete(path)[0]
-    if hours==25:
-        assert _band_for_horizon(25,[[1,6],[7,12],[13,18],[19,24]])==3
+    if hours==31:
+        assert _band_for_horizon(31,[[1,6],[7,12],[13,18],[19,24],[25,30]])==4
 
 
 @pytest.mark.parametrize('chart',[deterministic_forecast_chart,conformal_forecast_chart,forecast_line_chart])
@@ -97,7 +97,7 @@ def test_calibration_accepts_mixed_run_lengths_and_calibrates_extra_hour():
     frame=pd.concat([run(str(day.date())) for day in days],ignore_index=True)
     result=conformal_intervals(frame,min_runs=20)
     autumn=result[result.run_date.eq('2026-10-24')]
-    assert len(autumn)==25 and autumn.lower_80.notna().all()
+    assert len(autumn)==31 and autumn.lower_80.notna().all()
     assert result[result.run_date.eq('2026-10-26')].lower_80.notna().all()
     # Future outcomes must never alter the earlier bands.
     frame.loc[frame.run_date.ge('2026-10-24'),'actual_mw']=1e9
@@ -190,7 +190,7 @@ def test_rolling_learned_weights_handle_mixed_dst_training_lengths(tmp_path,monk
     settings=original('ensemble_registry.yml')['settings']
     monkeypatch.setattr(module,'load_yaml',lambda name:dict(settings=settings,selections={'BE':{'load':dict(method='constrained_learned',include_tso=False)}}) if name=='ensemble_registry.yml' else original(name))
     result=build_selected_ensembles(store,run_dates=days[-3:],actuals_path=path,offline_weights_path=tmp_path/'none.csv')
-    assert result.groupby('run_date').size().to_dict()=={'2026-10-24':25,'2026-10-25':24,'2026-10-26':24}
+    assert result.groupby('run_date').size().to_dict()=={'2026-10-24':31,'2026-10-25':30,'2026-10-26':30}
     assert result.covariate_case.str.startswith('rolling_prior_actuals:').all()
 
 
@@ -219,4 +219,4 @@ def test_isolated_onboarding_worker_exports_all_transition_hours(tmp_path):
     output=tmp_path/'run'
     assert evaluate_run(manifest,windows,output,sys.executable,root/'config/model_onboarding.yml','offline')
     forecasts=pd.read_csv(output/'forecasts.csv')
-    assert forecasts.groupby('run_date').size().to_dict()=={'2026-03-28':23,'2026-10-24':25}
+    assert forecasts.groupby('run_date').size().to_dict()=={'2026-03-28':29,'2026-10-24':31}

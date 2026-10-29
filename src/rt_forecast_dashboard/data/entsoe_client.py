@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
+import numpy as np
 import pandas as pd
 
 from rt_forecast_dashboard.config import load_settings
@@ -106,11 +107,13 @@ class EntsoeForecastClient:
         start = brussels_cutoff_timestamp(run_date)
         end = start + pd.Timedelta(hours=horizon_hours)
         archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)
-        if len(archive) >= horizon_hours:
-            return archive.head(horizon_hours)
+        archive = _forecast_on_grid(archive, start, horizon_hours)
+        if not archive.empty:
+            return archive
         stored = self._stored_tso_forecast(run_date=run_date, zone=zone, target=target, start=start, end=end, horizon_hours=horizon_hours)
-        if len(stored) >= horizon_hours:
-            return stored.head(horizon_hours)
+        stored = _forecast_on_grid(stored, start, horizon_hours)
+        if not stored.empty:
+            return stored
         if self.demo_mode:
             return demo_future_frame(run_date, zone, target, horizon_hours)[["timestamp", "tso_forecast_mw"]]
         if not self.api_key:
@@ -129,7 +132,7 @@ class EntsoeForecastClient:
             series = client.query_wind_and_solar_forecast(zone_code, start=start, end=end, psr_type="B18")
         else:
             raise ValueError(f"Unsupported target: {target}")
-        frame = _entsoe_response_to_hourly_frame(series, "tso_forecast_mw").head(horizon_hours)
+        frame = _forecast_on_grid(_entsoe_response_to_hourly_frame(series, "tso_forecast_mw"), start, horizon_hours)
         if len(frame) < horizon_hours:
             raise RuntimeError(f"Incomplete ENTSO-E TSO forecast horizon for {zone} {target}: {len(frame)}/{horizon_hours} hourly rows.")
         return frame
@@ -140,7 +143,7 @@ class EntsoeForecastClient:
         actual_archive = self.archive.fetch_actuals(zone=zone, target=target, start=start, end=end)
         forecast_archive = self.archive.fetch_forecast(zone=zone, target=target, start=start, end=end)
         if len(actual_archive) >= context_hours and len(forecast_archive) >= context_hours:
-            frame = actual_archive.merge(forecast_archive, on="timestamp", how="inner").sort_values("timestamp")
+            frame = actual_archive.merge(forecast_archive, on="timestamp", how="outer").sort_values("timestamp")
             frame = frame[["timestamp", "actual_mw", "tso_forecast_mw"]].tail(context_hours)
             expected_last = end - pd.Timedelta(hours=1)
             if len(frame) >= context_hours and pd.to_datetime(frame["timestamp"], utc=True).max() >= expected_last:
@@ -151,13 +154,13 @@ class EntsoeForecastClient:
         if not stored_context.empty:
             context_parts = []
             if not actual_archive.empty and not forecast_archive.empty:
-                context_parts.append(actual_archive.merge(forecast_archive, on="timestamp", how="inner"))
+                context_parts.append(actual_archive.merge(forecast_archive, on="timestamp", how="outer"))
             context_parts.append(stored_context)
             frame = pd.concat(context_parts, ignore_index=True)
             frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
             for column in ["actual_mw", "tso_forecast_mw"]:
                 frame[column] = pd.to_numeric(frame[column], errors="coerce")
-            frame = frame.dropna(subset=["actual_mw", "tso_forecast_mw"])
+            frame = frame.dropna(subset=["actual_mw"])
             frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
             frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
             if len(frame) >= context_hours:
@@ -190,7 +193,7 @@ class EntsoeForecastClient:
                                            start=start, end=end, **kwargs)
         tso_frame = _query_entsoe_hourly(forecast_query, "tso_forecast_mw", country_code=zone_code,
                                         start=start, end=end, **kwargs)
-        frame = actual_frame.merge(tso_frame, on="timestamp", how="inner")
+        frame = actual_frame.merge(tso_frame, on="timestamp", how="outer")
         return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
 
     def _stored_tso_forecast(
@@ -232,7 +235,7 @@ class EntsoeForecastClient:
         frame = frame[frame["timestamp"].between(start, end, inclusive="left")]
         for column in ["actual_mw", "tso_forecast_mw"]:
             frame[column] = pd.to_numeric(frame[column], errors="coerce")
-        frame = frame.dropna(subset=["actual_mw", "tso_forecast_mw"])
+        frame = frame.dropna(subset=["actual_mw"])
         frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
         return frame[["timestamp", "actual_mw", "tso_forecast_mw"]]
 
@@ -278,3 +281,17 @@ class EntsoeForecastClient:
             query, kwargs = client.query_generation, {"psr_type": psr_type}
         return _query_entsoe_hourly(query, "actual_mw", country_code=zone_code,
                                     start=start, end=end, **kwargs).dropna()
+
+
+def _forecast_on_grid(frame: pd.DataFrame, start: pd.Timestamp, hours: int) -> pd.DataFrame:
+    """Never accept an API calendar-day response by row count alone."""
+    if frame.empty:
+        return frame
+    frame = frame.copy()
+    frame['timestamp'] = pd.to_datetime(frame.timestamp, utc=True)
+    frame = frame.drop_duplicates('timestamp', keep='last').set_index('timestamp')
+    frame = frame.reindex(pd.date_range(start, periods=hours, freq='h', name='timestamp'))
+    values = pd.to_numeric(frame.tso_forecast_mw, errors='coerce').to_numpy(dtype=float, na_value=np.nan)
+    if not np.isfinite(values).all():
+        return frame.iloc[:0].reset_index()
+    return frame.reset_index()

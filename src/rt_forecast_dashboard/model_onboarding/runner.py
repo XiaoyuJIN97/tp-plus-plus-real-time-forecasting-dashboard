@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours, brussels_cutoff_timestamp
 import csv
 from datetime import UTC, datetime
 import json
@@ -56,8 +56,8 @@ def run(manifest_path, windows_path, output, python, policy_path, stage):
                     available = pd.Timestamp(row['inputs_available_at_utc'])
                     if origin.tzinfo is None or available.tzinfo is None or available > origin or origin != future.timestamp.min():
                         raise ValueError('Inputs must be documented as available by the forecast origin')
-                    if str(origin.tz_convert('Europe/Brussels').date()) != key[2]:
-                        raise ValueError('run_date must be the Brussels forecast-origin date')
+                    if str(origin.tz_convert('Europe/Brussels').date()) != key[2] or origin != brussels_cutoff_timestamp(pd.Timestamp(key[2]).date()):
+                        raise ValueError('Origin must be 18:00 Brussels on run_date')
                     truth = row.get('actuals', [None]*len(future))
                     if len(truth) != len(future):
                         raise ValueError('Actuals length does not match horizon')

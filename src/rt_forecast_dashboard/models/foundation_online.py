@@ -35,7 +35,7 @@ class FoundationOnlineAdapter:
         self.model = model
         self.device = os.getenv("FOUNDATION_DEVICE", device)
 
-    def predict_batch(self, contexts, covariates, horizon=24):
+    def predict_batch(self, contexts, covariates, horizon=30):
         python = os.getenv("FOUNDATION_PYTHON", str(ROOT / ".foundation-env/bin/python"))
         cache = os.getenv("FOUNDATION_CACHE", str(Path.home() / ".cache/huggingface/hub"))
         key = (python, self.model, self.device, cache)

@@ -37,6 +37,8 @@ class PersistenceAdapter:
         fallback = float(hist.tail(24).mean()) if not hist.empty else 0.0
         for ts in pd.to_datetime(features["timestamp"], utc=True):
             lookup_ts = ts - lag
+            while lookup_ts > hist.index.max():
+                lookup_ts -= lag
             values.append(float(hist.get(lookup_ts, fallback)))
         return np.maximum(np.asarray(values, dtype=float), 0.0)
 

@@ -12,6 +12,8 @@ settings:
     - 18
   - - 19
     - 24
+  - - 25
+    - 30
   selection_evidence: 90-run historical mock backtest (2025-01-01 through 2025-03-31)
     using saved Chronos2, Ridge-or-XGBoost, TimesFM3, and optional TSO forecasts
 selections:

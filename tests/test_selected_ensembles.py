@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
 
 from rt_forecast_dashboard.pipeline.build_selected_ensembles import build_selected_ensembles
 from rt_forecast_dashboard.storage import ForecastStore
 
 
 def _component_rows(run_date: str, zone: str, target: str, actual: np.ndarray) -> pd.DataFrame:
-    timestamps = pd.date_range(f"{run_date}T00:00:00Z", periods=24, freq="h")
+    timestamps = pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(run_date).date()), periods=30, freq="h")
     ml_model = "ridge_3mo_context" if target == "load" else "xgboost_online"
     offsets = {
         "chronos2_online": 10.0,
@@ -48,9 +49,9 @@ def test_build_selected_ensembles_uses_offline_selected_configuration(tmp_path) 
     run_dates = pd.date_range("2026-01-01", periods=22, freq="D")
     for day in run_dates:
         run_date = day.date().isoformat()
-        actual = np.linspace(100.0, 200.0, 24)
+        actual = np.linspace(100.0, 200.0, 30)
         store.append_forecasts(_component_rows(run_date, "BE", "load", actual), run_date)
-        timestamps = pd.date_range(f"{run_date}T00:00:00Z", periods=24, freq="h")
+        timestamps = pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(run_date).date()), periods=30, freq="h")
         actual_parts.append(
             pd.DataFrame(
                 {
@@ -71,22 +72,22 @@ def test_build_selected_ensembles_uses_offline_selected_configuration(tmp_path) 
         run_dates=[run_dates[-1].date().isoformat()],
     )
 
-    assert len(result) == 24
+    assert len(result) == 30
     assert result["model"].unique().tolist() == ["ensemble_selected"]
     assert result["model_label"].unique().tolist() == ["Ensembled model"]
     assert "TSO" not in result["covariate_case"].iloc[0].split(";", 1)[0]
     assert result["covariate_case"].nunique() == 1
     assert result["ensemble_weights"].str.len().gt(0).all()
     stored = store.read_forecasts()
-    assert len(stored[stored["model"].eq("ensemble_selected")]) == 24
+    assert len(stored[stored["model"].eq("ensemble_selected")]) == 30
 
 
 def test_simple_mean_selected_configuration(tmp_path) -> None:
     store = ForecastStore(data_dir=tmp_path / "forecast-data")
     run_date = "2026-01-22"
-    actual = np.linspace(100.0, 200.0, 24)
+    actual = np.linspace(100.0, 200.0, 30)
     store.append_forecasts(_component_rows(run_date, "DE", "wind_offshore", actual), run_date)
-    timestamps = pd.date_range(f"{run_date}T00:00:00Z", periods=24, freq="h")
+    timestamps = pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(run_date).date()), periods=30, freq="h")
     actuals_path = tmp_path / "actuals.parquet"
     pd.DataFrame(
         {
@@ -105,18 +106,18 @@ def test_simple_mean_selected_configuration(tmp_path) -> None:
         source="historical_mock_ensemble",
     )
 
-    assert len(result) == 24
+    assert len(result) == 30
     assert result["model_label"].unique().tolist() == ["Ensembled model"]
     assert result["source"].unique().tolist() == ["historical_mock_ensemble"]
     np.testing.assert_allclose(result["forecast_mw"], actual + (10.0 - 5.0 + 2.0) / 3.0)
 
 
-def test_constrained_ensemble_uses_offline_weights_before_training_minimum(tmp_path) -> None:
+def test_old_offline_weights_without_evening_bucket_use_equal_weight_warmup(tmp_path) -> None:
     store = ForecastStore(data_dir=tmp_path / "forecast-data")
     run_date = "2026-10-02"
-    actual = np.linspace(100.0, 200.0, 24)
+    actual = np.linspace(100.0, 200.0, 30)
     store.append_forecasts(_component_rows(run_date, "DK2", "load", actual), run_date)
-    timestamps = pd.date_range(f"{run_date}T00:00:00Z", periods=24, freq="h")
+    timestamps = pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(run_date).date()), periods=30, freq="h")
     actuals_path = tmp_path / "actuals.parquet"
     pd.DataFrame(
         {
@@ -129,26 +130,26 @@ def test_constrained_ensemble_uses_offline_weights_before_training_minimum(tmp_p
 
     result = build_selected_ensembles(store, actuals_path=actuals_path, run_dates=[run_date])
 
-    assert len(result) == 24
-    assert result["covariate_case"].str.startswith("offline_weight_fallback:").all()
+    assert len(result) == 30
+    assert result["covariate_case"].str.startswith("equal_weight_warmup:").all()
     assert result["ensemble_weights"].str.len().gt(0).all()
 
 
 def test_history_repair_preserves_saved_ensembles_but_refreshes_recent_dates(tmp_path) -> None:
     store = ForecastStore(data_dir=tmp_path / "data")
     day = "2026-07-24"
-    actual = np.linspace(100.0, 200.0, 24)
+    actual = np.linspace(100.0, 200.0, 30)
     store.append_forecasts(_component_rows(day, "DE", "wind_offshore", actual), day)
     path = tmp_path / "actuals.parquet"
-    pd.DataFrame({"timestamp_utc": pd.date_range(day, periods=24, freq="h", tz="UTC"),
+    pd.DataFrame({"timestamp_utc": pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(day).date()), periods=30, freq="h"),
                   "zone": "DE", "target": "wind_offshore", "actual_mw": actual}).to_parquet(path)
     first = build_selected_ensembles(store, actuals_path=path, run_dates=[day])
-    assert len(first) == 24
+    assert len(first) == 30
     assert build_selected_ensembles(store, actuals_path=path, run_dates=[day], only_missing=True).empty
     refreshed = build_selected_ensembles(store, actuals_path=path, run_dates=[day],
                                           only_missing=True, refresh_dates={day})
-    assert len(refreshed) == 24
-    assert len(store.read_forecasts().query("model == 'ensemble_selected'")) == 24
+    assert len(refreshed) == 30
+    assert len(store.read_forecasts().query("model == 'ensemble_selected'")) == 30
 
 
 def _add_model(frame, model, offset):
@@ -160,7 +161,7 @@ def _add_model(frame, model, offset):
 
 def _actual_file(tmp_path, day, actual):
     path = tmp_path / 'actuals.parquet'
-    pd.DataFrame({'timestamp_utc': pd.date_range(day, periods=24, freq='h', tz='UTC'),
+    pd.DataFrame({'timestamp_utc': pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(day).date()), periods=30, freq='h'),
                   'zone': 'DE', 'target': 'wind_offshore', 'actual_mw': actual}).to_parquet(path)
     return path
 
@@ -168,7 +169,7 @@ def _actual_file(tmp_path, day, actual):
 def test_new_foundation_models_change_mean_and_invalidate_saved_membership(tmp_path):
     store = ForecastStore(data_dir=tmp_path / 'data')
     day = '2026-07-24'
-    actual = np.linspace(100., 200., 24)
+    actual = np.linspace(100., 200., 30)
     frame = _component_rows(day, 'DE', 'wind_offshore', actual)
     path = _actual_file(tmp_path, day, actual)
     store.append_forecasts(frame, day)
@@ -176,7 +177,7 @@ def test_new_foundation_models_change_mean_and_invalidate_saved_membership(tmp_p
     expanded = _add_model(_add_model(frame, 't0_gamma_online', 20), 'timestral_online', 40)
     store.append_forecasts(expanded, day)
     result = build_selected_ensembles(store, actuals_path=path, run_dates=[day], only_missing=True)
-    assert len(result) == 24
+    assert len(result) == 30
     np.testing.assert_allclose(result.forecast_mw, actual + (10-5+2+22+42)/5)
     assert not np.allclose(result.forecast_mw, original.forecast_mw)
     assert result.ensemble_components.str.contains('t0_gamma_online').all()
@@ -192,7 +193,7 @@ def test_future_registry_model_is_included_without_code_change(tmp_path, monkeyp
     registry['load_only_model'] = dict(enabled=True, label='Load only', targets=['load'])
     monkeypatch.setattr(module, 'model_registry', lambda: registry)
     day = '2026-07-24'
-    actual = np.linspace(100., 200., 24)
+    actual = np.linspace(100., 200., 30)
     frame = _add_model(_component_rows(day, 'DE', 'wind_offshore', actual), 'future_model', 30)
     # Excluded and disabled models must not sneak into membership.
     frame = _add_model(frame, 'tabpfn_online', 1e6)
@@ -209,7 +210,7 @@ def test_future_registry_model_is_included_without_code_change(tmp_path, monkeyp
 
 def test_incomplete_new_component_is_omitted(tmp_path):
     day = '2026-07-24'
-    actual = np.linspace(100., 200., 24)
+    actual = np.linspace(100., 200., 30)
     frame = _add_model(_component_rows(day, 'DE', 'wind_offshore', actual), 't0_gamma_online', 20)
     frame.loc[frame.model.eq('t0_gamma_online') & (frame.index == frame.index.max()), 'forecast_mw'] = np.inf
     store = ForecastStore(data_dir=tmp_path / 'data')
@@ -221,16 +222,16 @@ def test_incomplete_new_component_is_omitted(tmp_path):
 
 def test_expanded_learned_weights_use_prior_history_and_all_five_models(tmp_path):
     store = ForecastStore(data_dir=tmp_path / 'data')
-    actual = np.linspace(100., 200., 24)
+    actual = np.linspace(100., 200., 30)
     outcomes = []
-    days = pd.date_range('2026-07-24', periods=22)
+    days = pd.date_range('2026-07-24', periods=23)
     for date in days:
         day = str(date.date())
         frame = _component_rows(day, 'BE', 'load', actual)
         frame = _add_model(_add_model(frame, 't0_gamma_online', -2), 'timestral_online', -3)
-        frame['actual_mw'] = np.tile(actual, len(frame)//24)
+        frame['actual_mw'] = np.tile(actual, len(frame)//30)
         store.append_forecasts(frame, day)
-        outcomes.append(pd.DataFrame({'timestamp_utc': pd.date_range(day, periods=24, freq='h', tz='UTC'),
+        outcomes.append(pd.DataFrame({'timestamp_utc': pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(day).date()), periods=30, freq='h'),
                                      'zone': 'BE', 'target': 'load', 'actual_mw': actual}))
     path = tmp_path / 'actuals.parquet'
     pd.concat(outcomes).to_parquet(path)

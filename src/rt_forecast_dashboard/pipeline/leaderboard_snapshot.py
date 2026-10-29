@@ -30,7 +30,8 @@ def build_daily_leaderboard(store: ForecastStore, forecasts: pd.DataFrame,
         status = json.loads(status_path.read_text())
         if (status.get("snapshot_date") == day
                 and status.get("actuals_through_utc") == actuals_through
-                and status.get("actual_rows") == actual_rows):
+                and status.get("actual_rows") == actual_rows
+                and status.get("forecast_window") == "next_day_midnight_v1"):
             return pd.read_parquet(path)
     if not {"timestamp", "run_date", "model", "target", "zone", "forecast_mw"}.issubset(forecasts.columns):
         return pd.DataFrame()
@@ -48,7 +49,7 @@ def build_daily_leaderboard(store: ForecastStore, forecasts: pd.DataFrame,
     temporary = path.with_suffix(".parquet.tmp")
     detail.to_parquet(temporary, index=False)
     temporary.replace(path)
-    status = {"snapshot_date": day, "generated_at_utc": now.isoformat(),
+    status = {"forecast_window": "next_day_midnight_v1", "snapshot_date": day, "generated_at_utc": now.isoformat(),
               "first_run_date": str(frame.run_date.min()),
               "latest_run_date": str(frame.run_date.max()),
               "actuals_through_utc": actuals_through, "actual_rows": actual_rows}

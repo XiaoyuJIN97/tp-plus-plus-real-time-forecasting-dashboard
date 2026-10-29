@@ -9,7 +9,7 @@ from rt_forecast_dashboard.data.entsoe_client import EntsoeForecastClient
 from rt_forecast_dashboard.models.registry import enabled_models_for_target
 from rt_forecast_dashboard.pipeline import run_daily as daily
 from rt_forecast_dashboard.storage import ForecastStore
-from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, forecast_horizon_hours
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
     def cached_fetch(self, *, run_date, zone_code, target, context_hours):
         key = (zone_code, target)
         if key not in cache:
-            broad_hours = context_hours + (args.end - args.start).days * 24
+            broad_hours = context_hours + int((brussels_cutoff_timestamp(args.end) - brussels_cutoff_timestamp(args.start)) / pd.Timedelta(hours=1))
             cache[key] = original_fetch(self, run_date=args.end, zone_code=zone_code,
                                         target=target, context_hours=broad_hours)
         cutoff = brussels_cutoff_timestamp(run_date)
@@ -56,7 +56,7 @@ def main():
                 part = saved[saved.zone.eq(zone) & saved.target.eq(target)].copy()
                 part['timestamp'] = pd.to_datetime(part.timestamp, utc=True)
                 cutoff = brussels_cutoff_timestamp(run_date)
-                expected = set(pd.date_range(cutoff, periods=24, freq='h'))
+                expected = set(pd.date_range(cutoff, periods=forecast_horizon_hours(run_date), freq='h'))
                 for model, group in part.groupby('model'):
                     if set(group.timestamp) == expected and group.forecast_mw.notna().all():
                         complete.add(model)
@@ -75,7 +75,7 @@ def main():
                 report.append(dict(run_date=str(run_date), zone=zone, model=model, hours=count))
             # Preserve a result before proceeding to the next date.
             pd.DataFrame(report).to_csv(store.data_dir / 'backfill/offshore_recovery.csv', index=False)
-    failed = [row for row in report if row['hours'] != 24]
+    failed = [row for row in report if row['hours'] != forecast_horizon_hours(row['run_date'])]
     if failed:
         raise RuntimeError(f'{len(failed)} offshore model windows remain incomplete: {failed}')
     print('Recovered', len(report), 'model windows', flush=True)
