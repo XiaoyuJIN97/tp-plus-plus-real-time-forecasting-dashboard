@@ -123,6 +123,19 @@ def test_forecast_chart_uses_market_timezone_label_and_reserves_footer_space() -
     assert figure.layout.xaxis.automargin is True
 
 
+def test_long_forecast_chart_renders_without_webgl() -> None:
+    frame = pd.DataFrame({
+        'timestamp': pd.date_range('2026-10-01', periods=1200, freq='h', tz='UTC'),
+        'run_date': '2026-09-30',
+        'zone': 'BE',
+        'model_label': 'Test model',
+        'forecast_mw': 100.0,
+    })
+    figure = deterministic_forecast_chart(frame, 'Load forecast')
+    assert all(trace.type == 'scatter' for trace in figure.data)
+    assert sum(len(trace.x) for trace in figure.data) == len(frame)
+
+
 def test_win_rate_is_reported_per_zone_with_half_credit_for_ties() -> None:
     rows = []
     errors = {

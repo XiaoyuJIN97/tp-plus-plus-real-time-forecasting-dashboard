@@ -93,6 +93,7 @@ def forecast_line_chart(frame: pd.DataFrame) -> go.Figure:
         line_dash="target",
         line_group="line_id",
         facet_row="target",
+        render_mode="svg",
         labels={"forecast_mw": "Forecast (MW)", "delivery_time_brussels": "Delivery time (CET/CEST)", "model_label": "Model"},
         height=680,
     )
@@ -157,6 +158,7 @@ def deterministic_forecast_chart(frame: pd.DataFrame, title: str) -> go.Figure:
         color="series",
         line_group="line_id",
         facet_row="zone",
+        render_mode="svg",
         labels={"value": "MW", "delivery_time_brussels": "Delivery time (CET/CEST)", "series": "Model"},
         title=title,
         height=max(500, 280 * max(1, plot_long["zone"].nunique())),
