@@ -149,3 +149,14 @@ def test_overlapping_plot_hours_prefer_latest_origin_even_if_old_run_was_replaye
     assert times.is_unique and times.is_monotonic_increasing and len(times)==55
     newer=brussels_cutoff_timestamp(pd.Timestamp('2026-10-25').date())
     assert np.all(np.asarray(trace.y)[times>=newer]==2.)
+
+
+def test_replay_comparison_rejects_old_24_hour_or_misaligned_baselines():
+    from scripts.report_foundation_online import matched_complete_windows
+    day='2026-07-24';origin=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+    frame=pd.DataFrame(dict(run_date=day,zone='BE',target='load',
+        timestamp=pd.date_range(origin,periods=30,freq='h'),context_end=origin-pd.Timedelta(hours=1),
+        context_end_baseline=origin-pd.Timedelta(hours=1)))
+    assert len(matched_complete_windows(frame))==30
+    assert matched_complete_windows(frame.iloc[:24]).empty
+    assert matched_complete_windows(frame.assign(context_end_baseline=origin)).empty

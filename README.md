@@ -2,7 +2,7 @@
 
 Daily online forecasting dashboard for load, solar, and wind in the BE, FR, DE, DK1, DK2, ES, and PT bidding zones.
 
-The first online version runs once per day after the daily 18:00 Europe/Brussels ENTSO-E Transparency Platform publication point. The dashboard workflow is triggered around 18:30 Europe/Brussels, after the realtime data collector has had time to snapshot and push the latest TSO forecasts; under normal conditions the new dashboard results should be visible before about 19:00. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
+The first online version runs once per day after the daily 18:00 Europe/Brussels ENTSO-E Transparency Platform publication point. The dashboard workflow is triggered around 18:30 Europe/Brussels, after the realtime data collector has had time to snapshot and push the latest TSO forecasts; publication time depends on GitHub scheduling, upstream availability and model runtime. It fetches the latest TSO forecasts and Open-Meteo weather forecasts, builds the agreed feature sets from the latest 3-month context window, runs configured ML/TSFM models, stores the forecasts, and visualizes forecast tracking in Streamlit.
 
 ## What Is Included
 
