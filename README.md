@@ -51,8 +51,13 @@ Dashboard visits never launch forecasting jobs. The scheduled pipeline publishes
 `forecast_catalog.parquet` and `probabilistic_leaderboard.parquet` alongside the
 forecast/interval files. Pages read these compact snapshots, load only the
 selected zone and task, and render only the selected point/probabilistic view.
-Observed outcomes come from the committed refresh results; page visits no longer
-wait for a collector HTTP request. A sleeping host can still have cold-start
+Observed outcomes and derived scores refresh hourly in the background via
+`refresh-results.yml` (scheduled at :15 each hour, subject to collector
+availability and GitHub delays). This updates actuals, point-score tables,
+probabilistic intervals and their coverage/width table without rerunning models
+or refitting ensemble forecasts. Forecast inference and ensemble generation stay
+in the daily workflow. Page visits no longer wait for a collector HTTP request.
+A sleeping host can still have cold-start
 overhead, independently of forecast scheduling.
 
 ## Credentials

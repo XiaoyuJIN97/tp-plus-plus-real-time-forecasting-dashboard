@@ -80,3 +80,4 @@ def test_realized_outcomes_survive_collector_history_retention(tmp_path) -> None
                   "target": ["load"], "actual_mw": [200.0]}).to_parquet(actuals_path)
     path, _ = build_dashboard_forecasts(store, actuals_path=actuals_path)
     assert pd.read_parquet(path).actual_mw.tolist() == [100.0]
+    assert store.read_forecasts().forecast_mw.tolist() == [90.0]
