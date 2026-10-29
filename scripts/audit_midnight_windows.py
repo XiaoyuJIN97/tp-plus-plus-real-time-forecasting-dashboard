@@ -30,7 +30,8 @@ def audit(source, inputs, output, start, end):
                 parts.append(f.set_index('timestamp').value)
             s=pd.concat(parts) if parts else pd.Series(dtype=float)
             series[field]=s[~s.index.duplicated(keep='last')].sort_index()
-        w=pd.read_csv(inputs/'weather/data/raw'/zone/TARGET_MAP[target]/'2026.csv')
+        weather_files=sorted((inputs/'weather/data/raw'/zone/TARGET_MAP[target]).glob('*.csv'))
+        w=pd.concat([pd.read_csv(p) for p in weather_files],ignore_index=True) if weather_files else pd.DataFrame(columns=['timestamp_utc'])
         w['timestamp']=pd.to_datetime(w.timestamp_utc,utc=True);w=w.drop_duplicates('timestamp',keep='last').set_index('timestamp')
         for day in sorted(scope.run_date):
             origin=brussels_cutoff_timestamp(pd.Timestamp(day).date());h=forecast_horizon_hours(day)

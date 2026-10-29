@@ -24,7 +24,7 @@ from rt_forecast_dashboard.model_onboarding.contracts import staging_path
 from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp,forecast_horizon_hours
 
 
-def prepare_scope(inputs,zone,target,days):
+def _prepare_scope(inputs,zone,target,days):
     inputs=Path(inputs);series={}
     for field,mapping in [('actual_mw',ACTUAL_VARIABLES),('tso_forecast_mw',FORECAST_VARIABLES)]:
         frames=[pd.read_parquet(p) for p in sorted((inputs/'entsoe/data/hourly'/zone/mapping[target]).glob('*.parquet'))]
@@ -52,6 +52,14 @@ def prepare_scope(inputs,zone,target,days):
         except Exception as exc:
             issues.append(dict(zone=zone,target=target,run_date=day,stage='prepare',error=str(exc)))
     return prepared,issues
+
+
+def prepare_scope(inputs,zone,target,days):
+    days=list(days)
+    try:
+        return _prepare_scope(inputs,zone,target,days)
+    except Exception as exc:
+        return {},[dict(zone=zone,target=target,run_date=day,stage='prepare',error=str(exc)) for day in days]
 
 
 def predict_batch(adapter,key,target,covs,chunk):
@@ -117,7 +125,8 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
                         for day,pred in zip(dates,predictions,strict=True):
                             context,future,quality,truth=prepared[day]
                             frame=pd.DataFrame(dict(run_date=day,run_at=datetime.now(UTC).isoformat(),source='historical_mock_replay',
-                                forecast_window='next_day_midnight_v1',input_vintage='retrospective_archived_revisions',zone=zone,target=target,
+                                forecast_window='next_day_midnight_v1',input_vintage='retrospective_archived_revisions',
+                                inference_device=getattr(adapter,'device',getattr(adapter,'device_map','cpu')),zone=zone,target=target,
                                 model=key,model_label=cfg.get('label',key),covariate_case=case,context_hours=2208,
                                 timestamp=future.timestamp,forecast_mw=pred,tso_forecast_mw=future.tso_forecast_mw,
                                 actual_mw=truth,context_start=context.timestamp.min(),context_end=context.timestamp.max(),

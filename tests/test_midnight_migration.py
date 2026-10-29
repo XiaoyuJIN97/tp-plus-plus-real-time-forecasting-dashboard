@@ -82,3 +82,70 @@ def test_assembler_preserves_legacy_groups_but_reports_them_unmigrated(tmp_path)
     staged.append_forecasts(bad,day)
     with pytest.raises(ValueError,match='Invalid replay group'):
         assemble(source.data_dir,[staged.data_dir],tmp_path/'rejected',day,day)
+
+
+def test_interrupted_forecast_write_preserves_previous_complete_file(tmp_path,monkeypatch):
+    from rt_forecast_dashboard.storage import ForecastStore
+    store=ForecastStore(tmp_path/'data');day='2026-07-24'
+    original=pd.DataFrame(dict(run_date=[day],zone=['BE'],target=['load'],model=['t0_gamma_online'],
+                               timestamp=['2026-07-24T16:00Z'],run_at=['2026-07-24T16:30Z'],forecast_mw=[100.]))
+    store.append_forecasts(original,day)
+    before=store.forecast_path(day).read_bytes()
+    def interrupted(self,path,**kwargs):
+        from pathlib import Path
+        Path(path).write_text('incomplete write')
+        raise OSError('Interrupted output')
+    monkeypatch.setattr(pd.DataFrame,'to_csv',interrupted)
+    with pytest.raises(OSError,match='Interrupted'):
+        store.append_forecasts(original.assign(forecast_mw=200.),day)
+    assert store.forecast_path(day).read_bytes()==before
+
+
+def test_missing_scope_inputs_are_reported_without_crashing_other_replay_scopes(tmp_path):
+    prepared,issues=prepare_scope(tmp_path,'BE','load',['2026-07-24','2026-07-25'])
+    assert not prepared and len(issues)==2
+    assert all(row['stage']=='prepare' for row in issues)
+
+
+def test_weather_failure_is_requested_once_and_preserves_weather_independent_models(tmp_path,monkeypatch):
+    from rt_forecast_dashboard.pipeline import run_daily as daily
+    from rt_forecast_dashboard.data.demo import demo_context_frame,demo_future_frame
+    from rt_forecast_dashboard.models.adapters import TsoReferenceAdapter
+    from rt_forecast_dashboard.storage import ForecastStore
+    from datetime import date
+    day=date(2026,7,24);calls=[]
+    class Power:
+        def fetch_tso_forecast(self,**kwargs):
+            return demo_future_frame(day,'BE','load',kwargs['horizon_hours'])[['timestamp','tso_forecast_mw']]
+        def fetch_actual_context(self,**kwargs):
+            return demo_context_frame(day,'BE','load',kwargs['context_hours'])[['timestamp','actual_mw','tso_forecast_mw']]
+    class BrokenWeather:
+        def fetch_future_weather(self,**kwargs):
+            calls.append('weather');raise RuntimeError('Incomplete forecast weather')
+    monkeypatch.setattr(daily,'EntsoeForecastClient',Power)
+    monkeypatch.setattr(daily,'OpenMeteoClient',BrokenWeather)
+    monkeypatch.setattr(daily,'ForecastStore',lambda:ForecastStore(tmp_path/'data'))
+    monkeypatch.setattr(daily,'zones',lambda:{'BE':{'entsoe_code':'BE','targets':['load']}})
+    monkeypatch.setattr(daily,'selected_weather_points',lambda *args:[])
+    monkeypatch.setattr(daily,'covariates_for',lambda t,z,k:('tso',[]) if k=='tso_reference' else ('weather',['missing_weather']))
+    monkeypatch.setattr(daily,'iter_model_adapters',lambda t:[(k,{'targets':['load']},TsoReferenceAdapter())
+        for k in ['tso_reference','t0_gamma_online','timestral_online']])
+    result=daily.run_daily_forecast(day)
+    assert set(result.model)=={'tso_reference'} and len(result)==30
+    assert calls==['weather']
+
+
+def test_overlapping_plot_hours_prefer_latest_origin_even_if_old_run_was_replayed_later():
+    from rt_forecast_dashboard.ui.charts import deterministic_forecast_chart
+    parts=[]
+    for day,value,generated in [('2026-10-24',1.,'2026-11-02'),('2026-10-25',2.,'2026-11-01')]:
+        origin=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+        parts.append(pd.DataFrame(dict(run_date=day,run_at=generated,zone='BE',target='load',
+            model='t0_gamma_online',model_label='T0 Gamma',forecast_mw=value,
+            timestamp=pd.date_range(origin,periods=forecast_horizon_hours(day),freq='h'))))
+    figure=deterministic_forecast_chart(pd.concat(parts,ignore_index=True),'DST overlap')
+    trace=next(t for t in figure.data if t.name=='T0 Gamma')
+    times=pd.DatetimeIndex(pd.to_datetime(trace.x,utc=True))
+    assert times.is_unique and times.is_monotonic_increasing and len(times)==55
+    newer=brussels_cutoff_timestamp(pd.Timestamp('2026-10-25').date())
+    assert np.all(np.asarray(trace.y)[times>=newer]==2.)

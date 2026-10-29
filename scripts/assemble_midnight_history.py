@@ -33,6 +33,9 @@ def assemble(source,inputs,output,start,end):
     replay=replay[replay.run_date.between(start,end)].copy()
     replay.timestamp=pd.to_datetime(replay.timestamp,utc=True)
     replay.run_at=pd.to_datetime(replay.run_at,utc=True)
+    if 'inference_device' not in replay:
+        replay['inference_device']='cpu'
+    replay['inference_device']=replay.inference_device.fillna('cpu')
     replay=replay.sort_values('run_at').drop_duplicates(KEYS+['timestamp'],keep='last')
     registry=model_registry();enabled=zones()
     for key,f in replay.groupby(KEYS):

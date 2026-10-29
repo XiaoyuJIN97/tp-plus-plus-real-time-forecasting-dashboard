@@ -23,3 +23,6 @@ models/*.pickle
 .onboarding-host/
 .model-envs/
 staging/
+
+# Interrupted atomic forecast writes
+*.csv.tmp

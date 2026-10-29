@@ -115,6 +115,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                 feature_frame = build_feature_frame(tso, tso[["timestamp"]]).head(horizon)
                 context_frame = build_feature_frame(actual_context, actual_context[["timestamp"]]).dropna(subset=["actual_mw"]).tail(context_hours)
                 weather_loaded = False
+                weather_error = None
 
                 def ensure_weather_features() -> None:
                     nonlocal feature_frame, context_frame, weather_loaded
@@ -155,7 +156,13 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                         covariate_case, covariates = covariates_for(target, zone, model_key)
                         missing_covariates = [column for column in covariates if column not in feature_frame.columns or column not in context_frame.columns]
                         if missing_covariates:
-                            ensure_weather_features()
+                            if weather_error is not None:
+                                raise weather_error
+                            try:
+                                ensure_weather_features()
+                            except Exception as exc:
+                                weather_error = exc
+                                raise
                         forecast = np.asarray(adapter.predict(feature_frame, target, context=context_frame, covariates=covariates), dtype=float)
                         if forecast.shape != (horizon,) or not np.isfinite(forecast).all():
                             raise ValueError(f'Expected {horizon} finite predictions through next-day midnight')
