@@ -212,7 +212,8 @@ def _render_target_section(target: str, prepared: pd.DataFrame | None, countries
     control_cols = st.columns([1.0, 1.0])
     selected_zone = control_cols[0].selectbox("Displayed zone", available_zones, key=f"{target}_displayed_zone")
     if current is None:
-        current = _prepared_forecast_series(_data_version(ForecastStore()),target,selected_zone)
+        with st.spinner('Loading forecasts for the selected zone and task…'):
+            current = _prepared_forecast_series(_data_version(ForecastStore()),target,selected_zone)
         if current.empty:
             st.info('No valid published forecasts are available for this zone and task.')
             return

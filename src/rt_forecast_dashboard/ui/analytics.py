@@ -499,7 +499,8 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
         for target in config.get("targets", [])
     }
     if enabled_pairs and {"model", "target"}.issubset(frame.columns):
-        frame = frame[frame[["model", "target"]].apply(tuple, axis=1).isin(enabled_pairs)].copy()
+        pairs = pd.MultiIndex.from_frame(frame[['model','target']])
+        frame = frame[pairs.isin(enabled_pairs)].copy()
     frame = frame[frame["context_hours"].eq(ONLINE_CONTEXT_HOURS)].copy()
     if frame.empty:
         return frame
@@ -521,7 +522,8 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     }
     offsets = (frame["timestamp"] - frame["run_date"].map(cutoffs)) / pd.Timedelta(hours=1)
     frame["horizon"] = offsets
-    expected_hours = frame["run_date"].map(forecast_horizon_hours)
+    horizons = {day:forecast_horizon_hours(day) for day in cutoffs}
+    expected_hours = frame["run_date"].map(horizons)
     correct_grid = offsets.ge(0) & offsets.lt(expected_hours) & offsets.mod(1).eq(0)
     correct_grid &= np.isfinite(pd.to_numeric(frame["forecast_mw"], errors="coerce"))
     valid_groups = correct_grid.groupby([frame[column] for column in group_cols]).transform("all")
@@ -531,7 +533,7 @@ def valid_online_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
         .nunique()
         .reset_index(name="horizon_count")
     )
-    complete = complete[complete["horizon_count"].eq(complete["run_date"].map(forecast_horizon_hours))]
+    complete = complete[complete["horizon_count"].eq(complete["run_date"].map(horizons))]
     if complete.empty:
         return frame.iloc[0:0].copy()
     return frame.merge(complete[group_cols], on=group_cols, how="inner")
