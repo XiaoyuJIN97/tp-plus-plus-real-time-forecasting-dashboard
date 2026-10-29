@@ -5,6 +5,7 @@ identical elapsed length are batched. Outputs stay outside production data.
 """
 from __future__ import annotations
 import argparse
+from functools import lru_cache
 from datetime import datetime,UTC
 from pathlib import Path
 import time
@@ -102,9 +103,10 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
     plan=original[original.run_date.between(start,end)][['run_date','zone','target','model']].drop_duplicates()
     registry=model_registry();enabled=zones();store=ForecastStore(output);audit=[];issues=[]
     adapters={};started=time.monotonic()
+    completion_for=lru_cache(maxsize=None)(complete_forecast_groups)
     for (zone,target),scope in plan.groupby(['zone','target'],sort=True):
         if zone not in enabled or target not in enabled[zone]['targets'] or (selected_scopes and (zone,target) not in selected_scopes):continue
-        completed={day:complete_forecast_groups(store.forecast_path(day)) for day in scope.run_date.unique()}
+        completed={day:completion_for(store.forecast_path(day)) for day in scope.run_date.unique()}
         pending_days=sorted({r.run_date for r in scope.itertuples() if r.model in registry
             and registry[r.model].get('enabled') and not registry[r.model].get('pipeline_generated')
             and r.model!='tabpfn_online' and (not models or r.model in models)

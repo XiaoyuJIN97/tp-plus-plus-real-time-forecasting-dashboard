@@ -1,0 +1,411 @@
+{
+  "frozen_at_utc": "2026-10-29T11:09:12.841752+00:00",
+  "provenance": "Retrospective collector/PSSD snapshots, retained observations and gap recovery; not as-issued vintages",
+  "files": [
+    {
+      "path": "entsoe/data/hourly/BE/actual_load/2026.parquet",
+      "bytes": 74359,
+      "sha256": "a3ea29d000b86bcdd035dda9dc65822e0ec2888ffeb9e87036feed66c037aebf"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/actual_offshore_wind_generation/2026.parquet",
+      "bytes": 72942,
+      "sha256": "7fc9a0c90ba509087af38bf4382d386077da46ef0cb3f55851729b27dd7b91a0"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 85451,
+      "sha256": "250cc34285df3273ae2418fadb2e05c9fbd619fdcf3ae512f296d678045b4b62"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/actual_solar_generation/2026.parquet",
+      "bytes": 64129,
+      "sha256": "52b5ab010715d54595d987bbf0e3b1b9fc29e9e2368f580295a82a9df26c76cf"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/forecast_load/2026.parquet",
+      "bytes": 74849,
+      "sha256": "f2132531e236076e0be36326347310d916e69356494587d4decbaeb2220334f9"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/forecast_offshore_wind_generation/2026.parquet",
+      "bytes": 69327,
+      "sha256": "9665eb97297ea30060d442d3d927247daa32a8ccb369b9eddad898aa18742566"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 69142,
+      "sha256": "c053183dcca337aa6491dcb2f5fd7df1730b1fdcded2a1aaa5ab65be7d2810e8"
+    },
+    {
+      "path": "entsoe/data/hourly/BE/forecast_solar_generation/2026.parquet",
+      "bytes": 68862,
+      "sha256": "33b1d0ebcb5adb43fab825c54af4468c035dbf6b6c983f85279c093469d5d0a0"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/actual_load/2026.parquet",
+      "bytes": 85410,
+      "sha256": "b4531cdee9382b49be0d98044eb156eebd63a5e7d5c5f230c14d8ea8f76541ff"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/actual_offshore_wind_generation/2026.parquet",
+      "bytes": 77709,
+      "sha256": "026a8bd2129808bfb99b10be6a8820da2aee6d10468c65858710d8131eb3a172"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 85451,
+      "sha256": "0e2fc79c9a97bddf242e8de7376d57f16e6df204790e3a8160ba08e8acf96aef"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/actual_solar_generation/2026.parquet",
+      "bytes": 73294,
+      "sha256": "09c6108823846e9cd479d9fee9d0fee2ea38aeda56f810e69266ef217975972b"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/forecast_load/2026.parquet",
+      "bytes": 86120,
+      "sha256": "96d65885b1ecfb93a03a62ad845e7ddf1fea54e5cc78e9e511d9f06d1c339078"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/forecast_offshore_wind_generation/2026.parquet",
+      "bytes": 75222,
+      "sha256": "496e74a73b21cdeeb59fe268f3950298c993c89abc3d4ca4cfb035e86bbb147c"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 85252,
+      "sha256": "a5b979c8c452c534cafc07a61e1412a2528c303fd2a9e751c44e64cbdf5d8a82"
+    },
+    {
+      "path": "entsoe/data/hourly/DE/forecast_solar_generation/2026.parquet",
+      "bytes": 71206,
+      "sha256": "3c3242f324b816c038d660975e67b1eeb433736b52ea6e0a3939bb3fba6f6754"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/actual_load/2026.parquet",
+      "bytes": 72527,
+      "sha256": "293083fe6dc0ec35c5b70a2beb21cbb802fc59b4079589782c11afef9ed1dec0"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/actual_offshore_wind_generation/2026.parquet",
+      "bytes": 77161,
+      "sha256": "fe3fcdb00ca57b6bc7a8a29c2c8b63114b749780183157cdcb85100fad27a820"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 76521,
+      "sha256": "60fbec255ce994c7960be9a645368ab33f1b71b11319cb6fd1b68ccf27b08cc7"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/actual_solar_generation/2026.parquet",
+      "bytes": 79070,
+      "sha256": "b85c6e9305fe50a0803284161f5b78c63a4143248eb514cdc8477d199d77c164"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/forecast_load/2026.parquet",
+      "bytes": 58569,
+      "sha256": "c5a97b867bd8405230ca4b559bbd3f3940b4190d731af4bdea8e191d812a701a"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/forecast_offshore_wind_generation/2026.parquet",
+      "bytes": 68525,
+      "sha256": "8227e5f443c3e7c5fb73273579f86438ecf224121e65a8b9e5dad889c22d5879"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 70751,
+      "sha256": "5adcfd3e62c3daf821471400b658cbeb06f7201cd011d4c41377f8e7c0a2c4e0"
+    },
+    {
+      "path": "entsoe/data/hourly/DK1/forecast_solar_generation/2026.parquet",
+      "bytes": 69716,
+      "sha256": "f18fc058df5ae3def9be290b5c2a21bdfe18555395423887d966d69dccc643ee"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/actual_load/2026.parquet",
+      "bytes": 72086,
+      "sha256": "0c3225cb7b416f587369249d0699b9ed8ff76f459d2fcd1b4d479410fed74abc"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/actual_offshore_wind_generation/2026.parquet",
+      "bytes": 77562,
+      "sha256": "cb13067a07506425a1826e8cf4b74bc1fe55fa8f072a7950cb0075056cee012e"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 77863,
+      "sha256": "1f425c31eb566545dfcadbbe5e48da522fd88a6fdb56ba3e9c047475966ba87c"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/actual_solar_generation/2026.parquet",
+      "bytes": 76282,
+      "sha256": "6a5772baa0e313b988df0dc738532af1bb5b9e19e76dea251f6f80509a4d3420"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/forecast_load/2026.parquet",
+      "bytes": 55105,
+      "sha256": "ad585fafa1fdfce48abf0936e0586998c39fa12d6b8da070f19d93d6163cb72a"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/forecast_offshore_wind_generation/2026.parquet",
+      "bytes": 68712,
+      "sha256": "b9fa093018d635109c2035c7e05ecea64d3f2adf13f95d7073e903c02af61b93"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 67129,
+      "sha256": "a82f45f9229043bf4c825105dc32239cac0d33206673f917d9b910c57e62b3f5"
+    },
+    {
+      "path": "entsoe/data/hourly/DK2/forecast_solar_generation/2026.parquet",
+      "bytes": 66091,
+      "sha256": "42963f6787334286a9e12255c192009076325fa3f4585976aa2f758158787036"
+    },
+    {
+      "path": "entsoe/data/hourly/ES/actual_load/2026.parquet",
+      "bytes": 66777,
+      "sha256": "4db08d412d5db805ef56b5b44fa9480205a81d0e0987910fc4f27856ba4797e7"
+    },
+    {
+      "path": "entsoe/data/hourly/ES/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 63226,
+      "sha256": "ae50a71f7a244a3b0af9211276bd81395c242fb40a3e9b5bb498ee1a9e41c1a7"
+    },
+    {
+      "path": "entsoe/data/hourly/ES/actual_solar_generation/2026.parquet",
+      "bytes": 62512,
+      "sha256": "ca132554d06cdff8d0294c094e4eb612a06db3f7f657d3d3db6c9cda080d9d92"
+    },
+    {
+      "path": "entsoe/data/hourly/ES/forecast_load/2026.parquet",
+      "bytes": 70769,
+      "sha256": "03dacd519ed282ec9b8a2e9380fbadd8c8218c01072f3ac520ba0f7a9ee0e8ea"
+    },
+    {
+      "path": "entsoe/data/hourly/ES/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 68264,
+      "sha256": "46ae9a70fecb94a6fef21075ec17ae9720fc45af412e555d2c59f9b2b1dd3bb5"
+    },
+    {
+      "path": "entsoe/data/hourly/ES/forecast_solar_generation/2026.parquet",
+      "bytes": 66167,
+      "sha256": "f73a7179baaa16513d126aca9bebb7699e062eeba9974f913eb47f14ea960249"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/actual_load/2026.parquet",
+      "bytes": 74419,
+      "sha256": "3a5d9f7c86d156e29fb278b31b02b590b4c9d0a4c5ccd9bd97c4960eb0854e6b"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/actual_offshore_wind_generation/2026.parquet",
+      "bytes": 73130,
+      "sha256": "4e675217197f298c9f73fa0c098f486402d1b60bb67fdf64a03bbae75ac8f6ee"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 75453,
+      "sha256": "b333cb1b3c80bccd7c45727806b1870c6cc702402c165cfce4bdb884af79a7ad"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/actual_solar_generation/2026.parquet",
+      "bytes": 65290,
+      "sha256": "94d17ff53cffc8fcb2c96c4b0421671620291e4c38b609cfe1f45bbae5b164e6"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/forecast_load/2026.parquet",
+      "bytes": 60758,
+      "sha256": "5f90bec7863763195c9da897464e1ade8f1b846bd6411c25124392e84ad27995"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/forecast_offshore_wind_generation/2026.parquet",
+      "bytes": 78114,
+      "sha256": "49418eebbf331e7b2cc88ee8a702112c9afbdba5fd8828227455212b03ec9a80"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 79816,
+      "sha256": "8b368ac22553da469308b16298aab83dcab2d34190f3a644e38d62e79ccb5ba7"
+    },
+    {
+      "path": "entsoe/data/hourly/FR/forecast_solar_generation/2026.parquet",
+      "bytes": 66813,
+      "sha256": "16141d16009597249aca303ee6aba211638661f7800fe6b777b883afd6e2fd34"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/actual_load/2026.parquet",
+      "bytes": 67866,
+      "sha256": "26f9a30c5b40ce4fe9e190ae91f52fe4cfe9259c77cb348ed4f2e9aaf782831a"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/actual_offshore_wind_generation/2026.parquet",
+      "bytes": 45780,
+      "sha256": "6e0b915c94aa7f7cc4c763be87caed3708e67cf509f8b922a66a77ffc3911911"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/actual_onshore_wind_generation/2026.parquet",
+      "bytes": 67042,
+      "sha256": "5a5f1b91210dba9b1e28611e2f92f34b4890c8bf104186c365108ddc231e9e31"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/actual_solar_generation/2026.parquet",
+      "bytes": 58142,
+      "sha256": "4698c6e58c7cb24b88bb67b5ba95b5d28a7276e05d03173c604de1c9b8a3103c"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/forecast_load/2026.parquet",
+      "bytes": 58109,
+      "sha256": "0a517f8e007ce1bdd88a7ff11bbd227d5c6f218b33030019d74d065173284d11"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/forecast_offshore_wind_generation/2026.parquet",
+      "bytes": 46039,
+      "sha256": "8592adbc9364cd1538a95ba9ae94d71e9ecad8bf8d99c1b5c04f92c4713a6227"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/forecast_onshore_wind_generation/2026.parquet",
+      "bytes": 65633,
+      "sha256": "b4670437719916d971d4d02ae34c8a1f603f213e7d7c7a208784de55ff5aa259"
+    },
+    {
+      "path": "entsoe/data/hourly/PT/forecast_solar_generation/2026.parquet",
+      "bytes": 58642,
+      "sha256": "d23aadeac1644fcb77991676932543e77f87b3f408d2f8491ae54929ae9a575d"
+    },
+    {
+      "path": "weather/data/raw/BE/load/2026.csv",
+      "bytes": 1683191,
+      "sha256": "260bd16bd338e0144bf8366f179bda33305ec2be69203ced181439b68167c362"
+    },
+    {
+      "path": "weather/data/raw/BE/offshore/2026.csv",
+      "bytes": 1705706,
+      "sha256": "f9597e56ded2bd61e99ec5a1e7a40c7d0c0b64bd2949b67ae3a3fc95538e574e"
+    },
+    {
+      "path": "weather/data/raw/BE/onshore/2026.csv",
+      "bytes": 1697001,
+      "sha256": "14529780651ffa99ccf9100fc08e92c3a7fd0f49a0e14d2d36add904d86352f8"
+    },
+    {
+      "path": "weather/data/raw/BE/solar/2026.csv",
+      "bytes": 1687034,
+      "sha256": "9cc127a09769cbb3fe041eee78f41aa5d1ae2a9062dfbb8483b6df4a909a8224"
+    },
+    {
+      "path": "weather/data/raw/DE/load/2026.csv",
+      "bytes": 1701614,
+      "sha256": "e295221bfed5f198628a9719093179fe7d651f94de4518f6d93a832344aea86b"
+    },
+    {
+      "path": "weather/data/raw/DE/offshore/2026.csv",
+      "bytes": 1721672,
+      "sha256": "421a74c69d137e70d13a301975b98df5b89997dc340ef85d3bbf64742166a0e3"
+    },
+    {
+      "path": "weather/data/raw/DE/onshore/2026.csv",
+      "bytes": 1717612,
+      "sha256": "d95af87e3c25a2d7b5e44d5b492baa7203257e2dab73e2f16a5873366fe983b4"
+    },
+    {
+      "path": "weather/data/raw/DE/solar/2026.csv",
+      "bytes": 1708483,
+      "sha256": "d9de159e0e8c9c641edba0745fc4dfa4fcb8a9726a21688f1f3d8314e0b1bc33"
+    },
+    {
+      "path": "weather/data/raw/DK1/load/2026.csv",
+      "bytes": 1712537,
+      "sha256": "779cd831e95e357ece565bb372e146da92e8a79a06c9ca10b7c0bbb23567892c"
+    },
+    {
+      "path": "weather/data/raw/DK1/offshore/2026.csv",
+      "bytes": 1729516,
+      "sha256": "7c511a855fae20329961e4b5e8be0013142e92fa1a1092ffe0fe2953cdbaba3d"
+    },
+    {
+      "path": "weather/data/raw/DK1/onshore/2026.csv",
+      "bytes": 1726601,
+      "sha256": "b70000e8179877bbdf88f0645d9511db8e68b2bba1e403b412de681ea057afbc"
+    },
+    {
+      "path": "weather/data/raw/DK1/solar/2026.csv",
+      "bytes": 1716729,
+      "sha256": "f82a1efa11e5559b956a9d3dd6461c6f954951dde60b2caad74d009680452685"
+    },
+    {
+      "path": "weather/data/raw/DK2/load/2026.csv",
+      "bytes": 1714961,
+      "sha256": "e120d94e24bf1a34474f896e3eda375fc97943dbc5bee0a180f0ce2ce8dc7dde"
+    },
+    {
+      "path": "weather/data/raw/DK2/offshore/2026.csv",
+      "bytes": 1730810,
+      "sha256": "a410226321f7ba5d61177a4ac4e70ca16e8e863bfb5e85dd6a1db5d01115e773"
+    },
+    {
+      "path": "weather/data/raw/DK2/onshore/2026.csv",
+      "bytes": 1728422,
+      "sha256": "2f1ee9cddf98174593d59c96dba24d14f18b0ed359fad595c4569a2948425e26"
+    },
+    {
+      "path": "weather/data/raw/DK2/solar/2026.csv",
+      "bytes": 1720203,
+      "sha256": "c6db96abde3da84ddb55a7b89a7c50044650effc94eff21241da08e7e9f19f4c"
+    },
+    {
+      "path": "weather/data/raw/ES/load/2026.csv",
+      "bytes": 1705397,
+      "sha256": "e674c2eb1cca3b0e53b84860177800c2f7aba02f2c039c722b01806755eaffdb"
+    },
+    {
+      "path": "weather/data/raw/ES/onshore/2026.csv",
+      "bytes": 1718828,
+      "sha256": "6d8cd1bf47b219d4892ba1df40f6709204df174af357d7f52d45e9e5b2086c18"
+    },
+    {
+      "path": "weather/data/raw/ES/solar/2026.csv",
+      "bytes": 1706923,
+      "sha256": "71bfce42e2c5203aa31683e53dbb9163cd10ba339cabee837101ac8534b0e7fd"
+    },
+    {
+      "path": "weather/data/raw/FR/load/2026.csv",
+      "bytes": 1698408,
+      "sha256": "27be2ab2ef734a26c2d97e7a144fd4a618a0e785e4ddc5736dae42c403b02e73"
+    },
+    {
+      "path": "weather/data/raw/FR/offshore/2026.csv",
+      "bytes": 1730494,
+      "sha256": "8b166eca38ecbf4c10872565b79ac42ea94f3a9632891ed438c627170edf59ab"
+    },
+    {
+      "path": "weather/data/raw/FR/onshore/2026.csv",
+      "bytes": 1718356,
+      "sha256": "c3470065ee62cdcc1a210bcaab841cafe6fd105ee7d6c36d4463b74dce283b46"
+    },
+    {
+      "path": "weather/data/raw/FR/solar/2026.csv",
+      "bytes": 1704573,
+      "sha256": "733ab0222fc59238ae329afa0024e3ecc08a6a97495726cf40068787bd0bf9b5"
+    },
+    {
+      "path": "weather/data/raw/PT/load/2026.csv",
+      "bytes": 1708108,
+      "sha256": "1140c021e287572222689aae8523d92195d78d737adf7d2828b7fc2993656e13"
+    },
+    {
+      "path": "weather/data/raw/PT/offshore/2026.csv",
+      "bytes": 1724441,
+      "sha256": "537ed64b58d67ed10a6868f64e5fed1319667fb86b68cb922b6cf6e0d85e6cad"
+    },
+    {
+      "path": "weather/data/raw/PT/onshore/2026.csv",
+      "bytes": 1718544,
+      "sha256": "51e10edd16b7cdfc9b3ad4b80f304fcad50e929a57991992cdba47c7ed7aceb4"
+    },
+    {
+      "path": "weather/data/raw/PT/solar/2026.csv",
+      "bytes": 1710072,
+      "sha256": "0e3e612f79a50f0b698f41839a99ac734e53bda5c5da80b3f174ca16b1b8df90"
+    }
+  ]
+}
