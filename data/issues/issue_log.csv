@@ -627,5 +627,5 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-10-29T23:14:59+00:00,2026-10-29,PT,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT solar: 0/30 hourly rows.,{},open
 2026-10-29T23:15:19+00:00,2026-10-29,PT,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_onshore: 0/30 hourly rows.,{},open
 2026-10-29T23:15:43+00:00,2026-10-29,PT,wind_offshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for PT wind_offshore: 0/30 hourly rows.,{},open
-2026-10-30T22:41:22+00:00,2026-10-30,DK1,load,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
-2026-10-30T22:42:36+00:00,2026-10-30,DK2,load,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
+2026-10-30T22:44:14+00:00,2026-10-30,DK1,load,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
+2026-10-30T22:45:10+00:00,2026-10-30,DK2,load,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
