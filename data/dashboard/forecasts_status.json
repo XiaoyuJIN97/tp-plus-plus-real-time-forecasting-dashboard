@@ -1,10 +1,10 @@
 {
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-10-30T19:23:47.240044+00:00",
+  "generated_at_utc": "2026-10-30T21:29:56.918353+00:00",
   "retention_days": 90,
-  "first_run_date": "2026-08-01",
-  "latest_run_date": "2026-10-29",
-  "rows": 573320,
+  "first_run_date": "2026-08-02",
+  "latest_run_date": "2026-10-30",
+  "rows": 572648,
   "zones": 8,
   "targets": 4,
   "models": 10

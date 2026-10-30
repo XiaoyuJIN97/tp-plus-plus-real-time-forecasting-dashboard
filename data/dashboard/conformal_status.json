@@ -1,7 +1,7 @@
 {
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-10-30T19:24:18.699572+00:00",
-  "rows": 554336,
+  "generated_at_utc": "2026-10-30T21:30:50.759213+00:00",
+  "rows": 554096,
   "calibrated_rows": 417296,
   "levels": [
     0.8,
