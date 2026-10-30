@@ -1,2 +1,2 @@
 checked_at,run_date,rows,seconds,status,message
-2026-10-30T21:19:31+00:00,2026-10-30,750,225.067,incomplete,"incomplete groups (2): DK1/load/timesfm3_online=0, DK2/load/timesfm3_online=0"
+2026-10-30T21:28:24+00:00,2026-10-30,1500,498.985,incomplete,"incomplete groups (4): DK1/load/t0_gamma_online=0, DK1/load/timestral_online=0, DK2/load/t0_gamma_online=0, DK2/load/timestral_online=0"
