@@ -631,5 +631,5 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-10-30T22:45:10+00:00,2026-10-30,DK2,load,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
 2026-10-31T22:51:06+00:00,2026-10-31,DK1,load,data_or_features,context has 60 missing actual hours; maximum automatic imputation is 48,{},open
 2026-10-31T22:52:12+00:00,2026-10-31,DK2,load,data_or_features,context has 60 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-01T22:22:35+00:00,2026-11-01,DK1,load,data_or_features,context has 62 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-01T22:24:02+00:00,2026-11-01,DK2,load,data_or_features,context has 62 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-01T22:26:03+00:00,2026-11-01,DK1,load,data_or_features,context has 62 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-01T22:26:53+00:00,2026-11-01,DK2,load,data_or_features,context has 62 missing actual hours; maximum automatic imputation is 48,{},open
