@@ -1,8 +1,8 @@
 {
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-11-01T19:41:51.103794+00:00",
-  "rows": 553856,
-  "calibrated_rows": 417296,
+  "generated_at_utc": "2026-11-01T21:18:36.698728+00:00",
+  "rows": 553586,
+  "calibrated_rows": 417266,
   "levels": [
     0.8,
     0.9,
