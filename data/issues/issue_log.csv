@@ -631,5 +631,5 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-10-30T22:45:10+00:00,2026-10-30,DK2,load,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
 2026-10-31T22:51:06+00:00,2026-10-31,DK1,load,data_or_features,context has 60 missing actual hours; maximum automatic imputation is 48,{},open
 2026-10-31T22:52:12+00:00,2026-10-31,DK2,load,data_or_features,context has 60 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-01T23:06:09+00:00,2026-11-01,DK1,load,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A65&processType=A16&outBiddingZone_Domain=10YDK-1--------W&out_Domain=10YDK-1--------W&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202610291700&periodEnd=202611011700,{},open
-2026-11-01T23:06:15+00:00,2026-11-01,DK2,load,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A65&processType=A16&outBiddingZone_Domain=10YDK-2--------M&out_Domain=10YDK-2--------M&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202607291700&periodEnd=202608291700,{},open
+2026-11-01T23:08:08+00:00,2026-11-01,DK1,load,data_or_features,context has 62 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-01T23:09:22+00:00,2026-11-01,DK2,load,data_or_features,context has 62 missing actual hours; maximum automatic imputation is 48,{},open
