@@ -1,6 +1,6 @@
 {
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-11-01T22:27:58.850480+00:00",
+  "generated_at_utc": "2026-11-01T23:10:52.901701+00:00",
   "retention_days": 90,
   "first_run_date": "2026-08-04",
   "latest_run_date": "2026-11-01",
