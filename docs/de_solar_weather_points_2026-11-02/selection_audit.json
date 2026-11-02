@@ -1,0 +1,1174 @@
+{
+  "registry_url": "https://download.marktstammdatenregister.de/Gesamtdatenexport_20261102_26.2.zip",
+  "registry_date": "2026-11-02",
+  "as_of": "2026-07-23",
+  "note": "Current export filtered by commission/registration/retirement dates; not a certified as-issued July inventory. Coordinates use public postcode centroids where exact locations are private.",
+  "geocoding": "https://download.geonames.org/export/zip/DE.zip (GeoNames, CC BY 4.0)",
+  "stats": {
+    "xml_units": 6623311,
+    "current_units": 6461221,
+    "current_net_mw": 117091.66706903432,
+    "current_postcode_net_mw": 45555.460242005654,
+    "preperiod_units": 6173661,
+    "preperiod_net_mw": 111802.95945703158,
+    "preperiod_postcode_net_mw": 43656.94249900463,
+    "current_reported_net_mw": 71536.20682699983,
+    "preperiod_reported_net_mw": 68146.01695799982,
+    "unlocated_net_mw": 53.66214500000001,
+    "unlocated_units": 4191
+  },
+  "states_gross_mwp": {
+    "1409": 16113.64244500015,
+    "1402": 16455.610278000127,
+    "1400": 10311.922468000013,
+    "1403": 35079.751257001844,
+    "1412": 1356.154234999999,
+    "1408": 11951.938725999975,
+    "1410": 6712.244339999977,
+    "1407": 5544.826583999996,
+    "1414": 6408.544121999998,
+    "1411": 5519.5536419999935,
+    "1413": 6000.782182999997,
+    "1405": 6116.245841999977,
+    "1415": 3580.300149000002,
+    "1406": 317.6354829999996,
+    "1401": 584.5229850000004,
+    "1404": 224.5285939999998
+  },
+  "entries": [
+    {
+      "file": "EinheitenSolar_1.xml",
+      "sha256": "d9b59b9c5bc69ce7595ecb5e693388ddd072ab3a74e2d3507f69a6475324833a",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98192,
+        "current_net_mw": 3442.0429320006087,
+        "current_postcode_net_mw": 831.4204959999557,
+        "preperiod_units": 98318,
+        "preperiod_net_mw": 3442.80477100061,
+        "preperiod_postcode_net_mw": 832.1433349999555,
+        "current_reported_net_mw": 2610.6224359999983,
+        "preperiod_reported_net_mw": 2610.6614359999985,
+        "unlocated_net_mw": 1.0095669999999999,
+        "unlocated_units": 42
+      }
+    },
+    {
+      "file": "EinheitenSolar_16.xml",
+      "sha256": "5ab7e7741a2cef67110bfe23cc8957b2c1466429e80e02f0280325e50c313b13",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98610,
+        "current_net_mw": 2157.288166000301,
+        "current_postcode_net_mw": 890.049256999976,
+        "preperiod_units": 98702,
+        "preperiod_net_mw": 2157.8199790003023,
+        "preperiod_postcode_net_mw": 890.5810699999757,
+        "current_reported_net_mw": 1267.2389089999967,
+        "preperiod_reported_net_mw": 1267.2389089999967,
+        "unlocated_net_mw": 0.7409700000000001,
+        "unlocated_units": 75
+      }
+    },
+    {
+      "file": "EinheitenSolar_15.xml",
+      "sha256": "720d36b7e7c0fc0d04213b736c467fbb0082fdc3a76343354144fd2768015b46",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98450,
+        "current_net_mw": 2647.9967840003733,
+        "current_reported_net_mw": 1771.3534689999974,
+        "preperiod_units": 98549,
+        "preperiod_net_mw": 2648.6940840003736,
+        "preperiod_reported_net_mw": 1771.4842889999975,
+        "current_postcode_net_mw": 876.643314999983,
+        "preperiod_postcode_net_mw": 877.2097949999833,
+        "unlocated_net_mw": 0.4853950000000002,
+        "unlocated_units": 62
+      }
+    },
+    {
+      "file": "EinheitenSolar_13.xml",
+      "sha256": "9dfce474ab4ed63587304badbad4e422b7390203c7181513bc5401dafa015bf8",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98444,
+        "current_net_mw": 2212.545053000356,
+        "current_postcode_net_mw": 859.821596999985,
+        "preperiod_units": 98562,
+        "preperiod_net_mw": 2213.486251000356,
+        "preperiod_postcode_net_mw": 860.6618949999846,
+        "current_reported_net_mw": 1352.7234559999927,
+        "preperiod_reported_net_mw": 1352.8243559999923,
+        "unlocated_net_mw": 1.5960949999999998,
+        "unlocated_units": 58
+      }
+    },
+    {
+      "file": "EinheitenSolar_10.xml",
+      "sha256": "76088b0cea2bfba464e8b18b87e8f0fe3d0a596052ec1bf14cf09eb9dc220a44",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98531,
+        "current_net_mw": 2273.7307020003695,
+        "current_postcode_net_mw": 888.9723069999758,
+        "preperiod_units": 98636,
+        "preperiod_net_mw": 2274.9181790003695,
+        "preperiod_postcode_net_mw": 889.5377639999758,
+        "current_reported_net_mw": 1384.7583949999955,
+        "preperiod_reported_net_mw": 1385.3804149999955,
+        "unlocated_net_mw": 1.4952999999999992,
+        "unlocated_units": 82
+      }
+    },
+    {
+      "file": "EinheitenSolar_11.xml",
+      "sha256": "2e84fad14c825f5ec9e391ec28b4a6447e16f0097afcc7786e088835e7251fd9",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98045,
+        "current_net_mw": 2039.345693000321,
+        "current_postcode_net_mw": 851.6730279999963,
+        "preperiod_units": 98178,
+        "preperiod_net_mw": 2040.8640730003222,
+        "preperiod_postcode_net_mw": 852.2782279999963,
+        "current_reported_net_mw": 1187.6726649999985,
+        "preperiod_reported_net_mw": 1188.5858449999987,
+        "unlocated_net_mw": 0.39377000000000006,
+        "unlocated_units": 37
+      }
+    },
+    {
+      "file": "EinheitenSolar_12.xml",
+      "sha256": "24e0144278f9ce0587cd0884c47ce0d204e7849b82fe2f07a3bb2034b7261e09",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98474,
+        "current_net_mw": 2178.24292000039,
+        "current_postcode_net_mw": 838.3952579999758,
+        "preperiod_units": 98583,
+        "preperiod_net_mw": 2178.98227900039,
+        "preperiod_postcode_net_mw": 838.9608169999757,
+        "current_reported_net_mw": 1339.8476620000004,
+        "preperiod_reported_net_mw": 1340.0214620000004,
+        "unlocated_net_mw": 0.319995,
+        "unlocated_units": 40
+      }
+    },
+    {
+      "file": "EinheitenSolar_14.xml",
+      "sha256": "9ca555d458850427f6ee1ac525161c106f63fad4c1f235475afc79d0a377732d",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98601,
+        "current_net_mw": 2293.890942000354,
+        "current_postcode_net_mw": 886.810878999988,
+        "preperiod_units": 98709,
+        "preperiod_net_mw": 2294.516957000356,
+        "preperiod_postcode_net_mw": 887.4368939999874,
+        "current_reported_net_mw": 1407.0800629999956,
+        "preperiod_reported_net_mw": 1407.0800629999956,
+        "unlocated_net_mw": 1.2177399999999992,
+        "unlocated_units": 35
+      }
+    },
+    {
+      "file": "EinheitenSolar_18.xml",
+      "sha256": "b40315b5e8f921875ffd206de063f7049daccacf3b390e1bdd7e36bd43b8ea52",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98573,
+        "current_net_mw": 2448.8173440004457,
+        "current_postcode_net_mw": 924.4914909999817,
+        "preperiod_units": 98685,
+        "preperiod_net_mw": 2450.898532000452,
+        "preperiod_postcode_net_mw": 925.2221549999815,
+        "current_reported_net_mw": 1524.3258529999996,
+        "preperiod_reported_net_mw": 1525.6763769999998,
+        "unlocated_net_mw": 0.26072999999999996,
+        "unlocated_units": 33
+      }
+    },
+    {
+      "file": "EinheitenSolar_19.xml",
+      "sha256": "7ff6cf84aa1391a0bee861232a50742a05c210152d59b57f13401833ac81e808",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98698,
+        "current_net_mw": 2401.683261000414,
+        "current_postcode_net_mw": 939.5089049999762,
+        "preperiod_units": 98763,
+        "preperiod_net_mw": 2402.833102000416,
+        "preperiod_postcode_net_mw": 939.8439459999761,
+        "current_reported_net_mw": 1462.1743559999863,
+        "preperiod_reported_net_mw": 1462.9891559999862,
+        "unlocated_net_mw": 0.30395,
+        "unlocated_units": 33
+      }
+    },
+    {
+      "file": "EinheitenSolar_22.xml",
+      "sha256": "c7e8dc7501e6f5517d162fba60f392fb50ab61d7ae290e4381c384f4d2fb6cce",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98659,
+        "current_net_mw": 1683.845546000318,
+        "current_postcode_net_mw": 840.1356559998814,
+        "preperiod_units": 98718,
+        "preperiod_net_mw": 1683.7602700003185,
+        "preperiod_postcode_net_mw": 840.314949999881,
+        "current_reported_net_mw": 843.7098900000011,
+        "preperiod_reported_net_mw": 843.4453200000011,
+        "unlocated_net_mw": 0.343405,
+        "unlocated_units": 49
+      }
+    },
+    {
+      "file": "EinheitenSolar_17.xml",
+      "sha256": "327b942c54f4b6c883065e62832e40f2ee9e5c7d8236707f6ef69a1867a8df43",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98430,
+        "current_net_mw": 1872.6690900002714,
+        "current_postcode_net_mw": 902.5217309999744,
+        "preperiod_units": 98550,
+        "preperiod_net_mw": 1873.385007000272,
+        "preperiod_postcode_net_mw": 903.237647999974,
+        "current_reported_net_mw": 970.1473589999903,
+        "preperiod_reported_net_mw": 970.1473589999903,
+        "unlocated_net_mw": 0.47770000000000007,
+        "unlocated_units": 45
+      }
+    },
+    {
+      "file": "EinheitenSolar_21.xml",
+      "sha256": "ee1c96229370d49d6efc8093b1f819b7e68533e279dea03edd370cdd864a18bf",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98366,
+        "current_net_mw": 2207.556044000505,
+        "current_postcode_net_mw": 835.5086059998482,
+        "preperiod_units": 98424,
+        "preperiod_net_mw": 2207.625154000505,
+        "preperiod_postcode_net_mw": 835.626675999848,
+        "current_reported_net_mw": 1372.0474379999919,
+        "preperiod_reported_net_mw": 1371.9984779999918,
+        "unlocated_net_mw": 0.5353350000000001,
+        "unlocated_units": 66
+      }
+    },
+    {
+      "file": "EinheitenSolar_2.xml",
+      "sha256": "b6427537f42aec534b5d8123d1b06b60d492420d89c33c20bda8bfd123b4e8b7",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98258,
+        "current_net_mw": 3380.47719000065,
+        "current_postcode_net_mw": 843.3894909999534,
+        "preperiod_units": 98389,
+        "preperiod_net_mw": 3381.668371000651,
+        "preperiod_postcode_net_mw": 844.1976419999538,
+        "current_reported_net_mw": 2537.0876989999997,
+        "preperiod_reported_net_mw": 2537.470729,
+        "unlocated_net_mw": 0.3101650000000001,
+        "unlocated_units": 40
+      }
+    },
+    {
+      "file": "EinheitenSolar_20.xml",
+      "sha256": "0e122ef2cabf351d42f4efe1ea183468372ad95672ad8ecc8d0f9fc77d751c7f",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98554,
+        "current_net_mw": 2346.967712000449,
+        "current_postcode_net_mw": 828.4635469999404,
+        "preperiod_units": 98611,
+        "preperiod_net_mw": 2347.12422400045,
+        "preperiod_postcode_net_mw": 828.6200589999407,
+        "current_reported_net_mw": 1518.504164999995,
+        "preperiod_reported_net_mw": 1518.504164999995,
+        "unlocated_net_mw": 1.1664199999999996,
+        "unlocated_units": 60
+      }
+    },
+    {
+      "file": "EinheitenSolar_23.xml",
+      "sha256": "2d04b2e7366359aae8e560b3d732f52c273c478ae4499d73f6d83bb433addcfd",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98051,
+        "current_net_mw": 2284.3548330005547,
+        "current_postcode_net_mw": 809.4679289998178,
+        "preperiod_units": 98124,
+        "preperiod_net_mw": 2284.202743000554,
+        "preperiod_postcode_net_mw": 809.5918989998171,
+        "current_reported_net_mw": 1474.8869039999913,
+        "preperiod_reported_net_mw": 1474.6108439999914,
+        "unlocated_net_mw": 0.47034500000000007,
+        "unlocated_units": 67
+      }
+    },
+    {
+      "file": "EinheitenSolar_29.xml",
+      "sha256": "e30da82ea2285a87d1851aeebd5aa8bf66ab847e7c1f2ecf1e310c1d44d4dc1f",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96638,
+        "current_net_mw": 1268.117648000425,
+        "current_postcode_net_mw": 611.7160739999127,
+        "preperiod_units": 96816,
+        "preperiod_net_mw": 1267.6007080004267,
+        "preperiod_postcode_net_mw": 611.6601339999127,
+        "current_reported_net_mw": 656.401574,
+        "preperiod_reported_net_mw": 655.9405740000001,
+        "unlocated_net_mw": 0.44569000000000003,
+        "unlocated_units": 72
+      }
+    },
+    {
+      "file": "EinheitenSolar_25.xml",
+      "sha256": "d42aea22ba1cab3825b4ee485a8a989339400896bc11a53806704bf5fc7cab97",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96426,
+        "current_net_mw": 1314.1009800001857,
+        "current_postcode_net_mw": 676.3568769998487,
+        "preperiod_units": 96594,
+        "preperiod_net_mw": 1314.0428720001871,
+        "preperiod_postcode_net_mw": 676.4776689998478,
+        "current_reported_net_mw": 637.7441029999993,
+        "preperiod_reported_net_mw": 637.5652029999992,
+        "unlocated_net_mw": 0.298835,
+        "unlocated_units": 56
+      }
+    },
+    {
+      "file": "EinheitenSolar_28.xml",
+      "sha256": "09003e8b7ad1a50c2bd05ad6a0217b39b4c966f03d7dacf2e347cf5f7856845c",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96738,
+        "current_net_mw": 1197.1013559999874,
+        "current_postcode_net_mw": 650.6413149998617,
+        "preperiod_units": 96897,
+        "preperiod_net_mw": 1196.3197899999832,
+        "preperiod_postcode_net_mw": 650.6107289998619,
+        "current_reported_net_mw": 546.4600410000011,
+        "preperiod_reported_net_mw": 545.7090610000012,
+        "unlocated_net_mw": 0.455865,
+        "unlocated_units": 66
+      }
+    },
+    {
+      "file": "EinheitenSolar_26.xml",
+      "sha256": "04762e1aeca07cfef437837dd087ec74b730f6243ed8a5f607943d6e048f1508",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96614,
+        "current_net_mw": 1530.8133280007744,
+        "current_postcode_net_mw": 646.3646019998439,
+        "preperiod_units": 96821,
+        "preperiod_net_mw": 1530.6983420007782,
+        "preperiod_postcode_net_mw": 646.4088159998429,
+        "current_reported_net_mw": 884.4487259999977,
+        "preperiod_reported_net_mw": 884.2895259999976,
+        "unlocated_net_mw": 0.35418,
+        "unlocated_units": 61
+      }
+    },
+    {
+      "file": "EinheitenSolar_27.xml",
+      "sha256": "d2b3af9ef304610ebb278bcfc1f6a6013a23ebabf2df69b97e4385b9d4a7033e",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96689,
+        "current_net_mw": 1366.8232070002553,
+        "current_postcode_net_mw": 645.6794519999294,
+        "preperiod_units": 96869,
+        "preperiod_net_mw": 1365.7864170002538,
+        "preperiod_postcode_net_mw": 645.7646319999297,
+        "current_reported_net_mw": 721.1437550000003,
+        "preperiod_reported_net_mw": 720.0217850000002,
+        "unlocated_net_mw": 0.5369550000000003,
+        "unlocated_units": 77
+      }
+    },
+    {
+      "file": "EinheitenSolar_24.xml",
+      "sha256": "06c9e4a55f1e55d60755a15b466d3f34e652181270416ac214b3545d01884880",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97449,
+        "current_net_mw": 1700.3804610004781,
+        "current_postcode_net_mw": 753.2416079998422,
+        "preperiod_units": 97542,
+        "preperiod_net_mw": 1700.4506360004793,
+        "preperiod_postcode_net_mw": 753.3117829998421,
+        "current_reported_net_mw": 947.1388530000021,
+        "preperiod_reported_net_mw": 947.1388530000021,
+        "unlocated_net_mw": 0.6670400000000002,
+        "unlocated_units": 85
+      }
+    },
+    {
+      "file": "EinheitenSolar_30.xml",
+      "sha256": "485bd3a816da38036aca9509c48c7ef732ce0b8506791d600acd7254ce6cddc6",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96633,
+        "current_net_mw": 1186.91860099998,
+        "current_postcode_net_mw": 601.6040359999269,
+        "preperiod_units": 96811,
+        "preperiod_net_mw": 1186.1884229999798,
+        "preperiod_postcode_net_mw": 601.5371579999268,
+        "current_reported_net_mw": 585.3145650000009,
+        "preperiod_reported_net_mw": 584.6512650000009,
+        "unlocated_net_mw": 0.4419999999999999,
+        "unlocated_units": 79
+      }
+    },
+    {
+      "file": "EinheitenSolar_3.xml",
+      "sha256": "2808ab70b0919fd75776a06c54d2b4c3b00155f1033c97fc70896cdb77445dee",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98205,
+        "current_net_mw": 3072.69263900063,
+        "current_postcode_net_mw": 862.0200049999523,
+        "preperiod_units": 98351,
+        "preperiod_net_mw": 3073.836277000633,
+        "preperiod_postcode_net_mw": 862.759477999952,
+        "current_reported_net_mw": 2210.672634,
+        "preperiod_reported_net_mw": 2211.076798999999,
+        "unlocated_net_mw": 0.23023400000000005,
+        "unlocated_units": 26
+      }
+    },
+    {
+      "file": "EinheitenSolar_31.xml",
+      "sha256": "edb493aa02cd964fd2a5328bfdb42d1975551b0ab7408ca7ce08501e795d9357",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96312,
+        "current_net_mw": 1234.8543990001815,
+        "current_postcode_net_mw": 585.7729609999977,
+        "preperiod_units": 96513,
+        "preperiod_net_mw": 1234.7617440001807,
+        "preperiod_postcode_net_mw": 585.6803059999983,
+        "current_reported_net_mw": 649.0814379999993,
+        "preperiod_reported_net_mw": 649.0814379999993,
+        "unlocated_net_mw": 0.4665600000000001,
+        "unlocated_units": 78
+      }
+    },
+    {
+      "file": "EinheitenSolar_33.xml",
+      "sha256": "8f38c12e31ec7ce81367cf1fd0651eaece88b121b65cdc7aaed538db7cebc11d",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96971,
+        "current_net_mw": 1120.5028749999537,
+        "current_postcode_net_mw": 615.2159519998977,
+        "preperiod_units": 97153,
+        "preperiod_net_mw": 1120.584228999955,
+        "preperiod_postcode_net_mw": 615.2973059998977,
+        "current_reported_net_mw": 505.28692300000057,
+        "preperiod_reported_net_mw": 505.28692300000057,
+        "unlocated_net_mw": 0.3849690000000001,
+        "unlocated_units": 65
+      }
+    },
+    {
+      "file": "EinheitenSolar_35.xml",
+      "sha256": "c311fa6e75b4657f11a2aaf2209e6f0d0663fd25cb537083e1da266ce96fc775",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97537,
+        "current_net_mw": 1516.5280210001015,
+        "current_postcode_net_mw": 665.7245389998378,
+        "preperiod_units": 97640,
+        "preperiod_net_mw": 1516.106136000102,
+        "preperiod_postcode_net_mw": 665.663613999838,
+        "current_reported_net_mw": 850.8034820000006,
+        "preperiod_reported_net_mw": 850.4425220000006,
+        "unlocated_net_mw": 0.49884000000000017,
+        "unlocated_units": 74
+      }
+    },
+    {
+      "file": "EinheitenSolar_34.xml",
+      "sha256": "23849b87926b3da73bda4f47e48162a4a5d17979dc6803728fbf89ab67bc00ce",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97226,
+        "current_net_mw": 1516.3763830004682,
+        "current_postcode_net_mw": 635.864967999873,
+        "preperiod_units": 97363,
+        "preperiod_net_mw": 1507.8266060004694,
+        "preperiod_postcode_net_mw": 635.8499909998734,
+        "current_reported_net_mw": 880.5114149999995,
+        "preperiod_reported_net_mw": 871.9766149999995,
+        "unlocated_net_mw": 0.45441000000000004,
+        "unlocated_units": 76
+      }
+    },
+    {
+      "file": "EinheitenSolar_32.xml",
+      "sha256": "a9890589c6a425037110b2d0d437815cb0952cea2591cd4b8b56581befcd6771",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96798,
+        "current_net_mw": 1114.1923579999009,
+        "current_postcode_net_mw": 617.927260999855,
+        "preperiod_units": 96973,
+        "preperiod_net_mw": 1114.1668909998996,
+        "preperiod_postcode_net_mw": 617.9017939998552,
+        "current_reported_net_mw": 496.26509700000105,
+        "preperiod_reported_net_mw": 496.26509700000105,
+        "unlocated_net_mw": 0.3936009999999999,
+        "unlocated_units": 65
+      }
+    },
+    {
+      "file": "EinheitenSolar_36.xml",
+      "sha256": "8aaf852625e5d338cf5960c09842dbe8d7dbda3bcc45cb257d42818cd11bf16f",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97923,
+        "current_net_mw": 1456.686873000424,
+        "current_postcode_net_mw": 716.0596399998456,
+        "preperiod_units": 97997,
+        "preperiod_net_mw": 1455.3419180004255,
+        "preperiod_postcode_net_mw": 715.9146849998455,
+        "current_reported_net_mw": 740.6272329999993,
+        "preperiod_reported_net_mw": 739.4272329999997,
+        "unlocated_net_mw": 0.5865240000000002,
+        "unlocated_units": 70
+      }
+    },
+    {
+      "file": "EinheitenSolar_37.xml",
+      "sha256": "0f8fd032289778a8e15d4d54433feeaf2aac3075be1c4b69df557507b5879157",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98229,
+        "current_net_mw": 1531.110673000467,
+        "current_postcode_net_mw": 769.2577589998052,
+        "preperiod_units": 98261,
+        "preperiod_net_mw": 1530.3687810004672,
+        "preperiod_postcode_net_mw": 769.161046999805,
+        "current_reported_net_mw": 761.8529139999993,
+        "preperiod_reported_net_mw": 761.2077339999993,
+        "unlocated_net_mw": 0.5479300000000003,
+        "unlocated_units": 81
+      }
+    },
+    {
+      "file": "EinheitenSolar_38.xml",
+      "sha256": "f2ff732e1ce1739ec0d245e49b7e348b8ed932e0e3b45528beeb563c549b149a",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97746,
+        "current_net_mw": 1627.3157570004755,
+        "current_postcode_net_mw": 727.3045199998259,
+        "preperiod_units": 97845,
+        "preperiod_net_mw": 1625.9105770004778,
+        "preperiod_postcode_net_mw": 727.2073399998258,
+        "current_reported_net_mw": 900.0112369999989,
+        "preperiod_reported_net_mw": 898.7032369999989,
+        "unlocated_net_mw": 0.44745899999999994,
+        "unlocated_units": 58
+      }
+    },
+    {
+      "file": "EinheitenSolar_39.xml",
+      "sha256": "62f00c406f21ba5521c7be6e4460defbf35185ce9f5741a305d1da4c0075f8c4",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97657,
+        "current_net_mw": 1491.9153770006976,
+        "current_postcode_net_mw": 686.8941329998861,
+        "preperiod_units": 97751,
+        "preperiod_net_mw": 1491.3475870006998,
+        "preperiod_postcode_net_mw": 686.7093429998865,
+        "current_reported_net_mw": 805.0212440000004,
+        "preperiod_reported_net_mw": 804.6382440000004,
+        "unlocated_net_mw": 19.205840000000016,
+        "unlocated_units": 61
+      }
+    },
+    {
+      "file": "EinheitenSolar_41.xml",
+      "sha256": "99ea89cfa3f1f888426be1855f0e60be30d4b87c5077c7e7c74e434d4d54b0a8",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96806,
+        "current_net_mw": 1174.3022410003755,
+        "current_postcode_net_mw": 527.7654430002785,
+        "preperiod_units": 96978,
+        "preperiod_net_mw": 1136.3773810003422,
+        "preperiod_postcode_net_mw": 527.7302030002807,
+        "unlocated_net_mw": 0.36519300000000005,
+        "unlocated_units": 79,
+        "current_reported_net_mw": 646.5367979999996,
+        "preperiod_reported_net_mw": 608.6471780000004
+      }
+    },
+    {
+      "file": "EinheitenSolar_40.xml",
+      "sha256": "1632fd4d9276c1ef3a8b1c9cd71b5dec653a5aa1b418b3505fe46e5fca54f3e2",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96978,
+        "current_net_mw": 1136.607153999968,
+        "current_postcode_net_mw": 579.5309070001199,
+        "preperiod_units": 97152,
+        "preperiod_net_mw": 1133.2191939999595,
+        "preperiod_postcode_net_mw": 579.4454570001218,
+        "current_reported_net_mw": 557.0762470000013,
+        "preperiod_reported_net_mw": 553.7737370000012,
+        "unlocated_net_mw": 0.44357000000000013,
+        "unlocated_units": 77
+      }
+    },
+    {
+      "file": "EinheitenSolar_43.xml",
+      "sha256": "d34ce440abe49480ce524f2e6cdae71eb38c87c5230a5c82d09dc77cdd405ebd",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97030,
+        "current_net_mw": 1054.2288300004043,
+        "current_postcode_net_mw": 471.0989830002779,
+        "preperiod_units": 97256,
+        "preperiod_net_mw": 1024.5923090003662,
+        "preperiod_postcode_net_mw": 471.10246200028007,
+        "current_reported_net_mw": 583.1298470000002,
+        "preperiod_reported_net_mw": 553.4898470000003,
+        "unlocated_net_mw": 2.4246669999999986,
+        "unlocated_units": 73
+      }
+    },
+    {
+      "file": "EinheitenSolar_4.xml",
+      "sha256": "0bd1e07a5294824d80c789d53b2881775f104d2125036bbbcdd3b303451efa4b",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98292,
+        "current_net_mw": 2878.927400000518,
+        "current_postcode_net_mw": 834.1202859999376,
+        "preperiod_units": 98424,
+        "preperiod_net_mw": 2880.1637030005177,
+        "preperiod_postcode_net_mw": 834.8630389999373,
+        "current_reported_net_mw": 2044.807113999991,
+        "preperiod_reported_net_mw": 2045.300663999991,
+        "unlocated_net_mw": 0.6349100000000003,
+        "unlocated_units": 61
+      }
+    },
+    {
+      "file": "EinheitenSolar_44.xml",
+      "sha256": "fa4c2192588c7ae95c790e75343e4f9be269b86956cde352657ccebcd8739d8e",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97121,
+        "current_net_mw": 1231.238991000697,
+        "current_postcode_net_mw": 525.6866260003054,
+        "preperiod_units": 97326,
+        "preperiod_net_mw": 1190.999118000653,
+        "preperiod_postcode_net_mw": 525.5617530003078,
+        "current_reported_net_mw": 705.5523650000009,
+        "preperiod_reported_net_mw": 665.4373650000015,
+        "unlocated_net_mw": 0.32710999999999996,
+        "unlocated_units": 63
+      }
+    },
+    {
+      "file": "EinheitenSolar_42.xml",
+      "sha256": "9df9f504d6a51bd877290fb17de3edb95ee2177857f8b37191e07d5451213536",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 96748,
+        "current_net_mw": 1063.7545700004828,
+        "current_postcode_net_mw": 480.347878000259,
+        "preperiod_units": 96953,
+        "preperiod_net_mw": 1062.22231900048,
+        "preperiod_postcode_net_mw": 480.308102000261,
+        "current_reported_net_mw": 583.4066920000001,
+        "preperiod_reported_net_mw": 581.9142170000003,
+        "unlocated_net_mw": 0.285091,
+        "unlocated_units": 77
+      }
+    },
+    {
+      "file": "EinheitenSolar_45.xml",
+      "sha256": "b24cb9bec026f00d533defbb457d4bad6bf45ab2b9831be33f1513772b7e580c",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97232,
+        "current_net_mw": 1330.606656000721,
+        "current_postcode_net_mw": 506.8566930003594,
+        "preperiod_units": 97435,
+        "preperiod_net_mw": 1265.6685640006433,
+        "preperiod_postcode_net_mw": 506.8599010003617,
+        "current_reported_net_mw": 823.7499629999993,
+        "preperiod_reported_net_mw": 758.8086630000004,
+        "unlocated_net_mw": 0.3861350000000001,
+        "unlocated_units": 83
+      }
+    },
+    {
+      "file": "EinheitenSolar_48.xml",
+      "sha256": "b0fd5dad367335cb0bbbffcb48cb0c65d8f2ec4ee4d96c9f13909a1a1672091b",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97932,
+        "current_net_mw": 1704.1983530006885,
+        "current_postcode_net_mw": 699.1323260000922,
+        "preperiod_units": 97980,
+        "preperiod_net_mw": 1701.03115400069,
+        "preperiod_postcode_net_mw": 698.7011170000933,
+        "current_reported_net_mw": 1005.0660269999951,
+        "preperiod_reported_net_mw": 1002.330036999995,
+        "unlocated_net_mw": 0.5914410000000003,
+        "unlocated_units": 85
+      }
+    },
+    {
+      "file": "EinheitenSolar_46.xml",
+      "sha256": "0ab499708507cbf352019d261d524a96466667c0a5219dc46ef45212c9be74b3",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97233,
+        "current_net_mw": 1421.739709000852,
+        "current_postcode_net_mw": 519.420991000295,
+        "preperiod_units": 97419,
+        "preperiod_net_mw": 1349.7268990007194,
+        "preperiod_postcode_net_mw": 519.3655360002966,
+        "current_reported_net_mw": 902.3187179999974,
+        "preperiod_reported_net_mw": 830.3613629999987,
+        "unlocated_net_mw": 0.5101300000000006,
+        "unlocated_units": 105
+      }
+    },
+    {
+      "file": "EinheitenSolar_50.xml",
+      "sha256": "d985b0e346699fb0c90b8b32705f2b3c59f6144a8b0f2091a43251289c59b83e",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97603,
+        "current_net_mw": 2277.672756999699,
+        "current_postcode_net_mw": 648.8301730002783,
+        "preperiod_units": 97703,
+        "preperiod_net_mw": 2274.5002769996913,
+        "preperiod_postcode_net_mw": 648.1153530002791,
+        "current_reported_net_mw": 1628.8425839999863,
+        "preperiod_reported_net_mw": 1626.3849239999865,
+        "unlocated_net_mw": 0.3326340000000001,
+        "unlocated_units": 61
+      }
+    },
+    {
+      "file": "EinheitenSolar_47.xml",
+      "sha256": "031065ad9832cc770fa674db46fa14dea4cdac17221db4238ea7a7526fdfcb0d",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97695,
+        "current_net_mw": 1291.439706000632,
+        "current_postcode_net_mw": 590.8368210002138,
+        "preperiod_units": 97847,
+        "preperiod_net_mw": 1289.3917010006335,
+        "preperiod_postcode_net_mw": 590.6105360002158,
+        "current_reported_net_mw": 700.6028849999991,
+        "preperiod_reported_net_mw": 698.7811649999991,
+        "unlocated_net_mw": 0.4253630000000001,
+        "unlocated_units": 67
+      }
+    },
+    {
+      "file": "EinheitenSolar_52.xml",
+      "sha256": "4b2e68992797ac6739900692a761eea6adc062c2f32b6bc72c434a1484ed1ac6",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97385,
+        "current_net_mw": 1478.8029380010116,
+        "current_postcode_net_mw": 453.7437970003933,
+        "preperiod_units": 97557,
+        "preperiod_net_mw": 1370.2509070010003,
+        "preperiod_postcode_net_mw": 453.4310260003951,
+        "unlocated_net_mw": 0.23761499999999985,
+        "unlocated_units": 77,
+        "current_reported_net_mw": 1025.0591409999975,
+        "preperiod_reported_net_mw": 916.8198809999982
+      }
+    },
+    {
+      "file": "EinheitenSolar_49.xml",
+      "sha256": "16d1fb77238e57c3b8f35fd79a363082fd1c56f66e42ddee5b1a8f38442d1173",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97742,
+        "current_net_mw": 2123.232179000791,
+        "current_postcode_net_mw": 700.0592370002621,
+        "preperiod_units": 97809,
+        "preperiod_net_mw": 2103.7058270008138,
+        "preperiod_postcode_net_mw": 699.7269250002638,
+        "current_reported_net_mw": 1423.1729419999863,
+        "preperiod_reported_net_mw": 1403.9789019999862,
+        "unlocated_net_mw": 0.5262980000000006,
+        "unlocated_units": 74
+      }
+    },
+    {
+      "file": "EinheitenSolar_5.xml",
+      "sha256": "799c3485a2b8e227fc17720d1d27e6797765b0e52cd022b76b570c11fa6a5db9",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98305,
+        "current_net_mw": 2694.6546280005705,
+        "current_postcode_net_mw": 843.1372249999464,
+        "preperiod_units": 98435,
+        "preperiod_net_mw": 2695.3758320005736,
+        "preperiod_postcode_net_mw": 843.8237489999461,
+        "current_reported_net_mw": 1851.5174029999894,
+        "preperiod_reported_net_mw": 1851.5520829999894,
+        "unlocated_net_mw": 1.206195,
+        "unlocated_units": 34
+      }
+    },
+    {
+      "file": "EinheitenSolar_51.xml",
+      "sha256": "37db7ae0c65cd521a6c8579eeceb7c9935666a0f17d0e6fe5bb9664d9f3125a4",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97406,
+        "current_net_mw": 1220.018249000825,
+        "current_postcode_net_mw": 496.99464700041125,
+        "preperiod_units": 97564,
+        "preperiod_net_mw": 1178.5966950008062,
+        "preperiod_postcode_net_mw": 496.57106300041295,
+        "current_reported_net_mw": 723.0236020000008,
+        "preperiod_reported_net_mw": 682.0256320000011,
+        "unlocated_net_mw": 0.3440590000000001,
+        "unlocated_units": 79
+      }
+    },
+    {
+      "file": "EinheitenSolar_53.xml",
+      "sha256": "f8053c70603f9b192958effdc9d36eef80bf1f5ae48b6d7fbee9362046e2ddce",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97816,
+        "current_net_mw": 1178.3951210008947,
+        "current_postcode_net_mw": 500.51342400043893,
+        "preperiod_units": 97954,
+        "preperiod_net_mw": 1171.4541580008922,
+        "preperiod_postcode_net_mw": 500.0318010004407,
+        "current_reported_net_mw": 677.8816969999968,
+        "preperiod_reported_net_mw": 671.4223569999971,
+        "unlocated_net_mw": 0.3209250000000001,
+        "unlocated_units": 64
+      }
+    },
+    {
+      "file": "EinheitenSolar_59.xml",
+      "sha256": "b1b2ef09fbfe2dce0c1ecceb7a6bf7ee50067f81f47c7deff986f5adc3308343",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97525,
+        "current_net_mw": 1928.177904000917,
+        "current_postcode_net_mw": 674.6341840002756,
+        "preperiod_units": 97117,
+        "preperiod_net_mw": 1812.8555580008885,
+        "preperiod_postcode_net_mw": 669.3433080002768,
+        "current_reported_net_mw": 1253.5437199999924,
+        "preperiod_reported_net_mw": 1143.5122499999934,
+        "unlocated_net_mw": 0.3699800000000004,
+        "unlocated_units": 66
+      }
+    },
+    {
+      "file": "EinheitenSolar_54.xml",
+      "sha256": "5efaaa97028e4121720663ad5843169bd5ba7b4f51c611840584ccbb35e6cf48",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97789,
+        "current_net_mw": 1259.3698880008792,
+        "current_postcode_net_mw": 487.602449000406,
+        "preperiod_units": 97936,
+        "preperiod_net_mw": 1233.5143560008596,
+        "preperiod_postcode_net_mw": 486.82547700040794,
+        "current_reported_net_mw": 771.7674389999979,
+        "preperiod_reported_net_mw": 746.6888789999979,
+        "unlocated_net_mw": 0.22315499999999994,
+        "unlocated_units": 66
+      }
+    },
+    {
+      "file": "EinheitenSolar_55.xml",
+      "sha256": "106d8c671de9e219149e4e77594ac3f9259b51b0bff514174c516ad9e6bb4e49",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97736,
+        "current_net_mw": 1328.1319250009162,
+        "current_postcode_net_mw": 488.6984670004448,
+        "preperiod_units": 97814,
+        "preperiod_net_mw": 1324.061169000919,
+        "preperiod_postcode_net_mw": 487.78273600044645,
+        "current_reported_net_mw": 839.4334579999992,
+        "preperiod_reported_net_mw": 836.2784329999992,
+        "unlocated_net_mw": 0.36880800000000014,
+        "unlocated_units": 69
+      }
+    },
+    {
+      "file": "EinheitenSolar_56.xml",
+      "sha256": "b1bb15516ddcaa8a955b2df5d9499a4bb5f8f30b4ba7b30570102357389fb8bd",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97698,
+        "current_net_mw": 1790.4914080010712,
+        "current_postcode_net_mw": 509.72869000035274,
+        "preperiod_units": 97722,
+        "preperiod_net_mw": 1723.606041001044,
+        "preperiod_postcode_net_mw": 508.310933000354,
+        "current_reported_net_mw": 1280.762717999992,
+        "preperiod_reported_net_mw": 1215.2951079999925,
+        "unlocated_net_mw": 0.3861040000000003,
+        "unlocated_units": 78
+      }
+    },
+    {
+      "file": "EinheitenSolar_57.xml",
+      "sha256": "ca83bc62230291ed8eb852924f23b780b6021b623647b0e4609c43804ec7d7ba",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97858,
+        "current_net_mw": 1921.887801001167,
+        "current_postcode_net_mw": 596.4330790003,
+        "preperiod_units": 97764,
+        "preperiod_net_mw": 1864.2416140011344,
+        "preperiod_postcode_net_mw": 594.2853070003016,
+        "current_reported_net_mw": 1325.4547219999913,
+        "preperiod_reported_net_mw": 1269.9563069999942,
+        "unlocated_net_mw": 0.3482450000000002,
+        "unlocated_units": 72
+      }
+    },
+    {
+      "file": "EinheitenSolar_58.xml",
+      "sha256": "a263abc9eec4167c471dc70a932da119cdadb22e13bc9a1d7d78f850b6dacc98",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97943,
+        "current_net_mw": 2001.0384740010086,
+        "current_postcode_net_mw": 686.3785690002675,
+        "preperiod_units": 97715,
+        "preperiod_net_mw": 1917.1907470009878,
+        "preperiod_postcode_net_mw": 683.3287420002671,
+        "current_reported_net_mw": 1314.6599049999922,
+        "preperiod_reported_net_mw": 1233.862004999994,
+        "unlocated_net_mw": 0.32775500000000013,
+        "unlocated_units": 61
+      }
+    },
+    {
+      "file": "EinheitenSolar_6.xml",
+      "sha256": "f2873441b4ace5a8e3c9cd3f63a0209abc0a8ecec9da75c14b965450e3141836",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98396,
+        "current_net_mw": 2573.722260000482,
+        "current_postcode_net_mw": 874.1641089999507,
+        "preperiod_units": 98488,
+        "preperiod_net_mw": 2574.6956180004804,
+        "preperiod_postcode_net_mw": 874.6021169999506,
+        "current_reported_net_mw": 1699.5581509999913,
+        "preperiod_reported_net_mw": 1700.093500999991,
+        "unlocated_net_mw": 0.22210000000000005,
+        "unlocated_units": 27
+      }
+    },
+    {
+      "file": "EinheitenSolar_60.xml",
+      "sha256": "6d469ded9bdeaf89a72d12372fdc8b98b46b73e528b0f2f117bdad075d38fcfe",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97063,
+        "current_net_mw": 1445.7579880010337,
+        "current_postcode_net_mw": 513.6926060005501,
+        "preperiod_units": 96436,
+        "preperiod_net_mw": 1197.0043270009335,
+        "preperiod_postcode_net_mw": 496.7528850005472,
+        "current_reported_net_mw": 932.065381999999,
+        "preperiod_reported_net_mw": 700.2514420000005,
+        "unlocated_net_mw": 0.32553100000000024,
+        "unlocated_units": 67
+      }
+    },
+    {
+      "file": "EinheitenSolar_67.xml",
+      "sha256": "8755c0cd316abf4edc7f4d921edef57308cd89fc3b155e057776e9ffcf80c690",
+      "stats": {
+        "xml_units": 23311,
+        "current_units": 20948,
+        "current_net_mw": 421.33718000004535,
+        "current_postcode_net_mw": 155.19976499999163,
+        "current_reported_net_mw": 266.13741500000015,
+        "unlocated_net_mw": 0.135025,
+        "unlocated_units": 15
+      }
+    },
+    {
+      "file": "EinheitenSolar_64.xml",
+      "sha256": "a776e61e6b706abc74e9135f4e554662dffab6898b746241a0150e641f966208",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97024,
+        "current_net_mw": 1187.9194140008544,
+        "current_postcode_net_mw": 533.1265030004747,
+        "preperiod_units": 19581,
+        "preperiod_net_mw": 184.51503399999572,
+        "preperiod_postcode_net_mw": 106.05343699999707,
+        "current_reported_net_mw": 654.7929109999998,
+        "preperiod_reported_net_mw": 78.46159700000003,
+        "unlocated_net_mw": 0.3704750000000003,
+        "unlocated_units": 73
+      }
+    },
+    {
+      "file": "EinheitenSolar_61.xml",
+      "sha256": "5bfb56645ebf7fe871a8a081d53a60642b34ab2d1c910991244b84039974afd7",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97129,
+        "current_net_mw": 1340.98677000111,
+        "current_postcode_net_mw": 474.83446000042983,
+        "preperiod_units": 96027,
+        "preperiod_net_mw": 1227.3335950010533,
+        "preperiod_postcode_net_mw": 462.6461300004254,
+        "current_reported_net_mw": 866.15231,
+        "preperiod_reported_net_mw": 764.6874650000004,
+        "unlocated_net_mw": 0.30247,
+        "unlocated_units": 62
+      }
+    },
+    {
+      "file": "EinheitenSolar_62.xml",
+      "sha256": "d0606b0b4564140629334aa5bc47f61890d8698dc7a58a1f34ada9afda4fadf6",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97448,
+        "current_net_mw": 1359.0169370009473,
+        "current_postcode_net_mw": 495.3910130003913,
+        "preperiod_units": 95558,
+        "preperiod_net_mw": 986.9551190007942,
+        "preperiod_postcode_net_mw": 477.39448500036775,
+        "current_reported_net_mw": 863.6259240000004,
+        "preperiod_reported_net_mw": 509.56063400000187,
+        "unlocated_net_mw": 0.5331340000000008,
+        "unlocated_units": 99
+      }
+    },
+    {
+      "file": "EinheitenSolar_63.xml",
+      "sha256": "b5926be0dbc9f68f6513859f6abc1c991ae2574b263ae6d4e188a4fc3726af43",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 97435,
+        "current_net_mw": 1143.7925820007285,
+        "current_postcode_net_mw": 561.0179620003984,
+        "preperiod_units": 93335,
+        "preperiod_net_mw": 899.7871530005716,
+        "preperiod_postcode_net_mw": 527.4306700003771,
+        "current_reported_net_mw": 582.7746200000004,
+        "preperiod_reported_net_mw": 372.35648300000094,
+        "unlocated_net_mw": 0.3438200000000001,
+        "unlocated_units": 68
+      }
+    },
+    {
+      "file": "EinheitenSolar_65.xml",
+      "sha256": "24ab3ed1c55459b77164f1409318f2c88e48045a9c482587263322bd1617a526",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 95364,
+        "current_net_mw": 1029.3784350005383,
+        "current_postcode_net_mw": 581.1806160003254,
+        "current_reported_net_mw": 448.1978190000012,
+        "unlocated_net_mw": 0.4836850000000004,
+        "unlocated_units": 86,
+        "preperiod_units": 5,
+        "preperiod_net_mw": 0.035464999999999997,
+        "preperiod_postcode_net_mw": 0.035464999999999997
+      }
+    },
+    {
+      "file": "EinheitenSolar_9.xml",
+      "sha256": "783e9eee4d686881fe8254da1e09632b8ea546c65b7593271f7ea71c77775eb8",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98480,
+        "current_net_mw": 2186.91247100032,
+        "current_postcode_net_mw": 835.2021169999671,
+        "preperiod_units": 98594,
+        "preperiod_net_mw": 2188.1204240003176,
+        "preperiod_postcode_net_mw": 835.7360699999674,
+        "current_reported_net_mw": 1351.710353999993,
+        "preperiod_reported_net_mw": 1352.3843539999932,
+        "unlocated_net_mw": 0.35822999999999994,
+        "unlocated_units": 47
+      }
+    },
+    {
+      "file": "EinheitenSolar_66.xml",
+      "sha256": "df9b00f4ba6b7ed434ba55cb556648a7c992ace1de77f5d07940d72141df7619",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 92465,
+        "current_net_mw": 1070.5577420003642,
+        "current_postcode_net_mw": 649.6927140001906,
+        "current_reported_net_mw": 420.8650280000004,
+        "unlocated_net_mw": 0.40289500000000017,
+        "unlocated_units": 66,
+        "preperiod_units": 4,
+        "preperiod_net_mw": 0.03265,
+        "preperiod_postcode_net_mw": 0.03265
+      }
+    },
+    {
+      "file": "EinheitenSolar_7.xml",
+      "sha256": "106c1c8aaa0a0782f6ada8658b4b9fa5157c233feb89a127555f09b0f0016f60",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98454,
+        "current_net_mw": 2467.479789000422,
+        "current_postcode_net_mw": 888.2061669999509,
+        "preperiod_units": 98550,
+        "preperiod_net_mw": 2468.1367960004222,
+        "preperiod_postcode_net_mw": 888.7989739999507,
+        "current_reported_net_mw": 1579.273621999993,
+        "preperiod_reported_net_mw": 1579.3378219999931,
+        "unlocated_net_mw": 1.1943229999999998,
+        "unlocated_units": 28
+      }
+    },
+    {
+      "file": "EinheitenSolar_8.xml",
+      "sha256": "0f3dc9582de3bdab858b1fa15d4d2a45f89f9b175e2ee3b6ccbf1111c033fa59",
+      "stats": {
+        "xml_units": 100000,
+        "current_units": 98415,
+        "current_net_mw": 2258.003471000345,
+        "current_reported_net_mw": 1400.7213509999985,
+        "preperiod_units": 98525,
+        "preperiod_net_mw": 2258.6758430003447,
+        "preperiod_reported_net_mw": 1400.7213509999985,
+        "current_postcode_net_mw": 857.2821199999553,
+        "preperiod_postcode_net_mw": 857.9544919999552,
+        "unlocated_net_mw": 0.06126,
+        "unlocated_units": 8
+      }
+    }
+  ],
+  "postcode_sha256": "9f1076028c8cca786a486ecc60b211682b9379dec29fa703d44b3d4fa7956771"
+}

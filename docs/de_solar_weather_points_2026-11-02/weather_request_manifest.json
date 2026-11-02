@@ -1,0 +1,1738 @@
+[
+  {
+    "arm": "baseline",
+    "chunk": "2026-04-23_2026-04-29",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:26.618736+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "83ec305e27c023a9842dd05ec8aedd52aec27be3203f7cfe10fd048994fecf49"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-04-30_2026-05-06",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:27.379837+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "e4725557c5356e08f16ae4e64b46c64097bd39cb422fcdc12c35444c8b4e1c86"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-05-07_2026-05-13",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:28.151080+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "9ed342438d46d588ba975cffbff9f190d380274da0296559418c409e56bd203e"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-05-14_2026-05-20",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:28.765168+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "c43bff1f2ca5cc53af2fff65e47daf4ad9a871e4038ee40b1f721c46ac2a8acd"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-05-21_2026-05-27",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:29.453096+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "1651868627e4a1b5f728afe36ba07a088eb942bb7342bb94dcf9f05fbe603ed3"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-05-28_2026-06-03",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:30.228952+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "09194c749bf3d4aed7ce69c52faeedb7603d157d66f0d577a967286b3a1c88a6"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-06-04_2026-06-10",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:30.853737+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "0c7bb884834ed658900b49e2e08039633425ae2a9a6951f1eeb4ef3f74023fe0"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-06-11_2026-06-17",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:31.622567+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "5ae3ddb163bc2562c6618184bd3399f428506fe652eb0ed87c45601e5eb45e11"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-06-18_2026-06-24",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:32.287443+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "b128d6e5f9dcc4bb91526fb531c6f873c65dfd2c4123125c55fb3e2bbe4bb38e"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-06-25_2026-07-01",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:33.027203+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "5a7d2952e62977ab1cb34b8de89f7617d60e0c1c8b72d0f543e2a10de6ef4099"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-07-02_2026-07-08",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:33.633660+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "d8fa0d5b3982f8eb8e893d913ac0918a728c09d77116602446c887cd24f4898b"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-07-09_2026-07-15",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:34.264312+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "56bf2d7cbb2a8895a860d1a30faba69548ca20bbc2a9235dc5c13791cd0154e6"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-07-16_2026-07-22",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:34.916799+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "42e57488411afdb653db047b4a02e4e6e94a1108ed51513f02f26f7f0d219ed3"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-07-23_2026-07-29",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:35.618738+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "ec49452b69c59b95b1079eaa1bfa6df6a0dc2d8573ba1b659eb37c0842502c4d"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-07-30_2026-08-05",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:36.357366+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "9848c9cf4652d919b428f5ad0c35149c6a5a4e2de0fa94e6d93aef153263321c"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-08-06_2026-08-12",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:36.957598+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "763c4fcf8c4ebc661a9bea62f5b1a72aea9cfc09eb36840ca2e507fb5e39f563"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-08-13_2026-08-19",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:37.598569+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "30059a936c8813272319fbbf1e9ec705282678f5d1a6f7691dc0bc8420c10906"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-08-20_2026-08-26",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:38.265578+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "1a82318dc860f92607caf30de7fe4bd9770f3f9dcdfdb9bcb0097c470594311a"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-08-27_2026-09-02",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:38.866134+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "404730eebc1b40ff27e6e3e0e65c57c5ee9c02fe6fa6a1414a1d2406c0b66a95"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-09-03_2026-09-09",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:39.478942+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "bb5a6ef59d042ce53ac0a13f41f03521b0b18f265cbac2b8dff015a082b153f0"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-09-10_2026-09-16",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:40.145810+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "fc6a23d3aa156795a6e1dc74bc8fff00ab1e369057cb4cd3d94c3275042efca1"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-09-17_2026-09-23",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:40.784849+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "bf8835da748c9955f379bd43763d3175797c4cd98518a0ef07c168da33691530"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-09-24_2026-09-30",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:41.383088+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "15919a50b47766ccec17acb926bab6e05f25db8263c4622efa45930cd5d1283e"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-10-01_2026-10-07",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:41.967015+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "ef9cfe548c3650d6d64dd767590d8fb8c4a5ad86f601e4d23533c02e349cd711"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-10-08_2026-10-14",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:42.547386+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "1daa04d8f3b29763587c93bc974e298143c2a51382f80b48f1455afde3494dae"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-10-15_2026-10-21",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:43.161140+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "c98ae396d015edb4812da41f47231a1decac972d5118ed5329d9679b3d223f5d"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-10-22_2026-10-28",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:43.720997+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "2e8e860832530a28e6614a241e0a1189d3c65d3be6db2ea1dc192048d9287b5a"
+  },
+  {
+    "arm": "baseline",
+    "chunk": "2026-10-29_2026-11-01",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:44.287562+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 51.44,
+        "gfs_lon": 13.0
+      },
+      {
+        "point": 2,
+        "gfs_lat": 54.72,
+        "gfs_lon": 9.26
+      },
+      {
+        "point": 3,
+        "gfs_lat": 53.56,
+        "gfs_lon": 11.72
+      },
+      {
+        "point": 4,
+        "gfs_lat": 49.8,
+        "gfs_lon": 8.78
+      }
+    ],
+    "sha256": "ddaab24c2401cf6e05f9773bcd2cde3407553921b63567b896d39fd78844fb43"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-04-23_2026-04-29",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:46.340138+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "8453d460c42e1569afce8d4c3bee216103ef56f99b9514328880c66ba8f738ca"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-04-30_2026-05-06",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:46.999490+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "5dce27f2dac7db6e23e0515f6e13e42262d31252d777a35262f02d4fea365813"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-05-07_2026-05-13",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:47.674746+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "1eec52e005e7f6f827f3fcd393b4098257e867446ed76f35ec43afeedcfec44e"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-05-14_2026-05-20",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:48.282165+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "b10016ab048645a34607e8729ee2bd4b56a606248ff3cf5222b17421abbaa6fb"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-05-21_2026-05-27",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:48.923459+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "c814700855d5e628b4862517e488f1be38a528461f8f7a3b6b280753b0a96f0c"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-05-28_2026-06-03",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:49.566203+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "b92e5919468b81895874fa408a7aa24262d966bfbb88a1428911271f471f9118"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-06-04_2026-06-10",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:50.179338+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "fde76c80495d89a44c9386ccb8aec4653248e925513fb1b0e8ac48883e366509"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-06-11_2026-06-17",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:50.907399+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "63c77afeb382f491ab0514b56699047a173ecd92b3bc9bdd0e1ab3950144a66d"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-06-18_2026-06-24",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:51.620728+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "c663c8dfab5d3a70a09384ecab50458f28e0479495f904a642063f083a3c3dfc"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-06-25_2026-07-01",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:52.340036+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "33a89208d806781373f52938aa74bf7a0e569b49cbe0cb9f64232d717b023bc2"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-07-02_2026-07-08",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:52.987538+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "bfdca855d1d01fa756b0b8f222abce0cdb4ec5b2e1314e5c68dcb4f78fc6a371"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-07-09_2026-07-15",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:53.606893+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "e6ec6f2145eb7a9859984c0da530a41a99553ad04b99eccaf7b0a230e3269fcc"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-07-16_2026-07-22",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:54.259118+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "1f25d96183387b314ad78a219ccca2666076ff039a5c1681b6950a333176eec7"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-07-23_2026-07-29",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:54.830415+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "86c261e4d9b068c246c6824d13539f69d4f4b60eaf40ca7421d1caebfc0a2c2a"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-07-30_2026-08-05",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:55.426359+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "03cb3272e31394b7f72cd254fe27392cc7cd31b64b0063c6e6092a047c3e37e2"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-08-06_2026-08-12",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:56.003777+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "7bb562cec0ba9d1bac795fff3938bdaf6db6a34cc4a9c87a5662691af25b8bc2"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-08-13_2026-08-19",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:56.589980+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "bc2090abd193f3722ee0fad9b9d0d0693e6d172ef0883d74d71d9c9018b3e71c"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-08-20_2026-08-26",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:57.193377+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "7c34eaee4e12542d50f169355a293c4c66fa553d4e2cc7f28f8721af4752a704"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-08-27_2026-09-02",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:57.777865+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "952502847fce639a0378fd6863897a1256c2cae889bf1fef4488ac789e5ddb54"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-09-03_2026-09-09",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:58.352529+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "50b609308cce6440e9e87048afaab80a4dd16614bfbfcbb510bd9a08e89db762"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-09-10_2026-09-16",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:58.999122+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "ea5e97ac42a3e9510a447e50acf63ff21b2b9288367b7f8183f2880e077672a5"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-09-17_2026-09-23",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:01:59.603805+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "33ffc5d147263435bd3b0f0f769e3b7edb4a50b6d4f8de4df9e5ef3ec46f4b4b"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-09-24_2026-09-30",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:02:00.211115+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "f0e19feb2bfcd8dd50127b0f9ec037c42b11be42f6d4abde601e7f40fae494bd"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-10-01_2026-10-07",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:02:00.794918+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "65871a5590c198d6a2c20963c79895a4f863a9ee81a106fb1b382597365c314a"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-10-08_2026-10-14",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:02:01.383170+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "5aa3bbc56c797a04d2957f3bfce6513893cbca67d170b3b2134300057249cc23"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-10-15_2026-10-21",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:02:01.990303+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "468034b2568712d3255fd8c36b0bb707caebecfd3d80cb44bedbcd4867f0e267"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-10-22_2026-10-28",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:02:02.575733+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "0184d19d384d06340e6ddcf520c50705fdfd42138354fe43c1ac897ee2c26344"
+  },
+  {
+    "arm": "candidate",
+    "chunk": "2026-10-29_2026-11-01",
+    "endpoint": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+    "model_policy": "automatic_best_match",
+    "fetched_at_utc": "2026-11-02T11:02:03.148046+00:00",
+    "vintage": "retrospective_stitched_historical_forecast",
+    "points": [
+      {
+        "point": 1,
+        "gfs_lat": 48.75,
+        "gfs_lon": 10.78125
+      },
+      {
+        "point": 2,
+        "gfs_lat": 50.7421875,
+        "gfs_lon": 7.734375
+      },
+      {
+        "point": 3,
+        "gfs_lat": 52.265625,
+        "gfs_lon": 12.7734375
+      },
+      {
+        "point": 4,
+        "gfs_lat": 53.203125,
+        "gfs_lon": 9.0234375
+      }
+    ],
+    "sha256": "44cdefc2c986ca165bac7b03f6e8d03a0c328baa24a4be321397c085c17887ea"
+  }
+]

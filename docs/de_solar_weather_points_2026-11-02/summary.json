@@ -1,0 +1,12 @@
+{
+  "first_origin": "2026-07-24",
+  "last_origin": "2026-10-31",
+  "origins": 98,
+  "observations_per_model": 2940,
+  "first_delivery": "2026-07-24 16:00:00+00:00",
+  "last_delivery": "2026-11-01 22:00:00+00:00",
+  "online_configuration_unchanged": true,
+  "weather_points_per_arm": 4,
+  "controls_identical": true,
+  "note": "Paired retrospective weather ablation. Stitched historical forecasts do not reproduce issue-time 18:00 forecast vintages; absolute scores are not production guarantees."
+}
