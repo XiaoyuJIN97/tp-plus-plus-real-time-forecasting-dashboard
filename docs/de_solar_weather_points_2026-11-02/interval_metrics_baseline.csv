@@ -1,0 +1,9 @@
+zone,target,model,model_label,coverage_pct,mean_interval_width_mw,scored_runs,scored_hours,arm
+DE,solar,chronos2_online,Chronos2 with covariates,86.96969696969697,2621.43190792918,77,2310,baseline
+DE,solar,ensemble_selected,Ensembled model,84.93506493506493,1934.098215905442,77,2310,baseline
+DE,solar,persistence,Persistence,83.2034632034632,7061.972566594516,77,2310,baseline
+DE,solar,t0_gamma_online,T0 Gamma with covariates,84.97835497835497,2333.026247138235,77,2310,baseline
+DE,solar,timesfm3_online,TimesFM3 with covariates,84.71861471861472,2016.882672058757,77,2310,baseline
+DE,solar,timestral_online,Timestral with covariates,83.37662337662337,1995.7301649841045,77,2310,baseline
+DE,solar,tso_reference,TSO forecast,87.44588744588745,1818.0289299339827,77,2310,baseline
+DE,solar,xgboost_online,XGBoost with covariates,85.97402597402596,2356.0435769352985,77,2310,baseline

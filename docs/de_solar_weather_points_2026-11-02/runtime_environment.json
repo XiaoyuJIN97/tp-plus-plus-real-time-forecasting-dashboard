@@ -1,0 +1,38 @@
+{
+  "python": "3.13.9",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "device": "cpu",
+  "host_torch_threads": 2,
+  "foundation_threads": 4,
+  "host_packages": {
+    "torch": "2.11.0",
+    "chronos-forecasting": "2.2.2",
+    "timesfm": "3.0.2",
+    "xgboost": "3.1.2",
+    "pandas": "3.0.6",
+    "numpy": "2.4.4",
+    "scipy": "1.16.3",
+    "scikit-learn": "1.7.2",
+    "lxml": "5.3.0",
+    "huggingface-hub": "0.36.1",
+    "transformers": "4.57.6"
+  },
+  "foundation_packages": {
+    "timestral": "1.0.0",
+    "rotary-embedding-torch": "0.9.1",
+    "tfc-t0": "0.6.0",
+    "huggingface_hub": "0.36.1",
+    "torchaudio": "2.11.0",
+    "torchvision": "0.26.0",
+    "torch": "2.11.0",
+    "transformers": "4.57.6",
+    "numpydoc": "1.9.0",
+    "numpy": "2.4.4"
+  },
+  "foundation_checkpoint_revisions": {
+    "t0_gamma": "e08aee083778f1f32da4974c0a34276776a35c52",
+    "timestral": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"
+  },
+  "base_code_revision": "0eb2b52557c30b586d8b08bcf44ea34e8ec4f664",
+  "inference_failures": 0
+}

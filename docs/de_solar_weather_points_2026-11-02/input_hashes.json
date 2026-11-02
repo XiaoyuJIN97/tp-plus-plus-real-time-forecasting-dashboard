@@ -1,0 +1,8 @@
+{
+  "inputs/baseline/entsoe/data/hourly/DE/actual_solar_generation/2026.parquet": "2172505c9e4a1167a063c1a239916b32b29b9101b321ce7e1ad3779a73f735a0",
+  "inputs/baseline/entsoe/data/hourly/DE/forecast_solar_generation/2026.parquet": "c9c20039efa42855db6e46eaa7b9930c94944526c229a4f914c5d20919a6e75d",
+  "inputs/baseline/weather/data/raw/DE/solar/2026.csv": "82a5dbf722761e0096c2008fda17b6b39c1d010e581295e029fe69c9330539a7",
+  "inputs/candidate/entsoe/data/hourly/DE/actual_solar_generation/2026.parquet": "2172505c9e4a1167a063c1a239916b32b29b9101b321ce7e1ad3779a73f735a0",
+  "inputs/candidate/entsoe/data/hourly/DE/forecast_solar_generation/2026.parquet": "c9c20039efa42855db6e46eaa7b9930c94944526c229a4f914c5d20919a6e75d",
+  "inputs/candidate/weather/data/raw/DE/solar/2026.csv": "5fc8bdb4cfe04fee363d94be9612986a8e75d9af82aaa3461fe69ff891681679"
+}

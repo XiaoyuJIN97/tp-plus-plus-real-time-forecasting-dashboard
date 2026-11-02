@@ -1,0 +1,12 @@
+# Lightweight data-selection/reporting tests; inference uses the existing online runtimes.
+numpy>=1.26
+pandas>=2.2
+pyarrow>=16
+requests>=2.32
+pyyaml>=6
+python-dotenv>=1
+scipy>=1.11
+scikit-learn>=1.5
+lxml>=5
+matplotlib>=3.8
+tabulate>=0.9

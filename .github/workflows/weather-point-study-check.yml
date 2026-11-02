@@ -1,0 +1,28 @@
+name: Weather-point study regression
+on:
+  pull_request:
+    paths:
+      - 'scripts/select_de_solar_weather_points.py'
+      - 'scripts/de_solar_weather_study.py'
+      - 'scripts/report_de_solar_weather_study.py'
+      - 'tests/test_de_solar_weather_study.py'
+      - 'requirements-weather-study.txt'
+      - '.github/workflows/weather-point-study-check.yml'
+  push:
+    paths:
+      - 'scripts/select_de_solar_weather_points.py'
+      - 'scripts/de_solar_weather_study.py'
+      - 'scripts/report_de_solar_weather_study.py'
+      - 'tests/test_de_solar_weather_study.py'
+      - 'requirements-weather-study.txt'
+      - '.github/workflows/weather-point-study-check.yml'
+jobs:
+  study-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-weather-study.txt pytest
+      - run: PYTHONPATH=src:. OMP_NUM_THREADS=2 python -m pytest tests/test_de_solar_weather_study.py -q
