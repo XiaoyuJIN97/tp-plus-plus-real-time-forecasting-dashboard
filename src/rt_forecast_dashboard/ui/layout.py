@@ -432,8 +432,8 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         mae, width="stretch", hide_index=True,
         column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
     )
-    _render_analysis_window(frame[frame["target"].eq(selected_target)])
     _render_probabilistic_leaderboard(selected_target)
+    _render_analysis_window(frame[frame["target"].eq(selected_target)])
 
 
 def _render_header() -> None:
