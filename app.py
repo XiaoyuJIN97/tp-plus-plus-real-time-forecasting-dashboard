@@ -1,4 +1,4 @@
-"""Streamlit entry point. Freshness revision: recovered outcomes and lightweight leaderboard loading."""
+"""Streamlit entry point. UI revision: 2026-11-02, data-period note follows all leaderboard tables."""
 
 from pathlib import Path
 import sys
