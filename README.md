@@ -213,3 +213,11 @@ The repository includes portable input export, a dependency-isolated runner,
 admission reports, explicit publication and a GitHub PR guard. Start from
 [the candidate template](examples/model_onboarding/manifest.yml); it is deliberately
 not admitted. See [the policy defaults](config/model_onboarding.yml).
+
+## Solar weather points and performance figures
+
+The [DE solar weather-point and dashboard performance package](docs/solar_forecast_package_2026-11-03/README.md)
+contains the currently deployed four-point map, exact request coordinates,
+original selection code/provenance, and reproducible figures comparing dashboard
+models and TSO benchmarks. PNG, PDF and SVG figures, frozen inputs and metric
+calculations are included; the production point configuration is unchanged.
