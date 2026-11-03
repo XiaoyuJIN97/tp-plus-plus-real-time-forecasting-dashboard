@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+from rt_forecast_dashboard.time_utils import forecast_horizon_hours, is_complete_forecast_window
 
 import hashlib
 from pathlib import Path
@@ -25,6 +25,7 @@ def frames(context, future, covariates, *, context_hours=2208, horizon=None):
         raise ValueError('Invalid covariate names')
     past = pd.DataFrame(context).loc[:, ['timestamp', 'actual_mw', *covariates]].copy()
     next_ = pd.DataFrame(future).loc[:, ['timestamp', *covariates]].copy()
+    infer_delivery_window = horizon is None
     if horizon is None:
         origin = pd.to_datetime(next_.timestamp, utc=True).iloc[0]
         horizon = forecast_horizon_hours(origin.tz_convert('Europe/Brussels').date())
@@ -40,6 +41,8 @@ def frames(context, future, covariates, *, context_hours=2208, horizon=None):
         frame[numeric.columns] = numeric
     if past.timestamp.max()+pd.Timedelta(hours=1) != next_.timestamp.min():
         raise ValueError('Context must end exactly one hour before forecast origin')
+    if infer_delivery_window and not is_complete_forecast_window(next_.timestamp, origin.tz_convert("Europe/Brussels").date()):
+        raise ValueError("Expected the exact 18:00 Brussels through next-day-midnight delivery window")
     return past, next_
 
 

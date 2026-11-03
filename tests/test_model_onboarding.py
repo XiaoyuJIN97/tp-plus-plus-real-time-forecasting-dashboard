@@ -207,6 +207,7 @@ def test_publication_is_explicit_preserves_incumbents_and_rejects_offline(eviden
     saved=store.read_forecasts()
     assert saved[saved.model.eq('incumbent')].forecast_mw.eq(999).all()
     assert saved[saved.model.eq(manifest['model_key'])].source.eq('historical_mock_replay').all()
+    assert saved[saved.model.eq(manifest['model_key'])].forecast_window.eq('next_day_midnight_v1').all()
 
 
 def test_future_model_scope_is_shared_by_inputs_completeness_ensemble_and_ui(monkeypatch):
@@ -304,3 +305,39 @@ def test_staging_cannot_overwrite_configured_production_data(tmp_path,monkeypatc
     with pytest.raises(ValueError,match='cannot write production'):
         staging_path(tmp_path/'live/dashboard/forecasts_recent.parquet')
     assert staging_path(tmp_path/'staging')==tmp_path/'staging'
+
+
+@pytest.mark.parametrize('shift', [1, -1])
+def test_gate_rejects_shifted_full_length_delivery_windows(evidence, shift):
+    root, _, _, _, baseline_paths = evidence
+    for stage in ('offline', 'replay'):
+        path = root / stage / 'forecasts.csv'
+        frame = pd.read_csv(path)
+        frame['timestamp'] = pd.to_datetime(frame.timestamp, utc=True) + pd.Timedelta(hours=shift)
+        frame.to_csv(path, index=False)
+        meta_path = root / stage / 'run.json'
+        meta = json.loads(meta_path.read_text())
+        meta['forecasts_sha256'] = digest(path)
+        meta_path.write_text(json.dumps(meta))
+        # Shifting references too must not make a wrong production grid valid.
+        refs = pd.read_csv(baseline_paths[stage])
+        refs['timestamp'] = pd.to_datetime(refs.timestamp, utc=True) + pd.Timedelta(hours=shift)
+        refs.to_csv(baseline_paths[stage], index=False)
+    report = admission(evidence)
+    failed = {c['name'] for c in report['checks'] if not c['passed']}
+    assert {'offline_complete_horizons', 'replay_complete_horizons'} <= failed
+    assert 'replay_BE_load_alignment' in failed
+
+
+def test_export_rejects_shifted_inventory_with_correct_row_count(tmp_path):
+    from rt_forecast_dashboard.model_onboarding.datasets import export_windows
+    w = window(hours=2208)
+    for name in ('context', 'future'):
+        frame = pd.DataFrame(w[name])
+        frame['timestamp'] = pd.to_datetime(frame.timestamp, utc=True) + pd.Timedelta(hours=1)
+        frame.to_parquet(tmp_path / (name + '.parquet'))
+    plan = {k: w[k] for k in ('zone','target','run_date','origin_utc','inputs_available_at_utc')}
+    plan.update(context_path='context.parquet', future_path='future.parquet', covariates='[]')
+    pd.DataFrame([plan]).to_csv(tmp_path / 'plan.csv', index=False)
+    with pytest.raises(ValueError, match='exact.*Brussels'):
+        export_windows(tmp_path / 'plan.csv', tmp_path / 'windows.jsonl')

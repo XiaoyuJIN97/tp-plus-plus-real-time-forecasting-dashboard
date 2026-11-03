@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import pandas as pd
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, is_complete_forecast_window
 from .contracts import digest, frames, records, staging_path
 
 
@@ -18,6 +19,10 @@ def export_windows(plan_path, output, context_hours=2208, horizon=None):
             context, future = read('context_path'), read('future_path')
             covs = json.loads(row['covariates'])
             past, next_ = frames(context,future,covs,context_hours=context_hours,horizon=horizon)
+            expected_origin = brussels_cutoff_timestamp(pd.Timestamp(row['run_date']).date())
+            origin = pd.Timestamp(row['origin_utc'])
+            if origin != expected_origin or not is_complete_forecast_window(next_.timestamp, row['run_date'], horizon or 30):
+                raise ValueError('Inventory origin/run_date must match the exact Brussels delivery window')
             actuals = future.actual_mw.where(future.actual_mw.notna(), None).tolist() if 'actual_mw' in future else [None]*len(next_)
             actuals = [None if pd.isna(x) else float(x) for x in actuals]
             result = {k:row[k] for k in ('zone','target','run_date','origin_utc','inputs_available_at_utc')}

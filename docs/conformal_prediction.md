@@ -1,19 +1,22 @@
 # Probabilistic forecast panels
 
 The Forecast visualization and analysis page has parallel Point forecasts and
-Probabilistic forecasts tabs. Existing target, zone and date controls apply to both.
-In the probabilistic tab, choose models and one or two plots per row.
-The displayed band has 80% nominal coverage, matching the interval coverage
+Probabilistic forecasts views. Existing target, zone and date controls apply to both.
+In the probabilistic view, choose models and one or two plots per row.
+The displayed interval has 80% nominal coverage, matching the interval coverage
 of Elia’s P10–P90 wind and solar forecasts. The conformal bounds are symmetric
 absolute-error intervals, not separately calibrated P10 and P90 quantiles.
 See [Elia wind forecast fields](https://opendata.elia.be/explore/dataset/ods086/information/)
-and [Elia solar forecast fields](https://opendata.elia.be/explore/dataset/ods087/information/). Each model has its own forecast, actuals and an 80% interval band.
+and [Elia solar forecast fields](https://opendata.elia.be/explore/dataset/ods087/information/). Each model has its own forecast, actuals and an 80% prediction interval.
 Coverage diagnostics remain available in the generated CSV artifact.
 
 Calibration uses absolute errors separately for each model, zone, target and
 six-hour horizon bucket. For every forecast origin, use at most 60 earlier,
 fully observed complete 29/30/31-hour runs and require at least 20. A run becomes eligible
 only after its final hourly delivery has ended, plus a two-hour reporting lag.
+The five buckets are hours 1–6, 7–12, 13–18, 19–24 and 25–30; hour 31
+shares the final bucket. All comparisons require the exact complete UTC grid
+defined by the [shared delivery-window contract](FORECAST_WINDOW_MIGRATION.md#operator-and-adapter-contract).
 Neither its own outcomes nor future outcomes enter a forecast's calibration.
 Original actual publication and revision vintages are unavailable: historical
 calibration uses current stored actuals under that lag assumption. Retrospective

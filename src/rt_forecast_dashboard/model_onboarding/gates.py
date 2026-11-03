@@ -1,7 +1,7 @@
 """Fail-closed admission from matched outcomes, resource evidence and reviews."""
 from __future__ import annotations
 
-from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+from rt_forecast_dashboard.time_utils import is_complete_forecast_window
 from datetime import UTC, datetime
 import json
 import re
@@ -94,8 +94,10 @@ def evaluate(manifest_path, policy_path, *, offline, baselines, replay, replay_b
         check(stage+'_model', f.model.eq(manifest['model_key']).all())
         valid = np.isfinite(f.forecast_mw) & f.forecast_mw.ge(0)
         check(stage+'_finite_predictions', valid.all())
-        complete = f.groupby(['zone','target','run_date']).agg(hours=('timestamp','nunique'))
-        check(stage+'_complete_horizons', len(complete)>0 and all(row.hours == forecast_horizon_hours(key[2], policy['horizon_hours']) for key,row in complete.iterrows()))
+        complete = f.groupby(['zone','target','run_date'])
+        check(stage+'_complete_horizons', len(f)>0 and all(
+            is_complete_forecast_window(part.timestamp, key[2], policy['horizon_hours'])
+            for key, part in complete))
         for zone,target in sorted(scope):
             planned = r[r.zone.eq(zone)&r.target.eq(target)]
             check(f'{stage}_{zone}_{target}_present', len(planned)>0)
@@ -124,11 +126,11 @@ def evaluate(manifest_path, policy_path, *, offline, baselines, replay, replay_b
         truth = b.groupby(KEYS).actual_mw.agg(['min','max'])
         check(stage+'_consistent_reference_actuals', np.allclose(truth['min'], truth['max'], equal_nan=True))
         panel = panel[references].join(truth['min'].rename('reference_actual')).reset_index()
-        expected_keys = panel.dropna(subset=references).groupby(['zone','target','run_date']).filter(lambda p:len(p)==forecast_horizon_hours(p.run_date.iloc[0], policy['horizon_hours']))
+        expected_keys = panel.dropna(subset=references).groupby(['zone','target','run_date']).filter(lambda p:is_complete_forecast_window(p.timestamp, p.run_date.iloc[0], policy['horizon_hours']))
         merged = f.merge(expected_keys, on=KEYS, how='inner', validate='one_to_one').dropna(subset=['actual_mw','reference_actual',*references])
         check(stage+'_identical_actuals', np.allclose(merged.actual_mw, merged.reference_actual, rtol=1e-6, atol=1e-6))
         # Compare every model on exactly the same complete delivery windows.
-        merged = merged.groupby(['zone','target','run_date']).filter(lambda p:len(p)==forecast_horizon_hours(p.run_date.iloc[0], policy['horizon_hours']))
+        merged = merged.groupby(['zone','target','run_date']).filter(lambda p:is_complete_forecast_window(p.timestamp, p.run_date.iloc[0], policy['horizon_hours']))
         for zone,target in sorted(scope):
             planned = r[r.zone.eq(zone)&r.target.eq(target)]
             candidate = f[f.zone.eq(zone)&f.target.eq(target)]

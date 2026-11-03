@@ -13,10 +13,12 @@ from scripts.onboarding_foundation_adapter import Adapter, CHECKPOINTS
 from rt_forecast_dashboard.models.foundation_runtime import REVISIONS
 
 
-def inputs(covs):
-    past = pd.DataFrame({'timestamp':pd.date_range(end='2024-01-02T16:00:00Z',periods=2208,freq='h'),
+def inputs(covs, day='2024-01-02'):
+    from rt_forecast_dashboard.time_utils import forecast_delivery_grid
+    grid = forecast_delivery_grid(day)
+    past = pd.DataFrame({'timestamp':pd.date_range(end=grid[0]-pd.Timedelta(hours=1),periods=2208,freq='h'),
                          'actual_mw':100.})
-    future = pd.DataFrame({'timestamp':pd.date_range(past.timestamp.iloc[-1]+pd.Timedelta(hours=1),periods=30,freq='h'),
+    future = pd.DataFrame({'timestamp':grid,
                            'actual_mw':120.})
     for name in covs:
         past[name]=1.
@@ -25,7 +27,8 @@ def inputs(covs):
 
 
 @pytest.mark.parametrize('family',list(CHECKPOINTS))
-def test_native_tensor_contract(family,monkeypatch):
+@pytest.mark.parametrize('day,hours', [('2024-01-02',30), ('2024-03-30',29), ('2025-10-25',31), ('2025-12-31',30)])
+def test_native_tensor_contract(family,monkeypatch,day,hours):
     import contextlib
     monkeypatch.setitem(sys.modules,'torch',types.SimpleNamespace(inference_mode=contextlib.nullcontext))
     adapter = Adapter.__new__(Adapter)
@@ -33,23 +36,24 @@ def test_native_tensor_contract(family,monkeypatch):
     class Native:
         def predict(self,x,**kwargs):
             assert x.shape==(1,2208)
-            assert kwargs['future_covariates'].shape==(1,1,2238)
-            return types.SimpleNamespace(median=np.ones((1,30)))
+            assert kwargs['future_covariates'].shape==(1,1,2208+hours)
+            return types.SimpleNamespace(median=np.ones((1,hours)))
         def forecast(self,x,**kwargs):
             assert x.shape==(1,1,2208)
-            assert kwargs['known_covariates'].shape==(1,1,2238)
-            return types.SimpleNamespace(median=np.ones((1,1,30)))
+            assert kwargs['known_covariates'].shape==(1,1,2208+hours)
+            return types.SimpleNamespace(median=np.ones((1,1,hours)))
     adapter.model=Native()
-    past,future=inputs(['weather'])
-    assert adapter.predict(future,'load',past,['weather']).shape==(30,)
+    past,future=inputs(['weather'],day)
+    assert adapter.predict(future,'load',past,['weather']).shape==(hours,)
     assert CHECKPOINTS[family][1]==REVISIONS[family]
 
 
-def test_generated_manifest_and_frozen_data(tmp_path):
+@pytest.mark.parametrize('day,hours', [('2024-01-02',30), ('2024-03-30',29), ('2025-10-25',31), ('2025-12-31',30)])
+def test_generated_manifest_and_frozen_data(tmp_path,day,hours):
     spec=initialize('t0_gamma',tmp_path/'model')
     assert all(x['commercial_use']=='unknown' for x in spec['licenses'].values())
     covs=spec['scope'][0]['covariates']
-    past,future=inputs(covs)
+    past,future=inputs(covs,day)
     past.to_csv(tmp_path/'context.csv',index=False)
     future.to_csv(tmp_path/'future.csv',index=False)
     origin=future.timestamp.iloc[0]
@@ -62,9 +66,9 @@ def test_generated_manifest_and_frozen_data(tmp_path):
     freeze(tmp_path/'model/manifest.yml',tmp_path/'inventory.csv',tmp_path/'refs.csv',tmp_path/'frozen')
     import json
     window=json.loads((tmp_path/'frozen/windows.jsonl').read_text())
-    assert len(window['context'])==2208 and len(window['future'])==30
+    assert len(window['context'])==2208 and len(window['future'])==hours
     assert 'actual_mw' not in window['future'][0]
-    assert window['actuals']==[120.]*30
+    assert window['actuals']==[120.]*hours
     refs.iloc[:-1].to_csv(tmp_path/'missing.csv',index=False)
     with pytest.raises(ValueError,match='does not cover'):
         freeze(tmp_path/'model/manifest.yml',tmp_path/'inventory.csv',tmp_path/'missing.csv',tmp_path/'bad')
