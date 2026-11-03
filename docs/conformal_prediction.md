@@ -10,6 +10,30 @@ See [Elia wind forecast fields](https://opendata.elia.be/explore/dataset/ods086/
 and [Elia solar forecast fields](https://opendata.elia.be/explore/dataset/ods087/information/). Each model has its own forecast, actuals and an 80% prediction interval.
 Coverage diagnostics remain available in the generated CSV artifact.
 
+## Probabilistic leaderboard page
+
+The sidebar's **Probabilistic forecasts** page (`/probabilistic_forecasts`) has
+the same task selector, model-family rows, bidding-zone columns and model order
+as the deterministic Leaderboard. It displays three separate tables:
+
+1. **Winkler score (MW):** mean 80% interval score; lower is better.
+2. **Mean interval width (MW).**
+3. **Coverage (%):** nominal target 80%.
+
+All three use identical complete, observed, calibrated runs across the compared
+models within each area. Scores are precomputed in
+`data/dashboard/probabilistic_leaderboard.parquet`, so the page loads the small
+selected-task snapshot. The deterministic page does not load interval results.
+Forecast visualizations remain on More detailed insights.
+
+For the 80% interval `[L, U]`, each hourly Winkler score is
+`(U - L) + 10 * max(L - actual, 0) + 10 * max(actual - U, 0)`.
+The table averages these hourly scores on the shared sample. The multiplier is
+`2 / (1 - coverage)`; an observation exactly on either bound incurs no miss
+penalty. Width and Winkler score have MW units; compare models within a column,
+rather than averaging scores across differently sized systems. This follows
+[Forecasting: Principles and Practice — interval accuracy](https://otexts.com/fpp3/distaccuracy.html).
+
 Calibration uses absolute errors separately for each model, zone, target and
 six-hour horizon bucket. For every forecast origin, use at most 60 earlier,
 fully observed complete 29/30/31-hour runs and require at least 20. A run becomes eligible
@@ -33,5 +57,5 @@ for discussion of conformal calibration for dependent time series.
 
 The daily forecast, outcome refresh and recovery artifact builders automatically
 regenerate data/dashboard/conformal_forecasts.parquet, conformal_coverage.csv
-and conformal_status.json. Precomputation avoids calibrating the entire archive
+and conformal_status.json, plus the probability score snapshot. Precomputation avoids calibrating the entire archive
 on each UI rerun. Only the selected target/zone is loaded into the panels.

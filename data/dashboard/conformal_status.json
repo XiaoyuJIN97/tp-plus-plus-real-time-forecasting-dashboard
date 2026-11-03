@@ -14,5 +14,12 @@
   "reporting_lag_hours": 2,
   "method": "Rolling absolute-error conformal; pointwise bands",
   "historical_actuals": "Current stored revisions; reporting-lag availability assumed",
-  "coverage": "Nominal target; exchangeability is not assumed for time-series guarantees"
+  "coverage": "Nominal target; exchangeability is not assumed for time-series guarantees",
+  "interval_score_level": 0.8,
+  "score_metrics": [
+    "winkler_score_mw",
+    "mean_interval_width_mw",
+    "coverage_pct"
+  ],
+  "scores_generated_at_utc": "2026-11-03T14:32:07.432261+00:00"
 }
