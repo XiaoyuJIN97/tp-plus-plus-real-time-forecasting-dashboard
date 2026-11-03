@@ -35,6 +35,19 @@ def forecast_horizon_hours(run_date: date | str, nominal_hours: int = 30) -> int
     return int((forecast_end_timestamp(day) - brussels_cutoff_timestamp(day)) / pd.Timedelta(hours=1))
 
 
+def forecast_delivery_grid(run_date: date | str, nominal_hours: int = 30) -> pd.DatetimeIndex:
+    """Exact UTC delivery instants, including the final hour ending at midnight."""
+    day = pd.Timestamp(run_date).date()
+    return pd.date_range(brussels_cutoff_timestamp(day),
+                         periods=forecast_horizon_hours(day, nominal_hours), freq="h")
+
+
+def is_complete_forecast_window(timestamps, run_date: date | str, nominal_hours: int = 30) -> bool:
+    """Reject shifted, duplicated, missing or legacy delivery timestamps."""
+    observed = pd.DatetimeIndex(pd.to_datetime(timestamps, utc=True, errors="coerce")).sort_values()
+    return observed.equals(forecast_delivery_grid(run_date, nominal_hours))
+
+
 def latest_complete_run_date(now: datetime | None = None) -> date:
     now = now or datetime.now(UTC)
     if now.tzinfo is None:

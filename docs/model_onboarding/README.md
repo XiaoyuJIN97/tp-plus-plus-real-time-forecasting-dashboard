@@ -7,6 +7,14 @@ Day-ahead horizons start at 18:00 Brussels and end at midnight after the followi
 day: normally 30 hours, **31 on the autumn transition and 29 in spring**. Adapters must use the input window's
 actual length; see [daylight-saving handling](../DAYLIGHT_SAVING.md).
 
+Use the [shared horizon contract and executable grid example](../FORECAST_WINDOW_MIGRATION.md#operator-and-adapter-contract)
+for every stage. `run_date` is the Brussels date of the 18:00 origin, not the
+execution/download date. A delayed job can execute the following morning.
+The 2024/2025 study needs 2023 context and inputs/truth into 1 January 2026.
+Include the spring/autumn transition origins and 31 December in regression
+checks even when the accuracy study uses monthly sampling. All baselines must
+be regenerated on the full grid; older 24-hour reports are historical evidence.
+
 This process currently supports time-series foundation models that can run on our local CPU. It provides reusable
 input/export, isolated inference, metrics/admission, ensemble and publication
 commands. The operator still writes the vendor-specific adapter and checks
@@ -171,7 +179,9 @@ Reference CSV schema:
 zone,target,run_date,timestamp,model,forecast_mw,actual_mw
 ```
 
-Every reference must use the same windows/settings; the evaluator rejects
+Every reference must use the same exact delivery grids/settings; export, admission
+and publication reject incomplete or shifted windows even with the correct row count.
+The evaluator rejects
 conflicting actuals and duplicate keys. It reports annual candidate MAE against
 the lowest reference MAE on the same complete windows. Replay reference CSVs
 must contain the entire current retained online history for the approved scope;
@@ -224,7 +234,8 @@ PYTHONPATH=src .onboarding-host/bin/python -m rt_forecast_dashboard.model_onboar
 
 This runs the existing mean/median/learned ensemble policy with and without the
 candidate in an in-memory preview store, including automatic component discovery
-and earlier-only learned weights. It writes no production forecasts. The report
+and learned weights from fully observed earlier windows. Runs overlap for six
+hours, so an earlier run date alone does not prove its outcomes were available. It writes no production forecasts. The report
 contains matched annual MAEs and fingerprints; insufficient observed scope/year
 coverage or excessive ensemble regression fails. Provide all reference components
 needed by the configured ensemble; do not pass an ensemble-only baseline CSV.

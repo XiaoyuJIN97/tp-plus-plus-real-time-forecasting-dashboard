@@ -41,7 +41,7 @@ expand scope and repeat qualification for each additional zone/target.
 | Step | Required local data | Produced evidence |
 | --- | --- | --- |
 | Package/review | Exact checkpoint, vendor code, complete environment lock, license/data-rights records | `manifest.yml`, disabled `registry-entry.yml`, `requirements.lock`, preparation log, local checkpoint |
-| Offline | 2024/2025 origin inventory; 2,208 past hours per origin (including 2023 context); 30 future covariate hours; separately held truth; matched reference predictions | Frozen `windows.jsonl`, `references.csv`; `forecasts.csv`, `runtime.csv`, `run.json`, worker log |
+| Offline | 2024/2025 origin inventory; 2,208 past hours per origin (including 2023 context); 29/30/31 future covariate hours; separately held truth; matched reference predictions | Frozen `windows.jsonl`, `references.csv`; `forecasts.csv`, `runtime.csv`, `run.json`, worker log |
 | Replay | Inventory covering the exact retained online origins, original input vintages and availability evidence; matching incumbent history | Same frozen/run files, tagged as replay |
 | Ensemble | Offline candidate run plus component-level offline reference predictions and observed outcomes | With/without-candidate `ensemble.json` |
 | Shadow | Fresh daily snapshots, once each real day for seven consecutive dates; no future truth required at inference | Seven daily run folders, combined `shadow` evidence |
@@ -123,16 +123,19 @@ Required frame contents:
 import pandas as pd
 import yaml
 from rt_forecast_dashboard.model_onboarding.contracts import frames
+from rt_forecast_dashboard.time_utils import forecast_delivery_grid
 
 spec = yaml.safe_load(open('staging/t0_gamma/package/manifest.yml'))
 covs = spec['scope'][0]['covariates']  # same list for Timestral in this scope
 context = pd.read_parquet('archives/offline/2024-01-02/context.parquet')
 future = pd.read_parquet('archives/offline/2024-01-02/future.parquet')
 # context columns: timestamp, actual_mw, *covs; 2208 consecutive hourly UTC rows
-# future columns: timestamp, *covs; 30 consecutive hourly UTC rows
+# future columns: timestamp, *covs; the exact 29/30/31-hour UTC delivery grid
 # Optional future.actual_mw supplies scoring truth, never model input.
 past, known_future = frames(context, future, covs)
-assert len(past) == 2208 and len(known_future) == 30
+grid = forecast_delivery_grid('2024-01-02')  # derive for EACH inventory run_date
+assert len(past) == 2208 and len(known_future) == len(grid)
+assert pd.DatetimeIndex(known_future.timestamp).equals(grid)
 assert 'actual_mw' not in known_future
 ```
 
@@ -153,7 +156,7 @@ zone,target,run_date,timestamp,model,forecast_mw,actual_mw
 BE,load,2024-01-02,2024-01-02T17:00:00Z,chronos2_online,10000,10100
 ```
 
-Provide **all 30 hours for every declared reference and origin**, not just this
+Provide **the entire 29/30/31-hour grid for every declared reference and origin**, not just this
 illustrative row. The generated load manifest declares Chronos2, Ridge,
 TimesFM3, existing T0 Gamma, existing Timestral and TSO. Using existing identical
 T0/Timestral as references can prevent their duplicate examples passing the 2%
@@ -304,7 +307,7 @@ and disable its registration to roll back, then rebuild affected artifacts.
 PYTHONPATH=src:. .onboarding-host/bin/python -m pytest -q tests/test_onboarding_examples.py
 ```
 
-These tests generate full-size synthetic input frames in temporary directories,
+These tests generate ordinary and daylight-saving full-size synthetic input frames in temporary directories,
 check both native tensor layouts with stubbed vendor calls, verify frozen truth
 separation and missing-reference rejection, and check checkpoint parity with the
 current runtime. They do **not** measure real model accuracy, memory, runtime,

@@ -64,6 +64,21 @@ overhead, independently of forecast scheduling.
 
 Set `ENTSOE_API_KEY` in `.env` or Streamlit secrets. Without credentials, the pipeline can still create deterministic demo data so the dashboard remains testable.
 
+## Forecast horizon and model onboarding
+
+The authoritative [delivery-window contract](docs/FORECAST_WINDOW_MIGRATION.md#operator-and-adapter-contract)
+covers inference, offline testing, historical mock replay, ensemble fitting and
+leaderboard scoring. Use `time_utils.forecast_delivery_grid(run_date)` rather
+than a fixed 24/30-row range. Context stays 2,208 elapsed hours; future windows
+have 29/30/31 hours from 18:00 Brussels through midnight at the end of the next
+day, excluding that midnight timestamp.
+
+To add a model, follow the [standard onboarding process](docs/model_onboarding/README.md),
+[T0 Gamma/Timestral code and data examples](docs/model_onboarding/FOUNDATION_EXAMPLES.md)
+and [admission checklist](docs/model_onboarding/PR_CHECKLIST.md). Regenerate all
+reference predictions on the same full windows. Test ordinary dates, both DST
+transitions and year-end before publication.
+
 ## Model Artifacts
 
 Place serialized model artifacts under `models/` and update `config/model_registry.yml`.
@@ -139,19 +154,19 @@ flowchart TD
   G --> H["Run configured online models for BE, FR, DE, DK1, DK2, ES, and PT"]
   H --> I["Commit core model rows first, then append TimesFM3 rows when that run finishes"]
   I --> J["Streamlit Cloud rebuilds from GitHub and displays Europe/Brussels delivery times"]
-  J --> K["After realized hours arrive, dashboard reads ENTSO-E actuals for scatter and accuracy"]
+  J --> K["Hourly outcome refresh saves independent actuals and rebuilds score/interval snapshots"]
 ```
 
 ### Operational Map
 
 | Stage | Repository / service | Included data | Dashboard use |
 |---|---|---|---|
-| ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | Forecast and actual series under `data/hourly`; compact BE/FR/DE/DK1/DK2/ES/PT comparison actuals under `data/dashboard/actuals_recent.parquet` | TSO covariate, TSO benchmark, 3-month context values, and one-request realized actuals for dashboard diagnostics |
+| ENTSO-E snapshot collection | `Energy-Data-Science/entsoe-realtime-data`, `data` branch | Forecast and actual series under `data/hourly`; compact BE/FR/DE/DK1/DK2/ES/PT comparison actuals under `data/dashboard/actuals_recent.parquet` | TSO covariate, TSO benchmark, 3-month context values, and observed outcomes attached by the hourly refresh |
 | Open-Meteo weather collection | `XiaoyuJIN97/open-meteo-realtime-data`, `data` branch | Four-point target-specific files under `data/raw/{BE,FR,DE,DK1,DK2,ES,PT}/{load,solar,onshore,offshore}`. Load uses `temperature_2m`, `relative_humidity_2m`, `shortwave_radiation`, plus a derived degree proxy. The degree proxy is computed in the dashboard as the absolute distance between the mean four-point temperature and an 18 C comfort/reference temperature, so it summarizes heating/cooling stress with one covariate. Solar uses `shortwave_radiation` and `temperature_2m`. Wind uses `wind_speed_100m_ms`, `wind_dir_sin`, and `wind_dir_cos`. Spain does not include offshore wind because that ENTSO-E series is unavailable. | Weather covariates for load, solar, onshore wind, offshore wind |
 | Daily forecast | this dashboard repo, `.github/workflows/daily-forecast.yml` | `data/forecasts/forecasts_YYYY-MM-DD.csv` with 29/30/31 hourly delivery timestamps, forecasts, TSO benchmark, run metadata, context start/end | Reads public ENTSO-E hourly archive first, falls back to raw/update files when needed, reads checked-out Open-Meteo files, and displays deterministic forecast analysis, scatter diagnostics, accuracy, and run history |
-| Streamlit display | Streamlit Cloud | Live dashboard from committed forecast CSVs plus fetched realized actuals | Displays timestamps in Europe/Brussels; uses ENTSO-E actuals only for visualization/diagnostics, not as forecast inputs |
+| Streamlit display | Streamlit Cloud | Live dashboard from committed forecast, actuals and score snapshots | Displays timestamps in Europe/Brussels; uses ENTSO-E actuals only for visualization/diagnostics, not as forecast inputs |
 
-The dashboard forecast workflow is scheduled to run after about `18:30 Europe/Brussels` each day. GitHub Actions cron is UTC-only and can be delayed, so the workflow uses several UTC fallback triggers with a Brussels-time guard. Only a trigger after the Brussels forecast window proceeds when the daily forecast file is missing. This deliberately leaves a buffer after the 18:00 Brussels publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.
+The dashboard forecast workflow is scheduled to run after about `18:30 Europe/Brussels` each day. GitHub Actions cron is UTC-only and can be delayed, so the workflow uses several UTC fallback triggers with a Brussels-time guard. Each trigger audits the latest eligible Brussels origin; a delayed trigger after midnight can recover the preceding date instead of skipping it. This deliberately leaves a buffer after the 18:00 Brussels publication time so the ENTSO-E collector can snapshot and push the latest TSO forecasts before forecasting begins.
 
 
 ### T0 Gamma and Timestral online forecasts
@@ -186,7 +201,7 @@ run `scripts/import_foundation_replay.py --replay PATH --data-dir data`, followe
 by `python -m rt_forecast_dashboard.pipeline.build_dashboard_artifacts`. The
 import audits every existing prediction and records revisions to shared actuals.
 
-The rollout [results and coverage report](docs/foundation_online_since_2026-07-24/RESULTS.md) covers 108,048 mock predictions from 24 July through 19 October 2026 across the seven active zones. Both new families appear in the compact forecast artifact and daily leaderboard.
+The original, **legacy 24-hour** rollout [results and coverage report](docs/foundation_online_since_2026-07-24/RESULTS.md) covers 108,048 mock predictions from 24 July through 19 October 2026 across the seven active zones. Both new families appear in the compact forecast artifact and daily leaderboard. Those archived scores do not validate today’s extended horizon; see the [midnight migration report](docs/forecast_midnight_2026-10-29/README.md).
 
 ## Adding a model
 

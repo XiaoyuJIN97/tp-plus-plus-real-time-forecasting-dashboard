@@ -208,3 +208,25 @@ def test_offline_batch_plan_uses_both_years_and_cannot_be_published_online(tmp_p
     for day,part in f.groupby('run_date'):store.append_forecasts(part,day)
     with pytest.raises(ValueError,match='Invalid replay group'):
         assemble(source,[output],tmp_path/'rejected','2024-01-01','2025-12-31')
+
+
+@pytest.mark.parametrize('day,hours', [('2024-01-02',30), ('2024-03-30',29), ('2025-10-25',31), ('2025-12-31',30)])
+def test_shared_delivery_contract_rejects_shifted_missing_and_duplicate_hours(day,hours):
+    from rt_forecast_dashboard.time_utils import forecast_delivery_grid, is_complete_forecast_window
+    grid = forecast_delivery_grid(day)
+    assert len(grid) == hours
+    assert grid[-1] + pd.Timedelta(hours=1) == forecast_end_timestamp(day)
+    assert is_complete_forecast_window(grid, day)
+    assert is_complete_forecast_window(grid[::-1], day)  # storage order is irrelevant
+    assert not is_complete_forecast_window(grid + pd.Timedelta(hours=1), day)
+    assert not is_complete_forecast_window(grid[:24], day)
+    assert not is_complete_forecast_window(grid[:-1].append(grid[-2:-1]), day)
+
+
+def test_legacy_mock_import_cannot_write_production_data(tmp_path, monkeypatch):
+    from scripts.import_realized_mock_history import import_realized_mock_history
+    production = tmp_path / 'production'
+    monkeypatch.setenv('FORECAST_DATA_DIR', str(production))
+    with pytest.raises(ValueError, match='cannot write production data'):
+        import_realized_mock_history(output=production)
+    assert not production.exists()

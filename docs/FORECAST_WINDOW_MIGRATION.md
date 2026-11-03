@@ -9,8 +9,8 @@ at/after 18:30. All storage, requests, joins and completeness checks use UTC.
 `time_utils.forecast_end_timestamp` and `forecast_horizon_hours` define the
 contract for online inference, archived replay, offline evaluation, ensembles,
 point-score tables and interval-score tables. The first six hours use the
-current delivery day's TSO day-ahead product; the next 24 use the following
-day's product. Do not describe all 30 hours as one newly issued TSO forecast.
+current delivery day's TSO day-ahead product; the following day's 23, 24 or
+25 elapsed hours use that day's product. Do not describe all 30 hours as one newly issued TSO forecast.
 
 Daily runs intentionally overlap by six delivery hours. Plotting retains the
 latest forecast per UTC delivery instant; scoring retains distinct run origins.
@@ -20,6 +20,56 @@ may use yesterday's still-unfinished outcomes. Learned weights and calibration
 have five buckets: 1–6, 7–12, 13–18, 19–24, 25–30; hour 31 shares the last bucket.
 Old offline weights lack the new bucket: use equal-weight warmup until enough
 complete earlier runs exist, rather than extrapolating unsupported weights.
+
+## Operator and adapter contract
+
+Use the same UTC grid for online forecasts, 2024/2025 tests, historical mock
+runs, references, ensembles and both leaderboard tables:
+
+```python
+import pandas as pd
+from rt_forecast_dashboard.time_utils import (
+    forecast_delivery_grid, forecast_end_timestamp, is_complete_forecast_window,
+)
+
+run_date = '2025-10-25'  # origin before the autumn transition: 31 hours
+future_grid = forecast_delivery_grid(run_date)
+context_grid = pd.date_range(end=future_grid[0] - pd.Timedelta(hours=1),
+                             periods=2208, freq='h')
+assert len(future_grid) == 31
+assert future_grid[-1] + pd.Timedelta(hours=1) == forecast_end_timestamp(run_date)
+assert is_complete_forecast_window(future_grid, run_date)
+# Model adapters return len(future_grid) values, never a hard-coded 24 or 30.
+```
+
+Ordinary dates have 30 delivery rows; 2024-03-30 and 2025-03-29 have 29;
+2024-10-26 and 2025-10-25 have 31. These are the run dates **before** the
+clock change. The last row starts at 23:00 Brussels on the following day;
+00:00 at the end is exclusive. UTC keeps both autumn 02:00 intervals distinct.
+Tensor covariates span `2208 + len(future_grid)` values (2237/2238/2239),
+with native axis layout handled by each adapter.
+
+Production configuration's `horizon_hours: 30` / `prediction_length_hours: 30`
+is nominal. Do not replace it with 29 or 31 for a clock change; the shared
+helpers derive the elapsed length. Other explicit experimental lengths in
+low-level helpers are not the production onboarding policy.
+
+Keep the configured per-window runtime/RAM admission limits and measure them
+on these full windows, including transition windows. Historical 24-hour timing
+or accuracy results do not certify the extended horizon. Comparison metrics use
+complete shared runs, not a truncated common 24-hour subset. Display plots pick
+the latest origin for overlapping forecasts; actual-only display extensions do
+not become model predictions, calibration rows or scoring windows.
+
+See the [onboarding guide](model_onboarding/README.md),
+[T0 Gamma/Timestral examples](model_onboarding/FOUNDATION_EXAMPLES.md),
+[PR checklist](model_onboarding/PR_CHECKLIST.md) and
+[DST operator checks](DAYLIGHT_SAVING.md).
+
+The old `run_timesfm3_new_zones.py` benchmark requires an explicit
+`--legacy-24-hour-study` flag. `import_realized_mock_history.py` additionally
+requires `--output` outside production `data/`. These tools preserve their
+historical origins/results and cannot supply current full-horizon evidence.
 
 ## Historical inputs and reruns
 

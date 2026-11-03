@@ -5,9 +5,13 @@
 - [ ] Immutable model revision, complete exact dependency lock, separate venv,
       preparation/cache instructions and adapter source are committed.
 - [ ] Scope and covariates are explicit. Inputs use UTC, 2,208 past hours and
-      24 delivery hours; no future actuals, false availability or silent fallback.
+      the exact 18:00 Brussels → midnight after the following day grid (29/30/31
+      delivery hours); no future actuals, false availability or silent fallback.
+- [ ] Ordinary, spring-forward, autumn-backward and year-end windows are tested;
+      final delivery interval ends at midnight and repeated local hours stay distinct in UTC.
 - [ ] 2024/2025 evidence covers both full years or the policy's monthly sample;
-      shared baselines/settings/outcomes, counts, annual MAE and timings are shown.
+      shared full-horizon baselines/settings/outcomes, counts, annual MAE and
+      timings are shown. Legacy 24-hour scores are not current admission evidence.
 - [ ] Cold/warm CPU timings, peak RAM, platform, threads and failures are recorded.
 - [ ] Mock history matches every retained online window in the approved scope;
       missing/reconstructed vintages and pretraining overlap are disclosed.

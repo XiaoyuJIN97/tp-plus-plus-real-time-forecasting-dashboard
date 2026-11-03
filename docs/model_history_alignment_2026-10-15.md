@@ -1,5 +1,10 @@
 # Model history alignment, 15 October 2026
 
+> Historical report: these results used the former 24-hour horizon. They are
+> retained as recorded evidence, not the current operating instructions or
+> full-horizon admission results. See the [current horizon contract](FORECAST_WINDOW_MIGRATION.md)
+> and the [completed migration report](forecast_midnight_2026-10-29/README.md).
+
 The dashboard now has complete forecast coverage from 24 July through 14 October 2026 for every displayed model in every active zone and task. The audit covers 162 model series across 27 zone/task combinations in BE, DE, DK1, DK2, ES, FR and PT. Each series has 83 daily runs with 24 hourly forecasts, totaling 322,704 displayed forecast rows.
 
 The earliest verified forecasts were TimesFM3 replays on 24 July. Other early models used an 18:00 UTC window while TimesFM3 used 18:00 Europe/Brussels (16:00 UTC during summer). Their delivery timestamps did not match, so ensembles could not form full 24-hour runs. Older source labels and missing deployed copies of saved replays also shortened the displayed history. Constrained ensembles skipped their initial training period when no offline fallback weights existed.

@@ -1,3 +1,8 @@
+"""Legacy fixed-24-hour import for reproducing old research in staging only.
+
+Use the model onboarding guide / midnight replay pipeline for current runs.
+Original UTC origins are deliberately preserved, not relabelled as new forecasts.
+"""
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -142,7 +147,9 @@ def _wind_rows(start: date, end: date, *, target: str, filename: str) -> pd.Data
     return pd.concat(rows, ignore_index=True)
 
 
-def import_realized_mock_history(days: int = 14) -> pd.DataFrame:
+def import_realized_mock_history(days: int = 14, *, output: Path) -> pd.DataFrame:
+    from rt_forecast_dashboard.model_onboarding.contracts import staging_path
+    output = staging_path(output)
     end = date(2025, 12, 30)
     start = end - timedelta(days=days - 1)
     frame = pd.concat(
@@ -154,13 +161,21 @@ def import_realized_mock_history(days: int = 14) -> pd.DataFrame:
         ],
         ignore_index=True,
     )
-    store = ForecastStore()
+    store = ForecastStore(data_dir=output)
     for run_date, part in frame.groupby("run_date"):
         store.append_forecasts(part, str(run_date))
     return frame
 
 
 if __name__ == "__main__":
-    result = import_realized_mock_history()
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--legacy-24-hour-study', action='store_true')
+    parser.add_argument('--output', type=Path, required=True, help='Staging directory outside production data/')
+    parser.add_argument('--days', type=int, default=14)
+    args = parser.parse_args()
+    if not args.legacy_24_hour_study:
+        parser.error('Legacy research only; use current midnight replay/onboarding for production')
+    result = import_realized_mock_history(args.days, output=args.output)
     print(f"Imported {len(result):,} realized mock forecast rows.")
     print(f"Dates: {result['run_date'].min()} to {result['run_date'].max()}")

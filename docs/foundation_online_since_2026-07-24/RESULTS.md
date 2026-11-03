@@ -1,5 +1,10 @@
 # T0 Gamma and Timestral online mock replay
 
+> Historical report: these results used the former 24-hour horizon. They are
+> retained as recorded evidence, not the current operating instructions or
+> full-horizon admission results. See the [current horizon contract](../FORECAST_WINDOW_MIGRATION.md)
+> and the [completed migration report](../forecast_midnight_2026-10-29/README.md).
+
 Mock forecasts follow each saved TimesFM3 delivery window from 24 July through 19 October 2026, with 2,208 context hours and 24 forecast hours. Actual context ends one hour before delivery. The model checkpoints and inference settings match the validated offline evaluation.
 
 All rows are labeled `historical_mock_replay`. Collector archives and retained outcomes reconstruct past inputs. October weather gaps use the Open-Meteo historical forecast API; these are not certified original issue-time vintages. This is a reconstructed mock comparison, not a claim of contemporaneous live performance.
