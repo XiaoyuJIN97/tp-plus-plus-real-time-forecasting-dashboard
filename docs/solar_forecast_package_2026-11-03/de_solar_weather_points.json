@@ -1,0 +1,26 @@
+{
+  "crs": "EPSG:4326",
+  "coordinate_meaning": "Exact request coordinates from deployed configuration; not guaranteed returned model grid cells",
+  "points": [
+    {
+      "point": 1,
+      "latitude": 51.44,
+      "longitude": 13.0
+    },
+    {
+      "point": 2,
+      "latitude": 54.72,
+      "longitude": 9.26
+    },
+    {
+      "point": 3,
+      "latitude": 53.56,
+      "longitude": 11.72
+    },
+    {
+      "point": 4,
+      "latitude": 49.8,
+      "longitude": 8.78
+    }
+  ]
+}

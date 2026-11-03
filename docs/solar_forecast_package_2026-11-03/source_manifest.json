@@ -1,0 +1,20 @@
+{
+  "repository": "XiaoyuJIN97/tp-plus-plus-real-time-forecasting-dashboard",
+  "repository_revision": "5d845f37484d34694fdd4a904cccab72f2b66806",
+  "snapshot_generated_at_utc": "2026-11-03T08:30:22.188898+00:00",
+  "source_forecasts_sha256": "3ee9885d53c480aa6ac30da9abf12220ab25be6a6348a7605133c9d274067f66",
+  "configuration_sha256": "68f8d565e1e9051d6b6b22c96ef703b8c9bb699f7344902cd1794eb0dd92bcf4",
+  "snapshot_rows": 140592,
+  "zones": [
+    "BE",
+    "DE",
+    "FR",
+    "ES",
+    "PT",
+    "DK1",
+    "DK2"
+  ],
+  "excluded": "Hidden TabPFN; NL is not an enabled dashboard area",
+  "truth_policy": "Use each TSO reference row actual_mw as one common truth for all models on the same zone/run_date/timestamp; do not modify forecast values",
+  "map_source": "https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_admin_0_countries.geojson"
+}

@@ -1,0 +1,18 @@
+{
+  "notebook_name": "0_select_4p_weather_points_and_fetch_gfs.ipynb",
+  "notebook_sha256": "3d9aa86999b4db54eee1cf63ff218c9201221e3f842ea1e26f1a847ba96073ef",
+  "extracted_cell": 5,
+  "functions": [
+    "capacity_weighted_centroid",
+    "haversine_km",
+    "nearest_gfs_grid_point",
+    "nearest_grid_point",
+    "nearest_unused_era5_grid_point",
+    "neighboring_grid_values",
+    "snap_to_era5_grid",
+    "weighted_kmeans_points"
+  ],
+  "original_metadata_name": "renewables_location_all.csv",
+  "original_metadata_available": false,
+  "public_upstream_publisher_verified": false
+}

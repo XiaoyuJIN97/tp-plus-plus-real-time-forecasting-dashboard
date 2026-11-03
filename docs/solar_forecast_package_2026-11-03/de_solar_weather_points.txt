@@ -1,0 +1,6 @@
+Currently deployed DE solar weather request coordinates (WGS84 / EPSG:4326)
+point	latitude_deg_north	longitude_deg_east
+1	51.44	13.00
+2	54.72	9.26
+3	53.56	11.72
+4	49.80	8.78

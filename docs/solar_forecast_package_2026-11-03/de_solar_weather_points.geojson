@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.0,
+          51.44
+        ]
+      },
+      "properties": {
+        "point": 1,
+        "country": "DE",
+        "target": "solar"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.26,
+          54.72
+        ]
+      },
+      "properties": {
+        "point": 2,
+        "country": "DE",
+        "target": "solar"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          11.72,
+          53.56
+        ]
+      },
+      "properties": {
+        "point": 3,
+        "country": "DE",
+        "target": "solar"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.78,
+          49.8
+        ]
+      },
+      "properties": {
+        "point": 4,
+        "country": "DE",
+        "target": "solar"
+      }
+    }
+  ]
+}

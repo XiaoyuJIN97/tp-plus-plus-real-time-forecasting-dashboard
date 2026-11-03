@@ -1,0 +1,5 @@
+country,type,point,era5_lat,era5_lon,reference_lat,reference_lon,selection_method,cluster_id,cluster_assets,cluster_capacity_mw,distance_reference_era5_km,gfs_lat,gfs_lon,distance_gfs_era5_km
+DE,solar,1,51.5,13.0,51.6045001789609,13.061488967587536,capacity_weighted_kmeans_solar,1,5,1177.9109999999998,12.37321002802243,51.445312,13.007812,6.10505241789161
+DE,solar,2,54.75,9.25,54.62955000000001,9.34596,capacity_weighted_kmeans_solar,2,1,83.6,14.745211094100869,54.726562,9.257812,2.653996279252192
+DE,solar,3,53.5,11.75,53.5253,11.6569,capacity_weighted_kmeans_solar,3,1,172.0,6.7682757582800726,53.554688,11.71875,6.4222681668511274
+DE,solar,4,49.75,8.75,49.653941052631566,8.756792336197636,capacity_weighted_kmeans_solar,4,9,186.2,10.692431588635664,49.804688,8.789062,6.69672379702121
