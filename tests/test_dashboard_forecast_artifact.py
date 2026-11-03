@@ -42,6 +42,8 @@ def test_build_dashboard_forecasts_keeps_recent_rows_and_attaches_actuals(tmp_pa
 
     assert result["run_date"].tolist() == ["2026-10-01"]
     assert result["actual_mw"].tolist() == [100.0]
+    observed = pd.read_parquet(store.dashboard_dir() / "actuals_recent.parquet")
+    assert observed.actual_mw.tolist() == [100.0]
     assert metadata["rows"] == 1
     assert store.read_dashboard_forecasts()["timestamp"].dt.tz is not None
 
@@ -81,3 +83,19 @@ def test_realized_outcomes_survive_collector_history_retention(tmp_path) -> None
     path, _ = build_dashboard_forecasts(store, actuals_path=actuals_path)
     assert pd.read_parquet(path).actual_mw.tolist() == [100.0]
     assert store.read_forecasts().forecast_mw.tolist() == [90.0]
+
+
+def test_display_actuals_extend_past_missing_forecast_without_inventing_predictions():
+    from rt_forecast_dashboard.ui.actuals import extend_display_actuals
+    frame = pd.DataFrame(dict(zone=['BE'], target=['load'], model=['test'], model_label=['Test'],
+                              run_date=['2026-11-01'], timestamp=pd.to_datetime(['2026-11-02T22:00Z']),
+                              forecast_mw=[90.], actual_mw=[100.], lower_80=[80.], upper_80=[110.]))
+    actuals = pd.DataFrame(dict(zone=['BE', 'BE', 'FR'], target=['load']*3,
+                               timestamp=pd.to_datetime(['2026-11-02T22:00Z', '2026-11-03T07:00Z', '2026-11-03T07:00Z']),
+                               actual_mw=[100., 105., 500.]))
+    result = extend_display_actuals(frame, actuals)
+    assert len(result) == 2
+    assert result.iloc[-1].actual_mw == 105.
+    assert pd.isna(result.iloc[-1].forecast_mw)
+    assert pd.isna(result.iloc[-1].lower_80)
+    assert len(frame) == 1

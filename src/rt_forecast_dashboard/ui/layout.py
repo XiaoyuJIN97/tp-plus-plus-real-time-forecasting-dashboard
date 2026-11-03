@@ -14,6 +14,7 @@ from rt_forecast_dashboard.ui.analytics import (
     valid_online_forecasts,
     _normal_model_family,
 )
+from rt_forecast_dashboard.ui.actuals import extend_display_actuals
 from rt_forecast_dashboard.ui.charts import (
     deterministic_forecast_chart,
     conformal_forecast_chart,
@@ -199,6 +200,21 @@ def _forecast_catalog(version: tuple) -> pd.DataFrame:
     return pd.DataFrame(columns=['zone','target','run_date'])
 
 
+@st.cache_data(max_entries=16, show_spinner=False)
+def _display_observations(version: tuple, target: str, zone: str) -> pd.DataFrame:
+    path = ForecastStore().dashboard_dir() / "actuals_recent.parquet"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_parquet(path, filters=[("target", "=", target), ("zone", "=", zone)])
+
+
+def _extend_plot_actuals(frame: pd.DataFrame, target: str, zone: str) -> pd.DataFrame:
+    path = ForecastStore().dashboard_dir() / "actuals_recent.parquet"
+    stat = path.stat() if path.exists() else None
+    version = (stat.st_mtime_ns, stat.st_size) if stat else (0, 0)
+    return extend_display_actuals(frame, _display_observations(version, target, zone))
+
+
 def _render_target_section(target: str, prepared: pd.DataFrame | None, countries: list[str]) -> None:
     if not countries:
         st.info("Select at least one bidding zone.")
@@ -238,7 +254,7 @@ def _render_target_section(target: str, prepared: pd.DataFrame | None, countries
                     horizontal=True,key=f'{target}_{selected_zone}_forecast_view',label_visibility='collapsed')
     if view == 'Point forecasts':
         st.plotly_chart(
-            deterministic_forecast_chart(current, f"{_target_label(target)} forecast visualization and analysis"),
+            deterministic_forecast_chart(_extend_plot_actuals(current, target, selected_zone), f"{_target_label(target)} forecast visualization and analysis"),
             width="stretch",
         )
     else:
@@ -293,7 +309,7 @@ def _render_conformal_section(target: str, zone: str, current: pd.DataFrame) -> 
                 if part.empty:
                     st.info(f"{labels[model]}: no forecast rows in this window.")
                     continue
-                st.plotly_chart(conformal_forecast_chart(part, levels, labels[model]), width="stretch",
+                st.plotly_chart(conformal_forecast_chart(_extend_plot_actuals(part, target, zone), levels, labels[model]), width="stretch",
                                 key=f"{target}_{zone}_{model}_conformal")
                 missing = part[f"lower_{min(levels)}"].isna().sum()
                 if missing:
