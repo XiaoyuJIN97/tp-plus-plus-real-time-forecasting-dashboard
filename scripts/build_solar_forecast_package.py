@@ -30,7 +30,10 @@ plt.rcParams.update({'font.family':'DejaVu Sans','font.size':11,'axes.spines.top
 
 def save(fig,path):
     for suffix in ('png','pdf','svg'):
-        fig.savefig(path.with_suffix('.'+suffix),dpi=220,facecolor='white')
+        target=path.with_suffix('.'+suffix)
+        fig.savefig(target,dpi=220,facecolor='white')
+        if suffix=='svg':
+            target.write_text('\n'.join(line.rstrip() for line in target.read_text().splitlines())+'\n')
     plt.close(fig)
 
 
