@@ -99,3 +99,18 @@ def test_display_actuals_extend_past_missing_forecast_without_inventing_predicti
     assert pd.isna(result.iloc[-1].forecast_mw)
     assert pd.isna(result.iloc[-1].lower_80)
     assert len(frame) == 1
+
+
+def test_history_diagnostics_reveal_legacy_horizon_gaps():
+    from rt_forecast_dashboard.pipeline.history_coverage import history_coverage
+    from rt_forecast_dashboard.time_utils import forecast_delivery_grid
+    parts=[]
+    for day,length in [('2026-08-05',24),('2026-09-21',30),('2026-10-24',31)]:
+        grid=forecast_delivery_grid(day)[:length]
+        parts.append(pd.DataFrame(dict(zone='DK1',target='solar',model='test',run_date=day,
+             timestamp=grid,forecast_mw=1.,actual_mw=1.)))
+    result=history_coverage(pd.concat(parts,ignore_index=True)).iloc[0]
+    assert result.first_stored_run_date=='2026-08-05'
+    assert result.first_full_run_date=='2026-09-21'
+    assert result.stored_runs==3 and result.full_horizon_runs==2
+    assert result.incomplete_horizon_runs==1

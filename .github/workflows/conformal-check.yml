@@ -6,6 +6,12 @@ on:
       - 'src/rt_forecast_dashboard/pipeline/build*artifacts.py'
       - 'src/rt_forecast_dashboard/ui/**'
       - 'tests/test_conformal.py'
+      - 'src/rt_forecast_dashboard/pipeline/history_coverage.py'
+      - 'src/rt_forecast_dashboard/data/energinet_solar_recovery.py'
+      - 'scripts/stage_dk_solar_history_repair.py'
+      - 'scripts/prepare_dk_solar_recovery_inputs.py'
+      - 'tests/test_dk_solar_history_repair.py'
+      - 'tests/test_energinet_solar_recovery.py'
       - '.github/workflows/conformal-check.yml'
   workflow_dispatch:
 jobs:
@@ -17,4 +23,4 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt pytest
-      - run: PYTHONPATH=src pytest tests/test_conformal.py tests/test_dashboard_forecast_artifact.py -q
+      - run: PYTHONPATH=src:. pytest tests/test_conformal.py tests/test_dashboard_forecast_artifact.py tests/test_dk_solar_history_repair.py tests/test_energinet_solar_recovery.py -q

@@ -1,0 +1,17 @@
+{
+  "replayed_groups": 735,
+  "repaired_ensemble_groups": 105,
+  "published_zero_hours": 157,
+  "historical_start": "2026-07-24",
+  "historical_end": "2026-11-02",
+  "retained_start": "2026-08-05",
+  "last_fully_observed_origin": "2026-11-01",
+  "dk_solar_runs_per_displayed_model": 89,
+  "observations_per_model": 2671,
+  "probability_runs": {
+    "DK1": 65,
+    "DK2": 65
+  },
+  "unaffected_forecast_rows": 623776,
+  "validated_complete_archive_groups": 1632
+}

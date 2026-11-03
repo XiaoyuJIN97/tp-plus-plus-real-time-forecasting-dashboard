@@ -221,3 +221,9 @@ contains the currently deployed four-point map, exact request coordinates,
 original selection code/provenance, and reproducible figures comparing dashboard
 models and TSO benchmarks. PNG, PDF and SVG figures, frozen inputs and metric
 calculations are included; the production point configuration is unchanged.
+
+The [DK solar history repair audit](docs/dk_solar_history_repair_2026-11-03/README.md)
+records the recovery of earlier full-horizon DK mocks, their published-observation
+evidence and reproduction steps. Each artifact rebuild now writes
+`data/dashboard/forecast_history_coverage.csv` so stored history and usable
+full-window coverage can be checked separately for each model and series.

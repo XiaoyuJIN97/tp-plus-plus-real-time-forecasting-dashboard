@@ -87,7 +87,8 @@ def predict_batch(adapter,key,target,covs,chunk):
                     prediction_length=h,id_column='id',timestamp_column='timestamp',target='target',
                     quantile_levels=[.1,.5,.9],freq='h',validate_inputs=False)
         col='0.5' if '0.5' in result else 'median'
-        return np.stack([result[result.id.eq(str(i))].sort_values('timestamp')[col].to_numpy(float) for i in range(len(chunk))])
+        return np.maximum(np.stack([result[result.id.eq(str(i))].sort_values('timestamp')[col].to_numpy(float)
+                                    for i in range(len(chunk))]), 0)
     return np.stack([adapter.predict(f,target,context=p,covariates=covs) for p,f in chunk])
 
 
