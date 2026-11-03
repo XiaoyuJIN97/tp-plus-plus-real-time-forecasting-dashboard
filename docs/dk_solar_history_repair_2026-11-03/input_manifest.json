@@ -1,0 +1,136 @@
+{
+  "before_revision": "b7493c36b54030a1cc1f07d69d8b067fdfe6d1ec",
+  "provenance": "Historical mock replays; archived revised inputs, not certified as-issued vintages",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 8334,
+      "sha256": "ffe76a3f540ecd9688349dcaccaab5a15a984e107bbf4650af30095c5bfc5654"
+    },
+    {
+      "path": "batch_issues.csv",
+      "bytes": 39,
+      "sha256": "c7893f0579f026f012b168479362f3ca748ca9726c8090a9697f278d911e99fa"
+    },
+    {
+      "path": "batch_runtime.csv",
+      "bytes": 4838,
+      "sha256": "ccafb98f5f4873b0f52ee66165b00d560ffed63b9fa72f1ca2675a732a8f727c"
+    },
+    {
+      "path": "chronos_online_clipping_ledger.csv",
+      "bytes": 4535,
+      "sha256": "a777e36378abb47dbf38fd55e150140b49ac2407d8428da02140f05d1cf4faae"
+    },
+    {
+      "path": "context_imputation.jsonl",
+      "bytes": 264503,
+      "sha256": "42c291a881bbef9d8d146dc9990a53b8247a151aab7b98fa750451a10b5d9df2"
+    },
+    {
+      "path": "context_quality.csv",
+      "bytes": 7355,
+      "sha256": "5d187043be7bad0fcd6cb9c27f33fddd4c5dfd580ededa48df2205bdb899c385"
+    },
+    {
+      "path": "energinet_dataset_metadata.json",
+      "bytes": 361,
+      "sha256": "5d05bc3cf9b738e4380fd6fed8868be4d8958aba8fd2cc9f017f6126bd9af0a3"
+    },
+    {
+      "path": "energinet_published_5min.parquet",
+      "bytes": 785735,
+      "sha256": "f12ed55cf01c1d400859e19d250eceab853c147fa7f9122424bf9177392926e4"
+    },
+    {
+      "path": "energinet_request.json",
+      "bytes": 333,
+      "sha256": "94a1dad3da4a9056ed6d3d03ce0700442e12c92204ce6aa48670d83010d750a1"
+    },
+    {
+      "path": "interval_scores_after.csv",
+      "bytes": 1540,
+      "sha256": "0579ca72096b48fec273f894c07e8208c536d719fb4e9e120e717441f8a9ca11"
+    },
+    {
+      "path": "original_dk_solar_forecasts.parquet",
+      "bytes": 199731,
+      "sha256": "301d70c3a761e6f34f83cd30f28841f94cc366e5608d0b07577dfb1530eb00ca"
+    },
+    {
+      "path": "point_scores_after.csv",
+      "bytes": 2055,
+      "sha256": "8838b4a1a1dee2da700591ef7587711379ff148e1e3248eaf9ab504842d9af61"
+    },
+    {
+      "path": "recovered_published_zero_actuals.parquet",
+      "bytes": 4761,
+      "sha256": "3a3b473a7a93e1d73127c43332e7df1e0a616d3e1aa9e7c838127352df7e0892"
+    },
+    {
+      "path": "repair_plan.csv",
+      "bytes": 26592,
+      "sha256": "cf6bce9f708967aaa1e30f53795aef1897677186476c8739a95072043416f25d"
+    },
+    {
+      "path": "reproduction_inputs/entsoe/data/hourly/DK1/actual_solar_generation/2026.parquet",
+      "bytes": 79070,
+      "sha256": "b85c6e9305fe50a0803284161f5b78c63a4143248eb514cdc8477d199d77c164"
+    },
+    {
+      "path": "reproduction_inputs/entsoe/data/hourly/DK1/forecast_solar_generation/2026.parquet",
+      "bytes": 69716,
+      "sha256": "f18fc058df5ae3def9be290b5c2a21bdfe18555395423887d966d69dccc643ee"
+    },
+    {
+      "path": "reproduction_inputs/entsoe/data/hourly/DK2/actual_solar_generation/2026.parquet",
+      "bytes": 76282,
+      "sha256": "6a5772baa0e313b988df0dc738532af1bb5b9e19e76dea251f6f80509a4d3420"
+    },
+    {
+      "path": "reproduction_inputs/entsoe/data/hourly/DK2/forecast_solar_generation/2026.parquet",
+      "bytes": 66091,
+      "sha256": "42963f6787334286a9e12255c192009076325fa3f4585976aa2f758158787036"
+    },
+    {
+      "path": "reproduction_inputs/weather/data/raw/DK1/solar/2026.csv.gz",
+      "bytes": 285690,
+      "sha256": "1c6fa437f9d6efcf9c4f5c371c472cfd4ed85042c8f83dbb39cb6d59ece64294"
+    },
+    {
+      "path": "reproduction_inputs/weather/data/raw/DK2/solar/2026.csv.gz",
+      "bytes": 287634,
+      "sha256": "f2830a50e6bfa20345961fb97c6551f71dcd922c354985327677749c6fa56e8b"
+    },
+    {
+      "path": "runtime_environment.json",
+      "bytes": 539,
+      "sha256": "347dcddaf3dc935431b6c738f790bb57a2374b33e04bcd07a7c6526914cf8d7e"
+    },
+    {
+      "path": "tso_comparison_after.csv",
+      "bytes": 452,
+      "sha256": "034e4c2354e41129cd12e130f666969246f489c373469264c59cd44bb85f30e7"
+    },
+    {
+      "path": "tso_solar_performance_same_period.pdf",
+      "bytes": 22331,
+      "sha256": "94ebb087cc3327c42fc2a4c47ec5e9238d0da85ec7ef7b52666d536361f2935e"
+    },
+    {
+      "path": "tso_solar_performance_same_period.png",
+      "bytes": 92575,
+      "sha256": "dd247bf679481febcd41c71965d368eb20db1271658bfc8c74c6d69e20f50ad3"
+    },
+    {
+      "path": "tso_solar_performance_same_period.svg",
+      "bytes": 40067,
+      "sha256": "f0655deb9b722b63e0e63fd7776fb466af92e616fb7ccfb44e089daee6d489b6"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 463,
+      "sha256": "5d2f499fc10ea74d2d5cb0671438a3bd483fc5d92e4bde2e81c7b493dd7f9901"
+    }
+  ]
+}

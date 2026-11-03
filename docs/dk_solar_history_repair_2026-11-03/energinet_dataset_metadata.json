@@ -1,0 +1,9 @@
+{
+  "datasetId": 28,
+  "datasetName": "ElectricityProdex5MinRealtime",
+  "title": "Electricity Production and Exchange 5 min Realtime",
+  "description": "The electricity production and exchange in MW in 5 minutes intervals and updated every 5 minutes.",
+  "organizationName": "tso-electricity",
+  "lastMetadataUpdate": "2026-10-30T10:21:03",
+  "active": true
+}

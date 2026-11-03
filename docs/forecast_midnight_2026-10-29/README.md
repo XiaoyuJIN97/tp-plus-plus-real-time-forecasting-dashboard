@@ -7,3 +7,8 @@ Historical replay covers origins 24 July–28 October: 17,465 complete model win
 Point and probabilistic leaderboards were rebuilt on shared, complete observed windows. Dashboard retention remains 90 days. The full 2024/2025 offline plan and pipeline were updated; the entire two-year benchmark was not rerun in this migration.
 
 Validation: 133 regression tests passed; native adapters exercised 29/30/31-hour windows. Batch/single CPU differences were below 0.002 MW; historical T0 Gamma/Timestral MPS acceleration agreed with CPU within 0.005 MW. Production inference remains CPU. Spring 29-hour integration used synthetic inputs only, excluded from published history.
+
+Follow-up: the [3 November DK solar repair](../dk_solar_history_repair_2026-11-03/README.md)
+resolved 735 previously unrecovered base-model groups and rebuilt 105 ensembles.
+It restores full archived DK solar windows back to 24 July; the original counts
+above remain the record of the 29 October migration, not current coverage.

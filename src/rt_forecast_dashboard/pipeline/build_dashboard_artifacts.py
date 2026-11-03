@@ -73,7 +73,11 @@ def build_dashboard_forecasts(
     temporary_catalog = catalog_path.with_suffix('.parquet.tmp')
     catalog.to_parquet(temporary_catalog,index=False)
     temporary_catalog.replace(catalog_path)
+    from rt_forecast_dashboard.pipeline.history_coverage import history_coverage
+    coverage = history_coverage(recent)
+    coverage.to_csv(path.with_name('forecast_history_coverage.csv'), index=False)
     metadata: dict[str, object] = {
+        "incomplete_horizon_groups": int(coverage.incomplete_horizon_runs.sum()),
         "forecast_window": "next_day_midnight_v1",
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "retention_days": retention_days,

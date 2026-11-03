@@ -230,3 +230,17 @@ def test_legacy_mock_import_cannot_write_production_data(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match='cannot write production data'):
         import_realized_mock_history(output=production)
     assert not production.exists()
+
+
+def test_chronos_batch_uses_same_nonnegative_postprocessing_as_online():
+    from scripts.batch_replay_midnight import predict_batch
+    from types import SimpleNamespace
+    origin=brussels_cutoff_timestamp(pd.Timestamp('2026-08-05').date())
+    past=pd.DataFrame(dict(timestamp=pd.date_range(origin-pd.Timedelta(hours=2),periods=2,freq='h'),actual_mw=100.,weather=1.))
+    future=pd.DataFrame(dict(timestamp=pd.date_range(origin,periods=30,freq='h'),weather=1.))
+    class Pipeline:
+        def predict_df(self,*args,**kwargs):
+            return pd.DataFrame({'id':['0']*30,'timestamp':future.timestamp,'0.5':[-.5]+[10.]*29})
+    adapter=SimpleNamespace(_pipeline=lambda:Pipeline())
+    result=predict_batch(adapter,'chronos2_online','solar',['weather'],[(past,future)])
+    assert result.shape==(1,30) and result.min()==0

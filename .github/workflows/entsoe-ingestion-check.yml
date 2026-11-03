@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'src/rt_forecast_dashboard/data/entsoe_client.py'
+      - 'src/rt_forecast_dashboard/data/energinet_solar_recovery.py'
+      - 'tests/test_energinet_solar_recovery.py'
       - 'tests/test_entsoe_response_normalization.py'
       - 'requirements-forecast.txt'
       - 'scripts/recover_missing_offshore.py'
@@ -21,4 +23,4 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install pytest 'pandas==${{ matrix.pandas }}' entsoe-py==0.8.1 python-dotenv pyyaml
-      - run: PYTHONPATH=src pytest tests/test_entsoe_response_normalization.py -q
+      - run: PYTHONPATH=src pytest tests/test_entsoe_response_normalization.py tests/test_energinet_solar_recovery.py -q

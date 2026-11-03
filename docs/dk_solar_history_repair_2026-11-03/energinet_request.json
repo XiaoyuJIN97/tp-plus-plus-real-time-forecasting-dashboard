@@ -1,0 +1,13 @@
+{
+  "dataset": "ElectricityProdex5MinRealtime",
+  "endpoint": "https://api.energidataservice.dk/dataset/ElectricityProdex5MinRealtime",
+  "start": "2026-04-22",
+  "end": "2026-09-24",
+  "columns": [
+    "Minutes5UTC",
+    "PriceArea",
+    "SolarPower"
+  ],
+  "rows": 89196,
+  "retrieved_at_utc": "2026-11-03T11:05:44.735642+00:00"
+}
