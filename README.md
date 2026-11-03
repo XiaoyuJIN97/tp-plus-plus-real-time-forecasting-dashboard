@@ -54,7 +54,7 @@ selected zone and task, and render only the selected point/probabilistic view.
 Observed outcomes and derived scores refresh hourly in the background via
 `refresh-results.yml` (scheduled at :15 each hour, subject to collector
 availability and GitHub delays). This updates actuals, point-score tables,
-probabilistic intervals and their coverage/width table without rerunning models
+probabilistic intervals and their Winkler/width/coverage tables without rerunning models
 or refitting ensemble forecasts. Forecast inference and ensemble generation stay
 in the daily workflow. Page visits no longer wait for a collector HTTP request.
 A sleeping host can still have cold-start
@@ -63,6 +63,15 @@ overhead, independently of forecast scheduling.
 ## Credentials
 
 Set `ENTSOE_API_KEY` in `.env` or Streamlit secrets. Without credentials, the pipeline can still create deterministic demo data so the dashboard remains testable.
+
+## Probabilistic forecast leaderboard
+
+Open **Probabilistic forecasts** in the sidebar for separate Winkler score,
+mean interval width and coverage tables. Each uses model-family rows and
+bidding-zone columns, matching the deterministic Leaderboard. The tables use
+the same shared, complete observed runs and 80% intervals; scores are
+precomputed by the scheduled artifact builder. See the
+[probabilistic scoring guide](docs/conformal_prediction.md).
 
 ## Forecast horizon and model onboarding
 

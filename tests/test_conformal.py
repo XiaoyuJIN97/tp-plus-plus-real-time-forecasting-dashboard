@@ -89,6 +89,7 @@ def test_interval_leaderboard_matches_complete_observed_calibrated_runs():
     assert result.scored_runs.eq(3).all() and result.scored_hours.eq(90).all()
     assert result.loc['a','mean_interval_width_mw']==20.
     assert result.loc['b','mean_interval_width_mw']==40.
+    np.testing.assert_allclose(result.winkler_score_mw, 200.)
     # A mismatched realized truth excludes that whole run from both models.
     b.loc[b.run_date.eq(sorted(b.run_date.unique())[1]),'actual_mw']+=1.
     result=interval_leaderboard(pd.concat([a,b],ignore_index=True))
@@ -110,25 +111,57 @@ def test_interval_leaderboard_preserves_dst_windows():
     assert result.coverage_pct.eq(100.).all()
 
 
-def test_probabilistic_leaderboard_renders_both_metrics(tmp_path,monkeypatch):
+def test_probabilistic_page_uses_identical_model_by_zone_tables(tmp_path, monkeypatch):
     from streamlit.testing.v1 import AppTest
     from rt_forecast_dashboard.ui import layout
     from rt_forecast_dashboard.storage import ForecastStore
-    scores=pd.DataFrame([dict(zone='BE',target='load',model='ensemble_selected',model_label='Ensembled model',
-        coverage_pct=81.,mean_interval_width_mw=200.,scored_runs=30,scored_hours=720)])
-    monkeypatch.setattr(layout,'_probabilistic_leaderboard',lambda *args:scores.copy())
+    scores = pd.DataFrame([
+        dict(zone=z,target='load',model=m,model_label=label,coverage_pct=coverage,
+             mean_interval_width_mw=width,winkler_score_mw=winkler,scored_runs=30,scored_hours=900)
+        for z,coverage,width,winkler in [('BE',81.,200.,250.),('DE',79.,400.,500.)]
+        for m,label in [('ensemble_selected','Ensembled model'),('chronos2_online','Chronos2 with covariates'),('new_model','New foundation model')]
+    ] + [dict(zone='NL',target='load',model='hidden',model_label='Hidden area',coverage_pct=80.,mean_interval_width_mw=1.,winkler_score_mw=2.,scored_runs=30,scored_hours=900)])
+    monkeypatch.setattr(layout,'_probabilistic_leaderboard',lambda version,target:scores[scores.target.eq(target)].copy())
     monkeypatch.setattr(layout,'ForecastStore',lambda:ForecastStore(data_dir=tmp_path))
+    monkeypatch.setattr(layout,'_leaderboard_summary',lambda *args:pd.DataFrame())
     def app():
-        from rt_forecast_dashboard.ui.layout import _render_probabilistic_leaderboard
-        _render_probabilistic_leaderboard('load')
+        from rt_forecast_dashboard.ui.layout import _render_probabilistic_forecasts_page
+        _render_probabilistic_forecasts_page()
     at=AppTest.from_function(app).run()
+    at.selectbox[0].select('load').run()
     assert not at.exception
-    assert len(at.dataframe)==1
-    table=at.dataframe[0].value
-    assert list(table)==['Zone','Model Family','Coverage (%)','Mean interval width (MW)']
-    assert table.loc[0,'Zone']=='BE'
-    assert table.loc[0,'Coverage (%)']==81.
-    assert table.loc[0,'Mean interval width (MW)']==200.
+    assert len(at.dataframe)==3
+    for table in at.dataframe:
+        assert list(table.value)==['Model Family','BE','DE']
+        assert table.value['Model Family'].tolist()==['Ensembled model','Chronos2','New foundation model']
+    assert at.dataframe[0].value.loc[0,'BE']==250.
+    assert at.dataframe[1].value.loc[0,'BE']==200.
+    assert at.dataframe[2].value.loc[0,'BE']==81.
+    headings=[m.value for m in at.markdown]
+    assert '#### Winkler score (MW)' in headings
+    assert '#### Mean interval width (MW)' in headings
+    assert '#### Coverage (%)' in headings
+
+
+def test_point_leaderboard_does_not_load_probability_scores(tmp_path,monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    from rt_forecast_dashboard.ui import layout
+    from rt_forecast_dashboard.storage import ForecastStore
+    store=ForecastStore(data_dir=tmp_path)
+    directory=store.dashboard_dir();directory.mkdir(parents=True,exist_ok=True)
+    pd.DataFrame([dict(zone='BE',target='load',display_family=m,rMAE=1.,MAE=100.,win_rate=50.)
+                  for m in ['Ensembled model','TSO forecast']]).to_parquet(directory/'leaderboard_daily.parquet')
+    monkeypatch.setattr(layout,'ForecastStore',lambda:store)
+    def forbidden(*args):
+        raise AssertionError('Point page must not load interval scores')
+    monkeypatch.setattr(layout,'_render_probabilistic_leaderboard',forbidden)
+    def app():
+        import pandas as pd
+        from rt_forecast_dashboard.ui.layout import _render_rmae_landing
+        _render_rmae_landing(pd.DataFrame(dict(target=['load'],timestamp=pd.to_datetime(['2026-11-01T00:00Z']),actual_mw=[100.])))
+    at=AppTest.from_function(app).run()
+    at.selectbox[0].select('load').run()
+    assert not at.exception and len(at.dataframe)==3
 
 
 def test_plot_band_segments_do_not_bridge_missing_days():
@@ -237,3 +270,31 @@ def test_only_selected_forecast_view_is_built(monkeypatch):
     at.radio[0].set_value('Probabilistic forecasts').run()
     assert not at.exception and called==['probabilistic']
     assert len(at.get('plotly_chart'))==0
+
+
+
+def test_winkler_score_penalizes_both_tails_and_keeps_boundary_values_inside():
+    from rt_forecast_dashboard.conformal import winkler_score
+    import pytest
+    actual=np.array([100.,85.,115.,90.,110.])
+    np.testing.assert_allclose(winkler_score(actual,90.,110.,.8),[20.,70.,70.,20.,20.])
+    np.testing.assert_allclose(winkler_score(actual,90.,110.,.9),[20.,120.,120.,20.,20.])
+    for level in [0,1,-.1,float('nan')]:
+        with pytest.raises(ValueError):winkler_score([100.],[90.],[110.],level)
+    with pytest.raises(ValueError):winkler_score([100.],[110.],[90.])
+    with pytest.raises(ValueError):winkler_score([float('nan')],[90.],[110.])
+
+
+def test_probability_page_handles_no_scores(tmp_path,monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    from rt_forecast_dashboard.ui import layout
+    from rt_forecast_dashboard.storage import ForecastStore
+    monkeypatch.setattr(layout,'_probabilistic_leaderboard',lambda *args:pd.DataFrame())
+    monkeypatch.setattr(layout,'ForecastStore',lambda:ForecastStore(data_dir=tmp_path))
+    monkeypatch.setattr(layout,'_leaderboard_summary',lambda *args:pd.DataFrame())
+    def app():
+        from rt_forecast_dashboard.ui.layout import _render_probabilistic_forecasts_page
+        _render_probabilistic_forecasts_page()
+    at=AppTest.from_function(app).run()
+    assert not at.exception and len(at.dataframe)==0
+    assert len(at.info)==1

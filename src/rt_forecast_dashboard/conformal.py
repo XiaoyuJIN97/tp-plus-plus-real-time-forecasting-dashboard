@@ -102,13 +102,26 @@ def conformal_intervals(frame, *, levels=LEVELS, window_runs=WINDOW_RUNS,
     return out
 
 
+def winkler_score(actual, lower, upper, level=.80):
+    """Pointwise interval score (MW): width plus 2/alpha times each miss."""
+    if not 0 < level < 1:
+        raise ValueError('Interval coverage must lie strictly between zero and one')
+    actual, lower, upper = np.broadcast_arrays(
+        np.asarray(actual, dtype=float), np.asarray(lower, dtype=float), np.asarray(upper, dtype=float))
+    if not all(np.isfinite(x).all() for x in (actual, lower, upper)) or (upper < lower).any():
+        raise ValueError('Winkler scores require finite outcomes and ordered interval bounds')
+    return upper-lower + 2/(1-level)*(np.maximum(lower-actual, 0) + np.maximum(actual-upper, 0))
+
+
 def interval_leaderboard(frame, level=.80):
     """Compare models on identical complete, observed and calibrated UTC runs.
 
     Coverage is an hourly fraction, not a whole-trajectory success rate. Width
     is averaged over the same hours. Do not rank coverage as 'higher is better'.
     """
-    columns = ['zone','target','model','model_label','coverage_pct','mean_interval_width_mw','scored_runs','scored_hours']
+    if not 0 < level < 1:
+        raise ValueError('Interval coverage must lie strictly between zero and one')
+    columns = ['zone','target','model','model_label','coverage_pct','mean_interval_width_mw','winkler_score_mw','scored_runs','scored_hours']
     if frame.empty:
         return pd.DataFrame(columns=columns)
     low,high = f'lower_{round(level*100)}',f'upper_{round(level*100)}'
@@ -148,6 +161,7 @@ def interval_leaderboard(frame, level=.80):
                 model_label=str(part.model_label.iloc[0]),
                 coverage_pct=float(100*part.actual_mw.between(part[low],part[high]).mean()),
                 mean_interval_width_mw=float((part[high]-part[low]).mean()),
+                winkler_score_mw=float(winkler_score(part.actual_mw, part[low], part[high], level).mean()),
                 scored_runs=int(part.run_date.nunique()),scored_hours=len(part)))
     return pd.DataFrame(rows,columns=columns)
 

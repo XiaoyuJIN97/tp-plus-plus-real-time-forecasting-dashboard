@@ -1,4 +1,4 @@
-"""Streamlit entry point. UI revision: 2026-11-02, data-period note follows all leaderboard tables."""
+"""Streamlit entry point. UI revision: 2026-11-03, dedicated probabilistic leaderboard."""
 
 from pathlib import Path
 import sys

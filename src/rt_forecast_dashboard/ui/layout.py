@@ -35,7 +35,7 @@ def _inject_styles() -> None:
             font-weight: 800;
             line-height: 1.2;
             margin: 1.75rem 0 0.35rem 0;
-            color: #111827;
+            color: inherit;
         }
         .ops-section-title {
             font-size: 1.15rem;
@@ -336,13 +336,31 @@ def _probabilistic_leaderboard(version: tuple, target: str) -> pd.DataFrame:
         bands = pd.read_parquet(path,filters=[('target','=',target)])
     else:
         frame = _prepared_online_forecasts(version[:2])
+        if frame.empty:
+            return interval_leaderboard(frame, .80)
         bands = conformal_intervals(frame[frame.target.eq(target)])
+    if bands.empty:
+        return interval_leaderboard(bands, .80)
     bands = bands[bands.zone.isin(zones()) & ~bands.model.isin(HIDDEN_MODEL_KEYS)]
     return interval_leaderboard(bands, .80)
 
 
+def _family_order(values) -> list[str]:
+    families = set(values)
+    return ([family for family in MODEL_FAMILY_ORDER if family in families]
+            + sorted(families-set(MODEL_FAMILY_ORDER)))
+
+
+def _probabilistic_metric_table(scores: pd.DataFrame, metric: str) -> pd.DataFrame:
+    """Use the deterministic leaderboard's model rows and bidding-zone columns."""
+    frame = scores.copy()
+    frame['Model Family'] = frame.model_label.map(_normal_model_family)
+    return (frame.pivot(index='Model Family', columns='zone', values=metric)
+            .reindex(index=_family_order(frame['Model Family']), columns=sorted(frame.zone.unique()))
+            .reset_index().rename_axis(columns=None))
+
+
 def _render_probabilistic_leaderboard(target: str) -> None:
-    st.markdown('#### Probabilistic forecast leaderboard')
     store = ForecastStore()
     path = store.dashboard_dir()/'conformal_forecasts.parquet'
     stat = path.stat() if path.exists() else None
@@ -352,22 +370,26 @@ def _render_probabilistic_leaderboard(target: str) -> None:
     version += (stat.st_mtime_ns if stat else 0,stat.st_size if stat else 0)
     with st.spinner('Loading probabilistic leaderboard…'):
         scores = _probabilistic_leaderboard(version,target)
+    if not scores.empty:
+        scores = scores[scores.zone.isin(zones()) & ~scores.model.isin(HIDDEN_MODEL_KEYS)].copy()
     if scores.empty:
         st.info('Interval comparisons require shared, fully observed runs with calibrated intervals for every compared model.')
         return
-    scores['Model Family'] = scores.model_label.map(_normal_model_family)
-    families = list(dict.fromkeys([f for f in MODEL_FAMILY_ORDER if f in set(scores['Model Family'])]
-                                 +sorted(set(scores['Model Family'])-set(MODEL_FAMILY_ORDER))))
-    st.caption('80% intervals, evaluated on the same complete observed runs within each zone. Coverage target: 80%. Compare widths alongside coverage.')
-    scores['_model_order'] = scores['Model Family'].map({family:index for index,family in enumerate(families)})
-    table = scores.sort_values(['zone','_model_order'])[
-        ['zone','Model Family','coverage_pct','mean_interval_width_mw']
-    ].rename(columns={'zone':'Zone','coverage_pct':'Coverage (%)',
-                      'mean_interval_width_mw':'Mean interval width (MW)'}).reset_index(drop=True)
-    st.dataframe(table,width='stretch',hide_index=True,column_config={
-        'Coverage (%)':st.column_config.NumberColumn(format='%.1f%%'),
-        'Mean interval width (MW)':st.column_config.NumberColumn(format='%.2f'),
-    })
+    st.caption('80% prediction intervals. All three tables use the same complete observed runs within each bidding zone.')
+    for title, metric, format_ in [
+        ('Winkler score (MW)', 'winkler_score_mw', '%.2f'),
+        ('Mean interval width (MW)', 'mean_interval_width_mw', '%.2f'),
+        ('Coverage (%)', 'coverage_pct', '%.1f%%'),
+    ]:
+        st.markdown(f'#### {title}')
+        if metric == 'winkler_score_mw':
+            st.caption('Mean interval width plus penalties for observations outside the interval. Lower is better.')
+        elif metric == 'coverage_pct':
+            st.caption('Nominal coverage: 80%.')
+        table = _probabilistic_metric_table(scores, metric)
+        st.dataframe(table, width='stretch', hide_index=True,
+                     column_config={zone:st.column_config.NumberColumn(format=format_)
+                                    for zone in table.columns if zone != 'Model Family'})
 
 
 def _render_rmae_landing(frame: pd.DataFrame) -> None:
@@ -395,7 +417,7 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         st.info("No complete comparisons are available for this forecasting task yet.")
         return
 
-    family_order = [family for family in MODEL_FAMILY_ORDER if family in set(target_detail["display_family"])]
+    family_order = _family_order(target_detail["display_family"])
     zone_order = sorted(target_detail["zone"].unique())
     rmae = (
         target_detail.pivot(index="display_family", columns="zone", values="rMAE")
@@ -448,7 +470,6 @@ def _render_rmae_landing(frame: pd.DataFrame) -> None:
         mae, width="stretch", hide_index=True,
         column_config={zone: st.column_config.NumberColumn(format="%.2f") for zone in zone_order},
     )
-    _render_probabilistic_leaderboard(selected_target)
     _render_analysis_window(frame[frame["target"].eq(selected_target)])
 
 
@@ -484,7 +505,7 @@ def _render_data_warning(prepared: pd.DataFrame) -> None:
         )
 
 
-def _render_leaderboard_page(details_page: st.Page) -> None:
+def _render_leaderboard_page(details_page: st.Page, probabilistic_page: st.Page | None = None) -> None:
     _render_header()
     prepared = _leaderboard_summary(_data_version(ForecastStore()))
     if prepared.empty:
@@ -492,7 +513,20 @@ def _render_leaderboard_page(details_page: st.Page) -> None:
         return
     _render_data_warning(prepared)
     _render_rmae_landing(prepared)
+    if probabilistic_page is not None:
+        st.page_link(probabilistic_page, label="Probabilistic forecasts →", icon="📊")
     st.page_link(details_page, label="More detailed insights →", icon="📈")
+
+
+def _render_probabilistic_forecasts_page() -> None:
+    _render_header()
+    st.markdown('<div class="task-section-title">Probabilistic forecasts</div>', unsafe_allow_html=True)
+    selected_target = st.selectbox('Forecast task', TARGET_ORDER, index=0,
+                                   format_func=_target_label, key='probabilistic_leaderboard_target')
+    _render_probabilistic_leaderboard(selected_target)
+    summary = _leaderboard_summary(_data_version(ForecastStore()))
+    if not summary.empty:
+        _render_analysis_window(summary[summary.target.eq(selected_target)])
 
 
 def _render_forecast_details_page() -> None:
@@ -511,11 +545,13 @@ def _render_forecast_details_page() -> None:
 def render_app() -> None:
     st.set_page_config(page_title="Transparency++", page_icon="chart_with_upwards_trend", layout="wide")
     details_page = st.Page(_render_forecast_details_page, title="More detailed insights", icon="📈")
+    probabilistic_page = st.Page(_render_probabilistic_forecasts_page,
+                                 title="Probabilistic forecasts", icon="📊", url_path="probabilistic_forecasts")
     leaderboard_page = st.Page(
-        lambda: _render_leaderboard_page(details_page),
+        lambda: _render_leaderboard_page(details_page, probabilistic_page),
         title="Leaderboard",
         icon="🏆",
         default=True,
     )
-    navigation = st.navigation([leaderboard_page, details_page])
+    navigation = st.navigation([leaderboard_page, probabilistic_page, details_page])
     navigation.run()
