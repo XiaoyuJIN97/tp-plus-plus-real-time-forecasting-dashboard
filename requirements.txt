@@ -1,4 +1,4 @@
-# Hosted UI revision: 2026-11-02 leaderboard footer placement.
+# Hosted UI revision: 2026-11-03 independent intraday observations.
 # Dashboard runtime only: leaderboard scores are computed by the scheduled pipeline.
 numpy>=1.26
 pandas>=2.2

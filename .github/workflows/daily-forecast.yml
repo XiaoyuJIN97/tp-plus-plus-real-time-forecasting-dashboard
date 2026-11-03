@@ -13,8 +13,8 @@ on:
         default: '1'
   schedule:
     # GitHub cron is UTC and can be delayed or occasionally missed. These
-    # fallback triggers are guarded below so only the first one after 18:30
-    # Europe/Brussels runs for a missing daily forecast file.
+    # fallback triggers audit the latest eligible 18:30 Europe/Brussels
+    # origin, including when a delayed trigger starts after midnight.
     - cron: "30 16 * * *"
     - cron: "30 17 * * *"
     - cron: "30 18 * * *"
@@ -56,17 +56,12 @@ jobs:
             echo "should_run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          local_hour="$(TZ=Europe/Brussels date +%H)"
-          local_minute="$(TZ=Europe/Brussels date +%M)"
-          run_date="$(TZ=Europe/Brussels date +%F)"
-          if [ "$local_hour" -lt 18 ] || { [ "$local_hour" = "18" ] && [ "$local_minute" -lt 30 ]; }; then
-            echo "Skipping before Brussels forecast window at ${local_hour}:${local_minute}."
-            echo "should_run=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Auditing recent forecast dates through ${run_date} at Brussels time ${local_hour}:${local_minute}."
-            echo "run_date=${run_date}" >> "$GITHUB_OUTPUT"
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-          fi
+          # Delayed cron jobs can start after midnight. Use the most recent
+          # eligible forecast origin rather than dropping yesterday's run.
+          run_date="$(python -c 'from datetime import datetime,timedelta; from zoneinfo import ZoneInfo; n=datetime.now(ZoneInfo("Europe/Brussels")); print((n if (n.hour,n.minute)>=(18,30) else n-timedelta(days=1)).date())')"
+          echo "Auditing recent forecast dates through ${run_date}."
+          echo "run_date=${run_date}" >> "$GITHUB_OUTPUT"
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
 
       - name: Checkout Open-Meteo realtime data
         if: steps.brussels_window.outputs.should_run == 'true'

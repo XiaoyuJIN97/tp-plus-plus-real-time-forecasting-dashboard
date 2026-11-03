@@ -43,6 +43,13 @@ def build_dashboard_forecasts(
             .sort_values("collection_time_utc" if "collection_time_utc" in actuals.columns else "timestamp")
             .drop_duplicates(["zone", "target", "timestamp"], keep="last")
         )
+        # Observations are independent of forecast coverage: a delayed daily
+        # run must not hide newer measurements from the dashboard.
+        observed_path = store.dashboard_dir() / "actuals_recent.parquet"
+        observed_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = observed_path.with_suffix(".parquet.tmp")
+        actuals[["zone", "target", "timestamp", "actual_mw"]].to_parquet(temporary, index=False)
+        temporary.replace(observed_path)
         actual_lookup = actuals[["zone", "target", "timestamp", "actual_mw"]].rename(
             columns={"actual_mw": "artifact_actual_mw"}
         )

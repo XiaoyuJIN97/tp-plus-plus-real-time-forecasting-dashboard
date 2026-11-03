@@ -43,3 +43,23 @@ def attach_display_actuals(forecasts: pd.DataFrame, now: pd.Timestamp | None = N
     if artifact_age_minutes is not None:
         frame.attrs["actual_artifact_age_minutes"] = artifact_age_minutes
     return frame.drop(columns=["actual_mw_display", "collection_time_utc"])
+
+
+def extend_display_actuals(frame: pd.DataFrame, actuals: pd.DataFrame) -> pd.DataFrame:
+    """Extend a plot only; these rows never enter calibration or scoring."""
+    if frame.empty or actuals.empty:
+        return frame
+    keys = frame[["zone", "target"]].drop_duplicates()
+    observed = actuals.merge(keys, on=["zone", "target"], how="inner").copy()
+    observed["timestamp"] = pd.to_datetime(observed["timestamp"], utc=True)
+    observed = observed[observed.timestamp.ge(frame.timestamp.min())].dropna(subset=["actual_mw"])
+    # Existing forecast observations are retained; append only uncovered hours.
+    uncovered = observed.merge(frame[["zone", "target", "timestamp"]].drop_duplicates(),
+                               on=["zone", "target", "timestamp"], how="left", indicator=True)
+    uncovered = uncovered[uncovered._merge.eq("left_only")].drop(columns="_merge")
+    if uncovered.empty:
+        return frame
+    for column in ("model", "model_label", "run_date"):
+        if column in frame:
+            uncovered[column] = str(frame[column].iloc[-1])
+    return pd.concat([frame, uncovered], ignore_index=True)
