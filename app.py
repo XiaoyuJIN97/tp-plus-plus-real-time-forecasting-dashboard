@@ -1,4 +1,5 @@
 """Streamlit entry point. UI revision: 2026-11-03, dedicated probabilistic leaderboard."""
+# Published dashboard data: fa619497b33b3911a21c45a1f5e0a99bbd6a99cd1c01f4fb00f0cc12093ca2f4
 
 from pathlib import Path
 import sys

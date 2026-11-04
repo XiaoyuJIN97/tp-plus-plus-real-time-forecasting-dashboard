@@ -55,7 +55,9 @@ Observed outcomes and derived scores refresh in the background via
 `refresh-results.yml` (scheduled at :15 and :45 each hour, subject to collector
 availability and GitHub delays). This updates actuals, point-score tables,
 probabilistic intervals and their Winkler/width/coverage tables without rerunning models
-or refitting ensemble forecasts. Forecast inference and ensemble generation stay
+or refitting ensemble forecasts. Publication also updates a deterministic data
+revision in the watched Streamlit entry point so the hosted app reloads the new
+snapshot; identical actual/forecast snapshots do not change that revision. Forecast inference and ensemble generation stay
 in the daily workflow. Page visits no longer wait for a collector HTTP request.
 A sleeping host can still have cold-start
 overhead, independently of forecast scheduling.
