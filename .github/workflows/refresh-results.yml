@@ -2,9 +2,9 @@ name: Refresh observed outcomes and leaderboard
 on:
   workflow_dispatch:
   schedule:
-    # Hourly, at :15 UTC (also :15 in Brussels in both CET and CEST).
+    # Twice-hourly opportunities reduce delay when scheduled starts are skipped.
     # Actual availability still depends on collector publication and Actions delays.
-    - cron: '15 * * * *'
+    - cron: '15,45 * * * *'
 permissions:
   contents: write
 concurrency:

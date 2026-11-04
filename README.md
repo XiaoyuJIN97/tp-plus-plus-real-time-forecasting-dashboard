@@ -51,8 +51,8 @@ Dashboard visits never launch forecasting jobs. The scheduled pipeline publishes
 `forecast_catalog.parquet` and `probabilistic_leaderboard.parquet` alongside the
 forecast/interval files. Pages read these compact snapshots, load only the
 selected zone and task, and render only the selected point/probabilistic view.
-Observed outcomes and derived scores refresh hourly in the background via
-`refresh-results.yml` (scheduled at :15 each hour, subject to collector
+Observed outcomes and derived scores refresh in the background via
+`refresh-results.yml` (scheduled at :15 and :45 each hour, subject to collector
 availability and GitHub delays). This updates actuals, point-score tables,
 probabilistic intervals and their Winkler/width/coverage tables without rerunning models
 or refitting ensemble forecasts. Forecast inference and ensemble generation stay
