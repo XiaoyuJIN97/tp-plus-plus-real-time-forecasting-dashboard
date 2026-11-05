@@ -1,2 +1,2 @@
 checked_at,run_date,rows,seconds,status,message
-2026-11-05T23:56:02+00:00,2026-11-05,0,189.294,incomplete,"incomplete groups (5): DK1/load/timesfm3_online=0, DK1/solar/timesfm3_online=0, DK2/load/timesfm3_online=0, ES/solar/timesfm3_online=0, ES/wind_onshore/timesfm3_online=0"
+2026-11-05T23:59:25+00:00,2026-11-05,0,179.94,incomplete,"incomplete groups (10): DK1/load/t0_gamma_online=0, DK1/load/timestral_online=0, DK1/solar/t0_gamma_online=0, DK1/solar/timestral_online=0, DK2/load/t0_gamma_online=0, DK2/load/timestral_online=0, ES/solar/t0_gamma_online=0, ES/solar/timestral_online=0, ES/wind_onshore/t0_gamma_online=0, ES/wind_onshore/timestral_online=0"
