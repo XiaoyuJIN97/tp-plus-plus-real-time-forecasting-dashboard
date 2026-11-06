@@ -6,7 +6,7 @@
     "coverage_pct"
   ],
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-11-06T15:03:48.681278+00:00",
+  "generated_at_utc": "2026-11-06T20:55:27.000226+00:00",
   "rows": 574016,
   "calibrated_rows": 437936,
   "levels": [
