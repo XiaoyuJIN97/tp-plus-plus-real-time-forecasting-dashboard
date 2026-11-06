@@ -646,6 +646,6 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-04T00:54:01+00:00,2026-11-03,DK2,load,data_or_features,context has 51 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-05T01:06:55+00:00,2026-11-04,DK1,load,data_or_features,context has 52 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-05T01:07:26+00:00,2026-11-04,DK2,load,data_or_features,context has 52 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-06T01:03:47+00:00,2026-11-05,DK1,solar,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-06T01:04:00+00:00,2026-11-05,ES,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES solar: 0/30 hourly rows.,{},open
-2026-11-06T01:04:14+00:00,2026-11-05,ES,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES wind_onshore: 0/30 hourly rows.,{},open
+2026-11-06T01:05:24+00:00,2026-11-05,DK1,solar,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-06T01:05:35+00:00,2026-11-05,ES,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES solar: 0/30 hourly rows.,{},open
+2026-11-06T01:05:47+00:00,2026-11-05,ES,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES wind_onshore: 0/30 hourly rows.,{},open

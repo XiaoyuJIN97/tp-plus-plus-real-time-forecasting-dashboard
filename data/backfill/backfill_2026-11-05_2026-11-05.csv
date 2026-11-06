@@ -1,2 +1,2 @@
 checked_at,run_date,rows,seconds,status,message
-2026-11-06T01:04:14+00:00,2026-11-05,0,52.597,incomplete,"incomplete groups (12): DK1/solar/chronos2_online=0, DK1/solar/persistence=0, DK1/solar/tso_reference=0, DK1/solar/xgboost_online=0, ES/solar/chronos2_online=0, ES/solar/persistence=0, ES/solar/tso_reference=0, ES/solar/xgboost_online=0, ES/wind_onshore/chronos2_online=0, ES/wind_onshore/persistence=0, ES/wind_onshore/tso_reference=0, ES/wind_onshore/xgboost_online=0"
+2026-11-06T01:05:47+00:00,2026-11-05,0,90.028,incomplete,"incomplete groups (3): DK1/solar/timesfm3_online=0, ES/solar/timesfm3_online=0, ES/wind_onshore/timesfm3_online=0"
