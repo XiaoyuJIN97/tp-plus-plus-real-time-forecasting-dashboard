@@ -657,13 +657,13 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-07T00:28:43+00:00,2026-11-06,DK2,wind_offshore,data_or_features,context has 57 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-07T00:28:47+00:00,2026-11-06,ES,solar,data_or_features,,{},open
 2026-11-07T00:28:51+00:00,2026-11-06,ES,wind_onshore,data_or_features,,{},open
-2026-11-07T23:14:00+00:00,2026-11-07,DK1,load,data_or_features,context has 50 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:15:54+00:00,2026-11-07,DK1,solar,data_or_features,context has 91 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:17:24+00:00,2026-11-07,DK1,wind_onshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:19:22+00:00,2026-11-07,DK1,wind_offshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:20:19+00:00,2026-11-07,DK2,load,data_or_features,context has 50 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:22:16+00:00,2026-11-07,DK2,solar,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:24:45+00:00,2026-11-07,DK2,wind_onshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:27:45+00:00,2026-11-07,DK2,wind_offshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-07T23:27:55+00:00,2026-11-07,ES,solar,data_or_features,,{},open
-2026-11-07T23:28:02+00:00,2026-11-07,ES,wind_onshore,data_or_features,,{},open
+2026-11-07T23:56:02+00:00,2026-11-07,DK1,load,data_or_features,context has 50 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-07T23:58:16+00:00,2026-11-07,DK1,solar,data_or_features,context has 91 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-07T23:59:57+00:00,2026-11-07,DK1,wind_onshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-08T00:04:15+00:00,2026-11-07,DK1,wind_offshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-08T00:05:13+00:00,2026-11-07,DK2,load,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A65&processType=A01&outBiddingZone_Domain=10YDK-2--------M&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202608041700&periodEnd=202609041700,{},open
+2026-11-08T00:05:22+00:00,2026-11-07,DK2,solar,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A75&processType=A16&in_Domain=10YDK-2--------M&psrType=B16&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202608041700&periodEnd=202609041700,{},open
+2026-11-08T00:08:01+00:00,2026-11-07,DK2,wind_onshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-08T00:12:09+00:00,2026-11-07,DK2,wind_offshore,data_or_features,context has 81 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-08T00:12:19+00:00,2026-11-07,ES,solar,data_or_features,,{},open
+2026-11-08T00:12:30+00:00,2026-11-07,ES,wind_onshore,data_or_features,,{},open
