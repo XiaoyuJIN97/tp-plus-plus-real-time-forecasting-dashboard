@@ -15,6 +15,7 @@ from rt_forecast_dashboard.pipeline.check_forecast_complete import complete_fore
 from rt_forecast_dashboard.storage import ForecastStore
 from rt_forecast_dashboard.model_onboarding.contracts import staging_path
 from rt_forecast_dashboard.config import zones
+from scripts.batch_replay_midnight import weather_verified_groups
 from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, forecast_horizon_hours
 
 
@@ -50,8 +51,11 @@ def _replay(source, output, start, end, models=None, selected_scopes=None, plan_
         day_start = time.monotonic()
         for (zone,target), model_plan in scope_plan.groupby(['zone','target'],sort=True):
             expected_models = set(model_plan.model)
-            result = run_daily_forecast(pd.Timestamp(day).date(),model_keys=expected_models,
-                         clear_issues=False,only_missing=True,scopes={(zone,target)})
+            verified = weather_verified_groups(store.forecast_path(day))
+            pending_models = {m for m in expected_models if (zone,target,m) not in verified}
+            result = (run_daily_forecast(pd.Timestamp(day).date(),model_keys=pending_models,
+                         clear_issues=False,only_missing=False,scopes={(zone,target)})
+                      if pending_models else pd.DataFrame())
             if not result.empty:
                 result['source'] = 'offline_midnight_backtest' if stage == 'offline' else 'historical_mock_replay'
                 result['forecast_window'] = 'next_day_midnight_v1'
@@ -64,7 +68,7 @@ def _replay(source, output, start, end, models=None, selected_scopes=None, plan_
                          end=origin+pd.Timedelta(hours=forecast_horizon_hours(day)))
                 result = result.drop(columns='actual_mw').merge(truth,on='timestamp',how='left')
                 store.append_forecasts(result,day)
-            complete = complete_forecast_groups(store.forecast_path(day))
+            complete = weather_verified_groups(store.forecast_path(day))
             for model in expected_models:
                 audit.append(dict(run_date=day,zone=zone,target=target,model=model,
                                   complete=(zone,target,model) in complete))

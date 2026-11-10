@@ -69,3 +69,28 @@ def test_past_date_is_strict_even_without_replay_environment(tmp_path, monkeypat
     client=OpenMeteoClient(demo_mode=False)
     with pytest.raises(WeatherVintageError,match='manifest'):
         client.fetch_future_weather(run_date=date(2020,1,1),zone='BE',points=[],target='solar',horizon_hours=30)
+
+
+def test_legacy_completed_staging_cannot_skip_weather_repair(tmp_path):
+    from scripts.batch_replay_midnight import weather_verified_groups
+    from rt_forecast_dashboard.storage import ForecastStore
+    from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp
+    store=ForecastStore(tmp_path/'staged');day='2026-10-01'
+    row=pd.DataFrame(dict(run_date=day,zone='BE',target='solar',model='timestral_online',
+        run_at='2026-11-10T00:00Z',timestamp=pd.date_range(brussels_cutoff_timestamp(pd.Timestamp(day).date()),periods=30,freq='h'),forecast_mw=1.))
+    store.append_forecasts(row,day)
+    assert not weather_verified_groups(store.forecast_path(day))
+    store.append_forecasts(row.assign(weather_vintage_policy='weather_collection_asof_v1'),day)
+    assert weather_verified_groups(store.forecast_path(day))=={('BE','solar','timestral_online')}
+
+@pytest.mark.parametrize('day,horizon',[('2026-03-28',29),('2026-10-24',31)])
+def test_snapshot_selection_preserves_dst_delivery_grid(tmp_path,day,horizon):
+    from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp,forecast_delivery_grid
+    cutoff=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+    grid=pd.date_range(cutoff-pd.Timedelta(hours=2),periods=2+horizon,freq='h')
+    relative='data/updates/BE/solar/dst.csv';path=tmp_path/relative;path.parent.mkdir(parents=True)
+    collected=cutoff-pd.Timedelta(minutes=1)
+    pd.DataFrame(dict(timestamp_utc=grid,updated_at_utc=collected,x=1.)).to_csv(path,index=False)
+    pd.DataFrame([dict(country='BE',target='solar',path=relative,collection_time_utc=collected,phase='forecast')]).to_csv(tmp_path/'data/update_manifest.csv',index=False)
+    past,future,_=WeatherVintages(tmp_path).select('BE','solar',cutoff,2,horizon)
+    assert len(past)==2 and future.index.equals(forecast_delivery_grid(day))

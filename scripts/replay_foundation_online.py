@@ -137,7 +137,8 @@ def main():
                     saved_rows = pd.read_csv(saved)
                     match = saved_rows[(saved_rows.zone == zone) & (saved_rows.target == target) & (saved_rows.model == name + "_online")]
                     aligned = np.array_equal(pd.to_datetime(match.timestamp, utc=True).sort_values().to_numpy(), template.timestamp.sort_values().to_numpy())
-                    if len(match) == len(template) and match.timestamp.nunique() == len(template) and np.isfinite(match.forecast_mw).all() and aligned:
+                    if ('weather_vintage_policy' in match and match.weather_vintage_policy.eq('weather_collection_asof_v1').all()
+                            and len(match) == len(template) and match.timestamp.nunique() == len(template) and np.isfinite(match.forecast_mw).all() and aligned):
                         continue
                 try:
                     weather = load_weather(args.inputs,zone,target,template.timestamp.min(),len(template))

@@ -1,12 +1,18 @@
 """Audit every retrospective group without changing forecasts or running models."""
 from pathlib import Path
 import argparse,json
+from functools import lru_cache
 import pandas as pd
 from rt_forecast_dashboard.data.weather_vintages import WeatherVintages,WeatherVintageError
 from rt_forecast_dashboard.storage import ForecastStore
+from rt_forecast_dashboard.covariates import covariates_for
 from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp,forecast_horizon_hours
 
 KEYS=['run_date','zone','target','model']
+
+@lru_cache(maxsize=None)
+def weather_required(z,t,m):
+    return m=='ensemble_selected' or bool(set(covariates_for(t,z,m)[1]).difference({'tso_forecast_mw'}))
 
 def audit(data,weather,output):
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
@@ -21,7 +27,9 @@ def audit(data,weather,output):
             _,_,proof=vintages.select(z,t,cutoff,2208,forecast_horizon_hours(day))
             status='weather_available';error='';proofs.append(dict(run_date=day,zone=z,target=t,**proof))
         except WeatherVintageError as exc:status='blocked';error=str(exc)
-        for row in group.to_dict('records'):reports.append(dict(**row,status=status,error=error))
+        for row in group.to_dict('records'):
+            requires = weather_required(z,t,row['model'])
+            reports.append(dict(**row,status=status,error=error,weather_input_required=requires))
     result=pd.DataFrame(reports);result.to_csv(output/'mock_weather_audit.csv',index=False)
     (output/'weather_provenance.json').write_text(json.dumps(proofs,indent=2)+'\n')
     summary=dict(groups=len(plan),weather_available_groups=int(result.status.eq('weather_available').sum()),

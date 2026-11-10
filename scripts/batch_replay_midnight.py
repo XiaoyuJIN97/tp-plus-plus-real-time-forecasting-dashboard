@@ -57,6 +57,20 @@ def _prepare_scope(inputs,zone,target,days):
     return prepared,issues
 
 
+def weather_verified_groups(path):
+    if not Path(path).exists():
+        return set()
+    frame = pd.read_csv(path)
+    valid = set()
+    for key, group in frame.groupby(['zone','target','model']):
+        _, covs = covariates_for(key[1],key[0],key[2])
+        independent = not set(covs).difference({'tso_forecast_mw'})
+        if independent or ('weather_vintage_policy' in group and
+                           group.weather_vintage_policy.eq('weather_collection_asof_v1').all()):
+            valid.add(key)
+    return complete_forecast_groups(path) & valid
+
+
 def prepare_scope(inputs,zone,target,days):
     days=list(days)
     try:
@@ -106,7 +120,7 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
     plan=original[original.run_date.between(start,end)][['run_date','zone','target','model']].drop_duplicates()
     registry=model_registry();enabled=zones();store=ForecastStore(output);audit=[];issues=[]
     adapters={};started=time.monotonic()
-    completion_for=lru_cache(maxsize=None)(complete_forecast_groups)
+    completion_for=lru_cache(maxsize=None)(weather_verified_groups)
     for (zone,target),scope in plan.groupby(['zone','target'],sort=True):
         if zone not in enabled or target not in enabled[zone]['targets'] or (selected_scopes and (zone,target) not in selected_scopes):continue
         completed={day:completion_for(store.forecast_path(day)) for day in scope.run_date.unique()}
