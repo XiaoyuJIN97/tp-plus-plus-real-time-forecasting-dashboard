@@ -1,11 +1,11 @@
 {
   "incomplete_horizon_groups": 124,
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-11-10T21:59:15.280825+00:00",
+  "generated_at_utc": "2026-11-10T22:53:03.349456+00:00",
   "retention_days": 90,
-  "first_run_date": "2026-08-12",
-  "latest_run_date": "2026-11-09",
-  "rows": 568616,
+  "first_run_date": "2026-08-13",
+  "latest_run_date": "2026-11-10",
+  "rows": 566216,
   "zones": 8,
   "targets": 4,
   "models": 9
