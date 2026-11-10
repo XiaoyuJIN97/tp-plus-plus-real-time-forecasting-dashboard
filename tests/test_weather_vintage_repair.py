@@ -22,7 +22,10 @@ def fixture(tmp_path):
 
 def test_staging_preserves_live_predictions_and_existing_scoring_truth(tmp_path):
     source,replay,audit=fixture(tmp_path)
+    source.dashboard_dir().mkdir(parents=True,exist_ok=True)
+    (source.dashboard_dir()/'leaderboard_daily_status.json').write_text('{}')
     result=stage(source.data_dir,replay.data_dir,audit,tmp_path/'staged')
+    assert not (tmp_path/'staged/dashboard/leaderboard_daily_status.json').exists()
     assert result['changed_groups']==1
     after=ForecastStore(tmp_path/'staged').read_forecasts()
     assert after[after.source.eq('online')].forecast_mw.eq(13).all()

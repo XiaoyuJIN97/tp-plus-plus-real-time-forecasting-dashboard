@@ -81,6 +81,13 @@ jobs:
             data/raw/ES
             data/raw/PT
             data/update_manifest.csv
+            data/updates/BE
+            data/updates/FR
+            data/updates/DE
+            data/updates/DK1
+            data/updates/DK2
+            data/updates/ES
+            data/updates/PT
 
       - name: Checkout ENTSO-E realtime data
         if: steps.brussels_window.outputs.should_run == 'true'

@@ -22,6 +22,7 @@ def stage(source,replay,audit,output):
     if len(incoming.merge(allowed,on=KEYS,how='inner'))!=len(incoming):
         raise ValueError('Replacement targets a non-mock group')
     evidence={};comparison=[];validated=[]
+    original_indices = before.groupby(KEYS).indices
     for key,part in incoming.groupby(KEYS):
         if not is_complete_forecast_window(part.timestamp,key[0]) or not np.isfinite(part.forecast_mw).all():
             raise ValueError('Incomplete/nonfinite replacement')
@@ -32,8 +33,7 @@ def stage(source,replay,audit,output):
             raise ValueError('Invalid cutoff/provenance')
         if any(pd.Timestamp(p['available_at'])>cutoff for p in proof['snapshots']):
             raise ValueError('Replacement contains later-collected weather')
-        old=before
-        for column,value in zip(KEYS,key):old=old[old[column].eq(value)]
+        old=before.iloc[original_indices[key]]
         joined=part.merge(old[['timestamp','forecast_mw','actual_mw']],on='timestamp',suffixes=('','_old'),validate='one_to_one')
         if len(joined)!=len(part):raise ValueError('Replacement delivery grid differs')
         delta=joined.forecast_mw.to_numpy()-joined.forecast_mw_old.to_numpy()
@@ -55,6 +55,9 @@ def stage(source,replay,audit,output):
     for folder in ['forecasts','dashboard']:
         if (source/folder).exists():shutil.copytree(source/folder,output/folder)
     store=ForecastStore(output)
+    # Daily score caching is intentional; a historical prediction replacement
+    # must explicitly invalidate it even when realized coverage is unchanged.
+    (store.dashboard_dir()/'leaderboard_daily_status.json').unlink(missing_ok=True)
     corrected=pd.concat(validated,ignore_index=True) if validated else incoming.iloc[:0]
     for day,part in corrected.groupby('run_date'):store.append_forecasts(part,day)
     after=store.read_forecasts();after.run_date=after.run_date.astype(str)
