@@ -50,16 +50,9 @@ def load_series(inputs, history, zone, target, value):
     return result[~result.index.duplicated(keep="last")].sort_index().rename(value)
 
 
-def load_weather(inputs, zone, target):
-    path = inputs / "weather/data/raw" / zone / TARGET_MAP[target] / "2026.csv"
-    frame = pd.read_csv(path)
-    frame["timestamp"] = pd.to_datetime(frame.timestamp_utc, utc=True)
-    extra = inputs / "weather_supplement" / f"{zone}_{target}.csv"
-    if extra.exists():
-        supplement = pd.read_csv(extra)
-        supplement["timestamp"] = pd.to_datetime(supplement.timestamp, utc=True)
-        frame = pd.concat([frame, supplement], ignore_index=True)
-    return frame.drop_duplicates("timestamp", keep="last").set_index("timestamp").sort_index()
+def load_weather(inputs, zone, target, cutoff, horizon):
+    from rt_forecast_dashboard.data.weather_vintages import WeatherVintages
+    return WeatherVintages(Path(inputs)/'weather').joined(zone,target,cutoff,2208,horizon)
 
 
 def prepare(template, actual, tso, weather, covs):
@@ -136,7 +129,6 @@ def main():
                 continue
             actual = load_series(args.inputs, history, zone, target, "actual_mw")
             tso = load_series(args.inputs, history, zone, target, "tso_forecast_mw")
-            weather = load_weather(args.inputs, zone, target)
             case, covs = covariates_for(target, zone, name + "_online")
             pending = []
             for run_date, template in templates.groupby("run_date"):
@@ -148,7 +140,11 @@ def main():
                     if len(match) == len(template) and match.timestamp.nunique() == len(template) and np.isfinite(match.forecast_mw).all() and aligned:
                         continue
                 try:
+                    weather = load_weather(args.inputs,zone,target,template.timestamp.min(),len(template))
                     x, cov, output = prepare(template, actual, tso, weather, covs)
+                    output['weather_vintage_policy']='weather_collection_asof_v1'
+                    output['weather_vintage_provenance']=json.dumps(weather.attrs['weather_vintage'],sort_keys=True)
+                    output['input_vintage']='weather_asof_other_inputs_retrospective'
                     pending.append((x, cov, output))
                     audit.append(dict(model=name, zone=zone, target=target, run_date=run_date, status="ready", imputed=int(output.context_imputed_hours.iloc[0])))
                 except Exception as exc:

@@ -43,6 +43,7 @@ def _replay(source, output, start, end, models=None, selected_scopes=None, plan_
         raise ValueError('No historical model groups match the requested replay')
     os.environ['FORECAST_DATA_DIR'] = str(output)
     os.environ['FORECAST_ARCHIVE_ONLY'] = 'true'
+    os.environ['FORECAST_REPLAY_ASOF'] = 'true'
     store = ForecastStore(output)
     audit = []
     for day, scope_plan in groups.groupby('run_date',sort=True):
@@ -54,7 +55,8 @@ def _replay(source, output, start, end, models=None, selected_scopes=None, plan_
             if not result.empty:
                 result['source'] = 'offline_midnight_backtest' if stage == 'offline' else 'historical_mock_replay'
                 result['forecast_window'] = 'next_day_midnight_v1'
-                result['input_vintage'] = 'retrospective_archived_revisions'
+                result['input_vintage'] = 'weather_asof_other_inputs_retrospective'
+                result['weather_vintage_policy'] = 'weather_collection_asof_v1'
                 # Truth is attached only after inference; it never enters future features.
                 from rt_forecast_dashboard.data.entsoe_realtime_archive import EntsoeRealtimeArchive
                 origin = brussels_cutoff_timestamp(pd.Timestamp(day).date())
@@ -78,7 +80,7 @@ def _replay(source, output, start, end, models=None, selected_scopes=None, plan_
 
 
 def replay(*args, **kwargs):
-    previous = {key:os.environ.get(key) for key in ('FORECAST_DATA_DIR','FORECAST_ARCHIVE_ONLY')}
+    previous = {key:os.environ.get(key) for key in ('FORECAST_DATA_DIR','FORECAST_ARCHIVE_ONLY','FORECAST_REPLAY_ASOF')}
     try:
         return _replay(*args, **kwargs)
     finally:

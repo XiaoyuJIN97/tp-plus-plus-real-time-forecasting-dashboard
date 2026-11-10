@@ -15,7 +15,9 @@ from rt_forecast_dashboard.config import zones,model_registry,model_supports_sco
 from rt_forecast_dashboard.context_quality import repair_context
 from rt_forecast_dashboard.covariates import covariates_for
 from rt_forecast_dashboard.data.entsoe_realtime_archive import ACTUAL_VARIABLES,FORECAST_VARIABLES
-from rt_forecast_dashboard.data.weather_archive import TARGET_MAP
+from rt_forecast_dashboard.data.weather_vintages import WeatherVintages
+import json
+import os
 from rt_forecast_dashboard.features import build_feature_frame
 from rt_forecast_dashboard.models.adapters import make_adapter
 from rt_forecast_dashboard.models.foundation_online import close_workers
@@ -31,9 +33,7 @@ def _prepare_scope(inputs,zone,target,days):
         frames=[pd.read_parquet(p) for p in sorted((inputs/'entsoe/data/hourly'/zone/mapping[target]).glob('*.parquet'))]
         f=pd.concat(frames,ignore_index=True);f['timestamp']=pd.to_datetime(f.timestamp_utc,utc=True)
         series[field]=f.drop_duplicates('timestamp',keep='last').set_index('timestamp').value.sort_index()
-    frames=[pd.read_csv(p) for p in sorted((inputs/'weather/data/raw'/zone/TARGET_MAP[target]).glob('*.csv'))]
-    w=pd.concat(frames,ignore_index=True);w['timestamp']=pd.to_datetime(w.timestamp_utc,utc=True)
-    w=w.drop_duplicates('timestamp',keep='last').set_index('timestamp').select_dtypes(include=np.number)
+    vintages = WeatherVintages(os.getenv('FORECAST_WEATHER_SNAPSHOT_ROOT', str(inputs/'weather')))
     prepared={};issues=[]
     for day in days:
         try:
@@ -42,13 +42,15 @@ def _prepare_scope(inputs,zone,target,days):
             past=pd.date_range(origin-pd.Timedelta(hours=2208),periods=2208,freq='h',name='timestamp')
             context=pd.DataFrame({k:s.reindex(past) for k,s in series.items()}).reset_index()
             context,quality=repair_context(context,expected_end=past[-1],context_hours=2208)
-            weather_past=w.reindex(past);weather_future=w.reindex(future)
+            weather_past,weather_future,proof = vintages.select(zone,target,origin,2208,h)
+            quality_proof = json.dumps(proof,sort_keys=True)
             if weather_past.isna().any().any() or weather_future.isna().any().any():
                 raise ValueError('Missing archived weather covariates')
             tso=series['tso_forecast_mw'].reindex(future)
             if not np.isfinite(tso).all():raise ValueError('Incomplete TSO delivery grid')
             features=build_feature_frame(tso.rename('tso_forecast_mw').reset_index(),weather_future.reset_index())
             context=build_feature_frame(context,weather_past.reset_index())
+            context.attrs['weather_provenance'] = quality_proof
             prepared[day]=(context,features,quality,series['actual_mw'].reindex(future).to_numpy())
         except Exception as exc:
             issues.append(dict(zone=zone,target=target,run_date=day,stage='prepare',error=str(exc)))
@@ -131,7 +133,8 @@ def replay(source,inputs,output,start,end,batch_size=8,selected_scopes=None,mode
                         for day,pred in zip(dates,predictions,strict=True):
                             context,future,quality,truth=prepared[day]
                             frame=pd.DataFrame(dict(run_date=day,run_at=datetime.now(UTC).isoformat(),source='offline_midnight_backtest' if stage=='offline' else 'historical_mock_replay',
-                                forecast_window='next_day_midnight_v1',input_vintage='retrospective_archived_revisions',
+                                forecast_window='next_day_midnight_v1',input_vintage='weather_asof_other_inputs_retrospective',
+                                weather_vintage_policy='weather_collection_asof_v1',weather_vintage_provenance=context.attrs.get('weather_provenance'),
                                 inference_device=getattr(adapter,'device',getattr(adapter,'device_map','cpu')),zone=zone,target=target,
                                 model=key,model_label=cfg.get('label',key),covariate_case=case,context_hours=2208,
                                 timestamp=future.timestamp,forecast_mw=pred,tso_forecast_mw=future.tso_forecast_mw,
