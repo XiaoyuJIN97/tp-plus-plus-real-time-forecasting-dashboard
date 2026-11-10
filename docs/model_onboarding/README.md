@@ -140,6 +140,8 @@ restricted macOS environments may need permission). CPU workers are POSIX-only.
 
 ## 2. Shared, frozen input windows
 
+For weather, follow the [mandatory snapshot-selection example](FOUNDATION_EXAMPLES.md#mandatory-weather-vintage-selection-for-replay). Merged annual weather files are not historical vintages.
+
 Prepare inputs **once per window**, then reuse the same snapshot for every
 candidate/reference. Do not fetch Open-Meteo/ENTSO-E once per model. Pin source
 repository revisions, dataset hashes, cutoff convention and covariate policy.

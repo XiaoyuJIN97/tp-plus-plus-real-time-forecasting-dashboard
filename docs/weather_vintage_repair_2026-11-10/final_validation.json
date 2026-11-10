@@ -1,0 +1,14 @@
+{
+  "rows_before": 708032,
+  "rows_after": 708032,
+  "forecast_keys_preserved": true,
+  "scoring_truth_preserved": true,
+  "online_labelled_predictions_preserved": true,
+  "changed_prediction_hours": 108248,
+  "changed_model_groups": 3718,
+  "unverifiable_history_retained_in_comparisons": true,
+  "labels_internal_only": true,
+  "fully_certified_backtest": false,
+  "point_score_rows": 216,
+  "probabilistic_score_rows": 216
+}

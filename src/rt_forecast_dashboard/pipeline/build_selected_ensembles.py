@@ -3,6 +3,7 @@ from __future__ import annotations
 from rt_forecast_dashboard.time_utils import forecast_horizon_hours, brussels_cutoff_timestamp
 
 import argparse
+from zoneinfo import ZoneInfo
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -328,8 +329,9 @@ def build_selected_ensembles(
                         "run_at": generated_at,
                         "source": (
                             "historical_mock_ensemble"
-                            if source == "online" and only_missing
-                            and run_date not in (refresh_dates or set())
+                            if source == "online" and (
+                                run_date < datetime.now(ZoneInfo("Europe/Brussels")).date().isoformat()
+                                or (only_missing and run_date not in (refresh_dates or set())))
                             else source
                         ),
                         "zone": zone,

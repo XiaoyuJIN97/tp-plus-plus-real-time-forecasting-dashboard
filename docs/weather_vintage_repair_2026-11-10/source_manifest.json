@@ -1,0 +1,15 @@
+{
+  "dashboard_source_commit": "1db79d5942f7c72c9363d8d80873731d942cda4f",
+  "weather_archive_commit": "0a2ee8da5e0874743275b9366308beae019aa69e",
+  "manifest_sha256": "108bbe52bc1637bf57a35813f1411d97b8ad843d1c07b7d71e8f9ca066b3f2df",
+  "model_revisions": {
+    "t0_gamma": "e08aee083778f1f32da4974c0a34276776a35c52",
+    "timestral": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"
+  },
+  "context_hours": 2208,
+  "horizon": "18:00 Brussels through end of next day",
+  "other_inputs": "Frozen midnight-inputs (2026-10-29); DK solar uses its original dk-solar-repair-2026-11-03/inputs with verified zero-hour recovery. Scoring truth preserved; other input vintages not certified.",
+  "manifest_entries": 1192,
+  "snapshot_files": 1198,
+  "unindexed_snapshots_not_used": 6
+}

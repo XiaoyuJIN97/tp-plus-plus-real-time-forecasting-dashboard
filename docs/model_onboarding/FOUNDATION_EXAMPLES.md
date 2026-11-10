@@ -313,3 +313,30 @@ separation and missing-reference rejection, and check checkpoint parity with the
 current runtime. They do **not** measure real model accuracy, memory, runtime,
 download/load compatibility or seven-day operation. Real archives and native
 environment runs above remain necessary.
+
+## Mandatory weather-vintage selection for replay
+
+Use original `data/updates` snapshots and the collection manifest, not merged
+`data/raw/.../2026.csv`. The latter replaces earlier vintages by delivery time.
+The replay scripts now fail closed when eligible weather is missing:
+
+```python
+from rt_forecast_dashboard.data.weather_vintages import WeatherVintages
+from rt_forecast_dashboard.time_utils import brussels_cutoff_timestamp, forecast_horizon_hours
+cutoff = brussels_cutoff_timestamp(run_date)
+past_weather, future_weather, proof = WeatherVintages(weather_snapshot_root).select(
+    zone, target, cutoff, 2208, forecast_horizon_hours(run_date))
+# Apply existing feature engineering; save proof with the frozen input manifest.
+```
+
+Both manifest and per-row collection timestamps must precede the cutoff. Future
+weather must come from one full, eligible collection; explicitly historical
+backfills cannot supply it. Past weather may use multiple collections, each
+available before the cutoff. Missing hours are a replay failure, not permission
+to fetch today's API or read an annual file. Pin the archive Git commit and save
+snapshot paths/hashes from `proof`. Collection is evidence of availability; it
+does not identify the provider's original NWP initialization time.
+
+This certifies **weather availability only**. TSO and actual revision vintages
+must be checked separately; outputs retain that qualification. Existing legacy
+mock history is not automatically made certified by this code change.

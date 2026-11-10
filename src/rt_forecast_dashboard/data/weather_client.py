@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 import os
 
 import numpy as np
@@ -32,6 +33,10 @@ class OpenMeteoClient:
         if self.demo_mode:
             return demo_future_frame(run_date, zone, target, horizon_hours).drop(columns=["actual_mw", "tso_forecast_mw"], errors="ignore")
         start = brussels_cutoff_timestamp(run_date)
+        if (os.getenv('FORECAST_REPLAY_ASOF') == 'true' or run_date < datetime.now(ZoneInfo('Europe/Brussels')).date()):
+            from .weather_vintages import WeatherVintages
+            root = os.getenv('FORECAST_WEATHER_SNAPSHOT_ROOT') or self.archive.root
+            return WeatherVintages(root).select(zone,target,start,0,horizon_hours)[1].reset_index()
         archive = self.archive.fetch_weather(zone=zone, target=target, start=start, hours=horizon_hours)
         if len(archive) >= horizon_hours:
             return archive.head(horizon_hours)
@@ -44,6 +49,11 @@ class OpenMeteoClient:
             return demo_context_frame(run_date, zone, target, context_hours).drop(columns=["actual_mw", "tso_forecast_mw"])
         end = brussels_cutoff_timestamp(run_date)
         start = end - pd.Timedelta(hours=context_hours)
+        if (os.getenv('FORECAST_REPLAY_ASOF') == 'true' or run_date < datetime.now(ZoneInfo('Europe/Brussels')).date()):
+            from .weather_vintages import WeatherVintages
+            from rt_forecast_dashboard.time_utils import forecast_horizon_hours
+            root = os.getenv('FORECAST_WEATHER_SNAPSHOT_ROOT') or self.archive.root
+            return WeatherVintages(root).select(zone,target,end,context_hours,forecast_horizon_hours(run_date))[0].reset_index()
         archive = self.archive.fetch_weather(zone=zone, target=target, start=start, hours=context_hours)
         if len(archive) >= context_hours:
             return archive.head(context_hours)

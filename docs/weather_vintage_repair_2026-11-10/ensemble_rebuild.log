@@ -1,0 +1,51 @@
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+W20261110 11:04:43.833262 683372544 cpu_info.cc:239] IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted
+W20261110 11:04:43.833732 683372544 cpu_info.cc:239] IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted
+W20261110 11:04:43.833827 683372544 cpu_info.cc:239] IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted
+W20261110 11:04:43.833906 683372544 cpu_info.cc:239] IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble weight optimization fell back to equal weights: Positive directional derivative for linesearch
+Ensemble 2026-10-24 FR solar: unavailable components ['chronos2_online', 't0_gamma_online', 'timesfm3_online', 'timestral_online', 'tso_reference', 'xgboost_online']
+Skip ensemble 2026-10-24 FR solar: fewer than two complete components.
+Ensemble 2026-10-24 FR wind_onshore: unavailable components ['chronos2_online', 't0_gamma_online', 'timesfm3_online', 'timestral_online', 'tso_reference', 'xgboost_online']
+Skip ensemble 2026-10-24 FR wind_onshore: fewer than two complete components.
+Ensemble 2026-10-24 FR wind_offshore: unavailable components ['chronos2_online', 't0_gamma_online', 'timesfm3_online', 'timestral_online', 'tso_reference', 'xgboost_online']
+Skip ensemble 2026-10-24 FR wind_offshore: fewer than two complete components.
+{'rebuilt_mock_ensemble_groups': 2195, 'changed_mock_ensemble_groups': 1029, 'preserved_live_rows': 71016}

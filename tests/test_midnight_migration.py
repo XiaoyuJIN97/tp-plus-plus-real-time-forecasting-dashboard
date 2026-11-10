@@ -48,8 +48,12 @@ def test_batched_preparation_keeps_delivery_truth_out_of_features(tmp_path):
     for variable,values in [('actual_load',np.r_[np.ones(2208)*100,np.ones(30)*1e12]),('forecast_load',np.ones(2238)*110)]:
         path=tmp_path/'entsoe/data/hourly/BE'/variable/'2026.parquet';path.parent.mkdir(parents=True)
         pd.DataFrame(dict(timestamp_utc=timestamps,value=values)).to_parquet(path,index=False)
-    weather=tmp_path/'weather/data/raw/BE/load/2026.csv';weather.parent.mkdir(parents=True)
-    pd.DataFrame(dict(timestamp_utc=timestamps,temperature_2m_p1=10.)).to_csv(weather,index=False)
+    weather=tmp_path/'weather/data/updates/BE/load/snapshot.csv';weather.parent.mkdir(parents=True)
+    collected=origin-pd.Timedelta(minutes=5)
+    pd.DataFrame(dict(timestamp_utc=timestamps,temperature_2m_p1=10.,updated_at_utc=collected)).to_csv(weather,index=False)
+    pd.DataFrame([dict(country='BE',target='load',collection_time_utc=collected,
+                       path='data/updates/BE/load/snapshot.csv',phase='forecast')]).to_csv(
+                           tmp_path/'weather/data/update_manifest.csv',index=False)
     prepared,issues=prepare_scope(tmp_path,'BE','load',[day])
     assert not issues
     past,future,quality,truth=prepared[day]
@@ -191,9 +195,16 @@ def test_offline_batch_plan_uses_both_years_and_cannot_be_published_online(tmp_p
             part=timestamps[timestamps.year==year]
             p=inputs/'entsoe/data/hourly/BE'/variable/f'{year}.parquet';p.parent.mkdir(parents=True,exist_ok=True)
             pd.DataFrame(dict(timestamp_utc=part,value=value)).to_parquet(p,index=False)
-    for year in timestamps.year.unique():
-        p=inputs/'weather/data/raw/BE/load'/f'{year}.csv';p.parent.mkdir(parents=True,exist_ok=True)
-        pd.DataFrame(dict(timestamp_utc=timestamps[timestamps.year==year],temperature_2m_p1=10.)).to_csv(p,index=False)
+    manifests=[]
+    for day in ['2024-01-02','2025-01-02']:
+        origin=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+        grid=pd.date_range(origin-pd.Timedelta(hours=2208),periods=2238,freq='h')
+        relative=f'data/updates/BE/load/{day}.csv'
+        p=inputs/'weather'/relative;p.parent.mkdir(parents=True,exist_ok=True)
+        collected=origin-pd.Timedelta(minutes=5)
+        pd.DataFrame(dict(timestamp_utc=grid,temperature_2m_p1=10.,updated_at_utc=collected)).to_csv(p,index=False)
+        manifests.append(dict(country='BE',target='load',collection_time_utc=collected,path=relative,phase='forecast'))
+    pd.DataFrame(manifests).to_csv(inputs/'weather/data/update_manifest.csv',index=False)
     plan_path=tmp_path/'plan.csv'
     pd.DataFrame(dict(run_date=['2024-01-02','2025-01-02'],zone='BE',target='load',model='tso_reference')).to_csv(plan_path,index=False)
     output=tmp_path/'offline';source=tmp_path/'source'

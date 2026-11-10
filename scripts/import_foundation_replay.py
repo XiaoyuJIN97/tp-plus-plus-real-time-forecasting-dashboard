@@ -31,6 +31,9 @@ def main():
     replay["timestamp"] = pd.to_datetime(replay.timestamp, utc=True)
     if not replay.source.eq("historical_mock_replay").all():
         raise ValueError("Unlabeled historical forecasts")
+    if ("weather_vintage_policy" not in replay
+            or not replay.weather_vintage_policy.eq("weather_collection_asof_v1").all()):
+        raise ValueError("Replay lacks pre-cutoff weather snapshot evidence")
     actual_keys = ["zone", "target", "timestamp"]
     actuals = replay[actual_keys + ["actual_mw"]].dropna()
     if (actuals.groupby(actual_keys).actual_mw.nunique() > 1).any():

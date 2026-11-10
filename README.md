@@ -238,3 +238,12 @@ records the recovery of earlier full-horizon DK mocks, their published-observati
 evidence and reproduction steps. Each artifact rebuild now writes
 `data/dashboard/forecast_history_coverage.csv` so stored history and usable
 full-window coverage can be checked separately for each model and series.
+
+Historical model onboarding must use weather collected before each simulated
+cutoff. The replay loaders select original timestamped `data/updates` snapshots,
+check their manifest and per-row collection times, and reject incomplete windows
+without falling back to merged annual files or today's API. Past-date daily
+catch-ups use the same rule and are labelled retrospective. See the
+[weather-vintage replay example](docs/model_onboarding/FOUNDATION_EXAMPLES.md#mandatory-weather-vintage-selection-for-replay).
+Weather availability evidence alone does not certify historical TSO or actual
+revision vintages.

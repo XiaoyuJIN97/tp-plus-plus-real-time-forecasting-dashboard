@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+from zoneinfo import ZoneInfo
 from datetime import UTC, date, datetime
 import sys
 
@@ -22,6 +24,7 @@ from rt_forecast_dashboard.weather_points import selected_weather_points
 
 def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None = None, *, clear_issues: bool = True, only_missing: bool = False, scopes: set[tuple[str, str]] | None = None) -> pd.DataFrame:
     run_date = run_date or latest_complete_run_date()
+    historical_run = run_date < datetime.now(ZoneInfo("Europe/Brussels")).date()
     run_date_str = run_date.isoformat()
     run_at = datetime.now(UTC).isoformat(timespec="seconds")
     store = ForecastStore()
@@ -114,11 +117,12 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                     )
                 feature_frame = build_feature_frame(tso, tso[["timestamp"]]).head(horizon)
                 context_frame = build_feature_frame(actual_context, actual_context[["timestamp"]]).dropna(subset=["actual_mw"]).tail(context_hours)
+                weather_provenance = None
                 weather_loaded = False
                 weather_error = None
 
                 def ensure_weather_features() -> None:
-                    nonlocal feature_frame, context_frame, weather_loaded
+                    nonlocal feature_frame, context_frame, weather_loaded, weather_provenance
                     if weather_loaded:
                         return
                     weather = weather_client.fetch_future_weather(
@@ -135,6 +139,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                         target=target,
                         context_hours=context_hours + 72,
                     )
+                    weather_provenance = weather_context.attrs.get('weather_vintage')
                     weather = weather.copy()
                     weather['timestamp'] = pd.to_datetime(weather.timestamp, utc=True)
                     weather = weather.drop_duplicates('timestamp', keep='last').set_index('timestamp')
@@ -171,7 +176,7 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                                 {
                                     "run_date": run_date_str,
                                     "run_at": run_at,
-                                    "source": "online",
+                                    "source": "historical_mock_replay" if historical_run else "online",
                                     "forecast_window": "next_day_midnight_v1",
                                     "zone": zone,
                                     "target": target,
@@ -189,6 +194,9 @@ def run_daily_forecast(run_date: date | None = None, model_keys: set[str] | None
                                     "context_imputed_hours": context_quality.imputed_hours,
                                     "context_imputation_method": context_quality.methods,
                                     "data_quality": context_quality.quality,
+                                    **({"weather_vintage_policy":"weather_collection_asof_v1",
+                                       "weather_vintage_provenance":json.dumps(weather_provenance,sort_keys=True)}
+                                       if weather_provenance else {}),
                                 }
                             )
                         )
