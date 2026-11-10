@@ -46,6 +46,7 @@ def stage(source,replay,audit,output):
         joined=joined.drop(columns='weather_vintage_provenance')
         joined['weather_provenance_id']=proof_id
         joined['weather_vintage_status']='corrected_weather_asof'
+        joined['weather_archive_audit']='weather_available'
         validated.append(joined)
     plan=pd.read_csv(audit,dtype={'run_date':str})
     eligible=plan[plan.status.eq('weather_available')][KEYS].drop_duplicates()
@@ -55,6 +56,17 @@ def stage(source,replay,audit,output):
     for folder in ['forecasts','dashboard']:
         if (source/folder).exists():shutil.copytree(source/folder,output/folder)
     store=ForecastStore(output)
+    # Internal provenance only: retain unrepairable mocks in comparisons and do
+    # not add a visible dashboard label or remove any forecast rows.
+    if 'weather_input_required' not in plan:
+        plan['weather_input_required']=True
+    annotations=plan[KEYS+['status','weather_input_required']].drop_duplicates(KEYS).copy()
+    annotations['weather_archive_audit']=np.where(
+        annotations.weather_input_required,annotations.status,'weather_not_used')
+    annotations=annotations[KEYS+['weather_archive_audit']]
+    for day,part in original.groupby('run_date'):
+        annotated=part.drop(columns='weather_archive_audit',errors='ignore').merge(annotations,on=KEYS,how='left',validate='many_to_one')
+        store.append_forecasts(annotated,day)
     # Daily score caching is intentional; a historical prediction replacement
     # must explicitly invalidate it even when realized coverage is unchanged.
     (store.dashboard_dir()/'leaderboard_daily_status.json').unlink(missing_ok=True)
@@ -69,7 +81,7 @@ def stage(source,replay,audit,output):
     pd.DataFrame(comparison).to_csv(output/'weather_prediction_comparison.csv',index=False)
     (output/'weather_provenance.json').write_text(json.dumps(evidence,indent=2)+'\n')
     report=dict(replacement_groups=len(comparison),changed_groups=sum(r['changed'] for r in comparison),
-                genuine_online_prediction_rows_preserved=len(live),prediction_absolute_tolerance_mw=1e-8,full_input_certification=False)
+                online_labelled_prediction_rows_preserved=len(live),prediction_absolute_tolerance_mw=1e-8,full_input_certification=False)
     (output/'weather_repair_validation.json').write_text(json.dumps(report,indent=2)+'\n')
     print(report);return report
 
