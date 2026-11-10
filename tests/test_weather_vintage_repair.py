@@ -49,3 +49,22 @@ def test_staging_cannot_replace_genuine_live_group(tmp_path):
     f=replay.read_forecasts();replay.append_forecasts(f.assign(model='chronos2_online'),'2026-10-01')
     with pytest.raises(ValueError,match='non-mock'):
         stage(source.data_dir,replay.data_dir,audit,tmp_path/'bad')
+
+
+def test_ensemble_rebuild_filters_to_original_mock_keys_and_preserves_truth(tmp_path,monkeypatch):
+    from scripts import rebuild_repaired_mock_ensembles as module
+    staged=ForecastStore(tmp_path/'staged');parts=[]
+    for day,source,value in [('2026-10-01','historical_mock_ensemble',10.),('2026-10-02','online',20.)]:
+        cutoff=brussels_cutoff_timestamp(pd.Timestamp(day).date())
+        frame=pd.DataFrame(dict(run_date=day,zone='BE',target='solar',model='ensemble_selected',model_label='Ensembled model',
+             source=source,run_at=cutoff,timestamp=pd.date_range(cutoff,periods=30,freq='h'),forecast_mw=value,actual_mw=12.,
+             context_hours=2208,context_end=cutoff-pd.Timedelta(hours=1)))
+        staged.append_forecasts(frame,day);parts.append(frame)
+    produced=pd.concat(parts,ignore_index=True).assign(source='historical_mock_ensemble',forecast_mw=99.,actual_mw=999.)
+    monkeypatch.setattr(module,'build_selected_ensembles',lambda *a,**k:produced)
+    report=module.rebuild(staged.data_dir,tmp_path/'scratch','2026-10-01')
+    after=staged.read_forecasts()
+    assert report['changed_mock_ensemble_groups']==1
+    assert after[after.source.eq('online')].forecast_mw.eq(20).all()
+    assert after[after.source.eq('historical_mock_ensemble')].forecast_mw.eq(99).all()
+    assert after.actual_mw.eq(12).all()
