@@ -699,14 +699,14 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-11T01:04:38+00:00,2026-11-10,DK2,wind_offshore,data_or_features,context has 153 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-11T01:04:39+00:00,2026-11-10,ES,solar,data_or_features,,{},open
 2026-11-11T01:04:46+00:00,2026-11-10,ES,wind_onshore,data_or_features,,{},open
-2026-11-11T23:51:23+00:00,2026-11-11,DK1,load,data_or_features,context has 56 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:52:10+00:00,2026-11-11,DK1,solar,data_or_features,context has 187 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:53:14+00:00,2026-11-11,DK1,wind_onshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:54:07+00:00,2026-11-11,DK1,wind_offshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:54:24+00:00,2026-11-11,DK2,load,data_or_features,context has 56 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:55:13+00:00,2026-11-11,DK2,solar,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:55:58+00:00,2026-11-11,DK2,wind_onshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:56:55+00:00,2026-11-11,DK2,wind_offshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-11T23:56:57+00:00,2026-11-11,ES,load,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES load: 0/30 hourly rows.,{},open
-2026-11-11T23:56:59+00:00,2026-11-11,ES,solar,data_or_features,,{},open
-2026-11-11T23:57:02+00:00,2026-11-11,ES,wind_onshore,data_or_features,,{},open
+2026-11-12T01:01:14+00:00,2026-11-11,DK1,load,data_or_features,context has 50 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:04:05+00:00,2026-11-11,DK1,solar,data_or_features,context has 187 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:05:20+00:00,2026-11-11,DK1,wind_onshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:06:49+00:00,2026-11-11,DK1,wind_offshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:07:14+00:00,2026-11-11,DK2,load,data_or_features,context has 50 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:08:30+00:00,2026-11-11,DK2,solar,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:09:35+00:00,2026-11-11,DK2,wind_onshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:10:42+00:00,2026-11-11,DK2,wind_offshore,data_or_features,context has 177 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-12T01:10:49+00:00,2026-11-11,ES,load,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES load: 0/30 hourly rows.,{},open
+2026-11-12T01:10:54+00:00,2026-11-11,ES,solar,data_or_features,,{},open
+2026-11-12T01:10:58+00:00,2026-11-11,ES,wind_onshore,data_or_features,,{},open
