@@ -710,13 +710,13 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-12T01:57:19+00:00,2026-11-11,ES,load,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES load: 0/30 hourly rows.,{},open
 2026-11-12T01:57:21+00:00,2026-11-11,ES,solar,data_or_features,,{},open
 2026-11-12T01:57:23+00:00,2026-11-11,ES,wind_onshore,data_or_features,,{},open
-2026-11-13T00:41:05+00:00,2026-11-12,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 0/30 hourly rows.,{},open
-2026-11-13T00:41:14+00:00,2026-11-12,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 0/30 hourly rows.,{},open
-2026-11-13T00:43:03+00:00,2026-11-12,DK1,solar,data_or_features,context has 211 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-13T00:44:47+00:00,2026-11-12,DK1,wind_onshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-13T00:46:57+00:00,2026-11-12,DK1,wind_offshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-13T00:48:55+00:00,2026-11-12,DK2,solar,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-13T00:50:14+00:00,2026-11-12,DK2,wind_onshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-13T00:52:12+00:00,2026-11-12,DK2,wind_offshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-13T00:52:25+00:00,2026-11-12,ES,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES solar: 0/30 hourly rows.,{},open
-2026-11-13T00:52:34+00:00,2026-11-12,ES,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES wind_onshore: 0/30 hourly rows.,{},open
+2026-11-13T00:52:45+00:00,2026-11-12,DE,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE solar: 0/30 hourly rows.,{},open
+2026-11-13T00:52:50+00:00,2026-11-12,DE,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for DE wind_onshore: 0/30 hourly rows.,{},open
+2026-11-13T00:54:34+00:00,2026-11-12,DK1,solar,data_or_features,context has 211 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-13T00:56:23+00:00,2026-11-12,DK1,wind_onshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-13T00:57:55+00:00,2026-11-12,DK1,wind_offshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-13T00:59:00+00:00,2026-11-12,DK2,solar,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-13T01:01:51+00:00,2026-11-12,DK2,wind_onshore,data_or_features,context has 201 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-13T01:03:14+00:00,2026-11-12,DK2,wind_offshore,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A75&processType=A16&in_Domain=10YDK-2--------M&psrType=B18&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202611091700&periodEnd=202611121700,{},open
+2026-11-13T01:03:29+00:00,2026-11-12,ES,solar,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES solar: 0/30 hourly rows.,{},open
+2026-11-13T01:03:37+00:00,2026-11-12,ES,wind_onshore,data_or_features,Incomplete ENTSO-E TSO forecast horizon for ES wind_onshore: 0/30 hourly rows.,{},open
