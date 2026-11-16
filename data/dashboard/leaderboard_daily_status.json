@@ -1,9 +1,9 @@
 {
   "forecast_window": "next_day_midnight_v1",
   "snapshot_date": "2026-11-16",
-  "generated_at_utc": "2026-11-16T00:24:16.000763+00:00",
+  "generated_at_utc": "2026-11-16T07:18:47.601422+00:00",
   "first_run_date": "2026-08-18",
   "latest_run_date": "2026-11-15",
-  "actuals_through_utc": "2026-11-15T23:00:00+00:00",
-  "actual_rows": 549048
+  "actuals_through_utc": "2026-11-16T05:00:00+00:00",
+  "actual_rows": 549888
 }
