@@ -756,12 +756,12 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-18T02:56:23+00:00,2026-11-17,DK2,solar,data_or_features,context has 321 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-18T02:57:56+00:00,2026-11-17,DK2,wind_onshore,data_or_features,context has 321 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-18T02:58:57+00:00,2026-11-17,DK2,wind_offshore,data_or_features,context has 321 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:19:45+00:00,2026-11-18,DE,load,context_imputation,Recovered 4 missing context hour(s) using synthetic_tso_block.,"{'records': [{'timestamp_utc': '2026-11-18T09:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 67680.95713595}, {'timestamp_utc': '2026-11-18T10:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 67389.31781915}, {'timestamp_utc': '2026-11-18T11:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 67097.67850235}, {'timestamp_utc': '2026-11-18T12:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 66806.03918555}]}",recovered
-2026-11-18T23:20:44+00:00,2026-11-18,DK1,load,data_or_features,context has 59 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:21:55+00:00,2026-11-18,DK1,solar,data_or_features,context has 352 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:23:14+00:00,2026-11-18,DK1,wind_onshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:24:21+00:00,2026-11-18,DK1,wind_offshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:24:44+00:00,2026-11-18,DK2,load,data_or_features,context has 59 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:25:42+00:00,2026-11-18,DK2,solar,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:26:49+00:00,2026-11-18,DK2,wind_onshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-18T23:27:59+00:00,2026-11-18,DK2,wind_offshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:31:44+00:00,2026-11-18,DE,load,context_imputation,Recovered 4 missing context hour(s) using synthetic_tso_block.,"{'records': [{'timestamp_utc': '2026-11-18T09:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 67680.95713595}, {'timestamp_utc': '2026-11-18T10:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 67389.31781915}, {'timestamp_utc': '2026-11-18T11:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 67097.67850235}, {'timestamp_utc': '2026-11-18T12:00:00+00:00', 'method': 'synthetic_tso_block', 'imputed_actual_mw': 66806.03918555}]}",recovered
+2026-11-18T23:33:28+00:00,2026-11-18,DK1,load,data_or_features,context has 59 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:34:33+00:00,2026-11-18,DK1,solar,data_or_features,context has 352 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:35:49+00:00,2026-11-18,DK1,wind_onshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:36:58+00:00,2026-11-18,DK1,wind_offshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:37:33+00:00,2026-11-18,DK2,load,data_or_features,context has 59 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:38:18+00:00,2026-11-18,DK2,solar,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:39:13+00:00,2026-11-18,DK2,wind_onshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-18T23:39:50+00:00,2026-11-18,DK2,wind_offshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
