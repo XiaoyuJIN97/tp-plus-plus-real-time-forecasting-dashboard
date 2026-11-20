@@ -764,9 +764,9 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-19T02:28:27+00:00,2026-11-18,DK2,solar,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-19T02:29:36+00:00,2026-11-18,DK2,wind_onshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-19T02:31:32+00:00,2026-11-18,DK2,wind_offshore,data_or_features,context has 345 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-20T02:03:09+00:00,2026-11-19,DK1,solar,data_or_features,context has 375 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-20T02:05:02+00:00,2026-11-19,DK1,wind_onshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-20T02:06:57+00:00,2026-11-19,DK1,wind_offshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-20T02:08:35+00:00,2026-11-19,DK2,solar,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-20T02:10:20+00:00,2026-11-19,DK2,wind_onshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-20T02:11:45+00:00,2026-11-19,DK2,wind_offshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-20T02:14:01+00:00,2026-11-19,DK1,solar,data_or_features,context has 375 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-20T02:15:55+00:00,2026-11-19,DK1,wind_onshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-20T02:17:30+00:00,2026-11-19,DK1,wind_offshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-20T02:19:11+00:00,2026-11-19,DK2,solar,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-20T02:21:04+00:00,2026-11-19,DK2,wind_onshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-20T02:22:37+00:00,2026-11-19,DK2,wind_offshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
