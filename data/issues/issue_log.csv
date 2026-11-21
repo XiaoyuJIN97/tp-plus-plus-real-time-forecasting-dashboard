@@ -770,9 +770,9 @@ logged_at,run_date,zone,target,stage,message,context,status
 2026-11-20T02:19:11+00:00,2026-11-19,DK2,solar,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-20T02:21:04+00:00,2026-11-19,DK2,wind_onshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
 2026-11-20T02:22:37+00:00,2026-11-19,DK2,wind_offshore,data_or_features,context has 369 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-21T00:42:05+00:00,2026-11-20,DK1,solar,data_or_features,context has 399 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-21T00:43:25+00:00,2026-11-20,DK1,wind_onshore,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-21T00:44:13+00:00,2026-11-20,DK1,wind_offshore,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-21T00:44:49+00:00,2026-11-20,DK2,solar,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-21T00:46:21+00:00,2026-11-20,DK2,wind_onshore,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
-2026-11-21T00:46:52+00:00,2026-11-20,DK2,wind_offshore,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-21T01:00:38+00:00,2026-11-20,DK1,solar,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A75&processType=A16&in_Domain=10YDK-1--------W&psrType=B16&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202611171700&periodEnd=202611201700,{},open
+2026-11-21T01:00:47+00:00,2026-11-20,DK1,wind_onshore,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A75&processType=A16&in_Domain=10YDK-1--------W&psrType=B19&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202608171700&periodEnd=202609171700,{},open
+2026-11-21T01:01:47+00:00,2026-11-20,DK1,wind_offshore,data_or_features,599 Server Error: Unknown for url: https://web-api.tp.entsoe.eu/api?documentType=A75&processType=A16&in_Domain=10YDK-1--------W&psrType=B18&securityToken=6a20f3fc-7226-4f1b-8715-968f741b036c&periodStart=202609171700&periodEnd=202610171700,{},open
+2026-11-21T01:05:26+00:00,2026-11-20,DK2,solar,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-21T01:08:11+00:00,2026-11-20,DK2,wind_onshore,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
+2026-11-21T01:10:06+00:00,2026-11-20,DK2,wind_offshore,data_or_features,context has 393 missing actual hours; maximum automatic imputation is 48,{},open
