@@ -1,7 +1,7 @@
 {
   "incomplete_horizon_groups": 124,
   "forecast_window": "next_day_midnight_v1",
-  "generated_at_utc": "2026-11-20T23:53:49.878225+00:00",
+  "generated_at_utc": "2026-11-21T00:48:04.788408+00:00",
   "retention_days": 90,
   "first_run_date": "2026-08-23",
   "latest_run_date": "2026-11-20",
